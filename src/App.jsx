@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import ProductP1 from './component/Productp1'
+import { Routes, Route } from 'react-router-dom'
 
 
 function App() {
@@ -9,7 +9,11 @@ function App() {
 
   return (
     <>
-      <div className=''>zsgbsg</div>
+    <Routes>
+      <Route path='/' element={<ProductP1/>}/>
+      
+    </Routes>
+    
     </>
   )
 }
