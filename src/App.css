@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+ .products-title {
+  text-align: center;
+  font-size: 40px;
+  font-weight: bold;
+  color: #2e1324;
+  padding: 20px;
+}
+
+.products-title:hover {
+  color: hsl(290, 68%, 55%);
+  
+}

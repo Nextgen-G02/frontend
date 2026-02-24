@@ -1,19 +1,17 @@
 import { useState } from 'react'
 import './App.css'
-import ProductP1 from './component/Productp1'
-import { Routes, Route } from 'react-router-dom'
+import Products from "./components/Products"
+import{ Route, Routes } from "react-router-dom"
 
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-    <Routes>
-      <Route path='/' element={<ProductP1/>}/>
+    <routes>
+    <Products />
+    {/* <Route path="/" element={<Products />} /> */}
       
-    </Routes>
-    
+    </routes>
     </>
   )
 }
