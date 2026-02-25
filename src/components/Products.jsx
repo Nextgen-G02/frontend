@@ -3,7 +3,7 @@ import React from "react";
 function Products() {
   return (
     <div>
-      <h1 className="products-title">All Products</h1>
+      <h1 className="text-center text-[40px] font-bold text-gray-800 p-[20px]">All Products</h1>
     </div>
   );
 }
