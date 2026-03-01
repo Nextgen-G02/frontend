@@ -11,16 +11,9 @@ function App() {
     <Routes>
       <Route path='/' element={<Home />} />
       <Route path='/login' element={<Login />} />
+      <Route path="/products" element={<Products />} />
     </Routes>
   )
 }
 
 export default App
-
-
-
-{/* <routes> */}
-    // <Products />
-    {/* <Route path="/" element={<Products />} /> */}
-      
-// </routes>
