@@ -1,24 +1,27 @@
 @import "tailwindcss";
 
 @layer utilities {
+  /* Light pink color */
   .bg-primary {
-    @apply bg-[#ef460e];
+    @apply bg-[#fdf2f9];
   }
   .text-primary {
-    @apply text-[#0a0a23];
+    @apply text-[#fdf2f9];
   }
 
+  /* White color */
   .bg-secondary {
-    @apply bg-[#06021d];
+    @apply bg-[#ffffff]; 
   }
   .text-secondary {
-    @apply text-[#06021d];
+    @apply text-[#ffffff];
   }
   
+  /* Dark pink color */
   .bg-accent {
-    @apply bg-[#894def];
+    @apply bg-[#ff14c0];
   }
   .text-accent {
-    @apply text-[#894def];
+    @apply text-[#ff1493];
   }
 }
