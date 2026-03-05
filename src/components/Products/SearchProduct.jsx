@@ -2,31 +2,28 @@ import React from 'react'
 
 const SearchProduct = () => {
   return (
-    <div className="bg-pink-50 p-6 rounded-2xl shadow-md max-w-3xl mx-auto mt-6 bg-primary">
+    <div className="bg-primary p-6 rounded-2xl shadow-md max-w-7.5xl mx-auto mt-5">
+
       <div>
-         <h1 className="text-center text-[40px] font-bold text-gray-800 p-[20px]">All Products</h1>
+        <h1 className="text-center text-[40px] font-bold text-accent p-[20px]">All Products</h1>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
 
-        {/* Search Input */}
         <div className="flex flex-col w-full">
-          <label htmlFor="search" className="text-pink-600 font-semibold mb-1">Search</label>
-          <input type="text" id="search" placeholder="Search cakes..." className="p-2 rounded-lg border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"/>
-       
+          <label htmlFor="search" className="text-accent font-semibold mb-1 text-[17px] ">Search</label>
+          <input type="text" id="search" placeholder="Search cakes..." className="p-2 rounded-lg border border-accent bg-secondary text-accent focus:outline-none focus:ring-2 focus:ring-accent"/>
+        </div>
 
-        {/* Category Select */}
-        {/* <div className="flex flex-col w-full"> */}
-          <label htmlFor="Category" className="text-pink-600 font-semibold mb-1">Category</label>
-          
-          <select id="Category" className="p-2 rounded-lg border border-pink-200 focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white">
+        <div className="flex flex-col w-full">
+          <label htmlFor="Category" className="text-accent font-semibold mb-1 text-[17px]">Category</label>
+          <select id="Category" className="p-2 rounded-lg border border-accent bg-secondary text-accent focus:outline-none focus:ring-2 focus:ring-accent">
             <option value="all">All</option>
             <option value="bento_cake">Bento Cake</option>
             <option value="Birthday_cake">Birthday Cake</option>
             <option value="Wedding_cake">Wedding Cake</option>
             <option value="Cup_cake">Cup Cake</option>
           </select>
-
         </div>
 
       </div>
