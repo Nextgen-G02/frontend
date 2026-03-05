@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+@layer utilities {
+  .bg-primary {
+    @apply bg-[#ef460e];
+  }
+  .text-primary {
+    @apply text-[#0a0a23];
+  }
+
+  .bg-secondary {
+    @apply bg-[#06021d];
+  }
+  .text-secondary {
+    @apply text-[#06021d];
+  }
+  
+  .bg-accent {
+    @apply bg-[#894def];
+  }
+  .text-accent {
+    @apply text-[#894def];
+  }
+}
