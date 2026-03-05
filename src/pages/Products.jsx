@@ -1,11 +1,10 @@
 import React from 'react'
-import ProductTitle from './ProductTitle.jsx';
+import SearchProduct from '../components/Products/SearchProduct';
 
 function Products() {
   return (
     <div>
-      <ProductTitle />
-
+      <SearchProduct />
     </div>
   )
 }
