@@ -5,7 +5,7 @@ import ItemProduct from '../components/Products/ItemProduct';
 function Products() {
   return (
     <div>
-      <SearchProduct />
+      <SearchProduct /><br></br>
       <ItemProduct/>
     </div>
   )
