@@ -1,16 +1,15 @@
 import React from "react";
 
-const ItemProduct = () => {
+const ItemProduct = ({ SearchParams }) => {
+  
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 mt-6">
+    <>
+    {loading}
+     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 mt-2">
 
       <div className="w-full max-w-[260px] rounded-2xl shadow-md overflow-hidden bg-secondary font-sans hover:shadow-lg transition">
         
-        <img
-          src="https://images.unsplash.com/photo-1621303837174-89787a7d4729"
-          alt="product"
-          className="w-full h-[180px] object-cover"
-        />
+        <img src="https://images.unsplash.com/photo-1621303837174-89787a7d4729" alt="product" className="w-full h-[180px] object-cover"/>
 
         <div className="p-4">
 
@@ -51,7 +50,8 @@ const ItemProduct = () => {
         </div>
       </div>
 
-    </div>
+     </div>
+     </>
   );
 };
 
