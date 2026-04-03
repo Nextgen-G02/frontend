@@ -5,6 +5,9 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Products from './pages/Products'
 import AdminProduct from './pages/AdminProduct'
+import OrderList from './pages/orders/OrderList'
+import OrderForm from './pages/orders/OrderForm'
+import OrderDetails from './pages/orders/OrderDetails'
 
 
 function App() {
@@ -14,6 +17,12 @@ function App() {
       <Route path='/login' element={<Login />} />
       <Route path="/products" element={<Products />} />
       <Route path='/adminproduct' element={<AdminProduct />} />
+      
+      {/* Order Management Routes */}
+      <Route path='/orders' element={<OrderList />} />
+      <Route path='/orders/new' element={<OrderForm />} />
+      <Route path='/orders/edit/:id' element={<OrderForm />} />
+      <Route path='/orders/:id' element={<OrderDetails />} />
     </Routes>
   )
 }
