@@ -10,9 +10,11 @@ import AddProduct from './components/Products/Addproduct';
 
 function App() {
   return (
+
     <Routes>
       <Route path='/' element={<Home />} />
       <Route path='/login' element={<Login />} />
+      <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/products" element={<Products />} />
       <Route path='/adminproduct' element={<AdminProduct />} />
       <Route path="/addproduct" element={<AddProduct />} />
