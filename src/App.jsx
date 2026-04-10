@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard'
 
 function App() {
   return (
+
     <Routes>
       <Route path='/' element={<Home />} />
       <Route path='/login' element={<Login />} />
