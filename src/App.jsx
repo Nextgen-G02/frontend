@@ -5,7 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Products from './pages/Products'
 import AdminProduct from './pages/AdminProduct'
-import AdminDashboard from './pages/AdminDashboard'
+import AddProduct from './components/Products/Addproduct';
 
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/products" element={<Products />} />
       <Route path='/adminproduct' element={<AdminProduct />} />
+      <Route path="/addproduct" element={<AddProduct />} />
     </Routes>
   )
 }
