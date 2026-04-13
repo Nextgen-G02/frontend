@@ -2,6 +2,7 @@ import React from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ProductScroller from '../components/ProductScroller'
+import HeroCarousel from '../components/HeroCarousel'
 export default function Home() {
 
 
@@ -9,11 +10,14 @@ export default function Home() {
     <div >
         <Navbar />
         
-      <div >
+      <div className="pt-20">
+
+        <HeroCarousel />
+
         <ProductScroller
         title="Popular Items"
-        category="pastry"
-        bgColor="#d6cfc7"
+        category="cake"
+        bgColor="#ff149305"
       />
 
       <ProductScroller
@@ -23,9 +27,10 @@ export default function Home() {
       />
 
       <ProductScroller
-        title="Pastries"
-        category="pastry"
-        bgColor="#d6cfc7"
+        title="Cupcakes"
+        category="cupcake"
+        bgColor="#ff149305"
+        // bgColor="#d6cfc7"
       />
     </div>  
 
