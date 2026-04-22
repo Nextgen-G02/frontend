@@ -9,23 +9,15 @@ import {
   LogOut,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-// import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
-  // const { cart } = useCart();
-
+  const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  // const cartItemCount = cart.reduce(
-  //   (total, item) => total + item.quantity,
-  //   0
-  // );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -38,13 +30,11 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
+    logout();
     toast.success("Logged out successfully");
-
     navigate("/login");
   };
+
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -55,10 +45,10 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-white shadow-md py-3"
-          : "bg-transparent py-5"
+          ? "bg-white/80 backdrop-blur-xl shadow-xl shadow-black/5 py-2.5"
+          : "bg-transparent py-4 md:py-6"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -66,85 +56,83 @@ export default function Navbar() {
         {/* LOGO */}
         <Link
           to="/"
-          className="flex items-center gap-3 group"
+          className="flex items-center gap-2.5 group"
         >
-          <div className="w-11 h-11 bg-[#D92323] rounded-xl flex items-center justify-center rotate-3 group-hover:rotate-12 transition-transform">
-            <ShoppingBag className="text-white" size={22} />
+          <div className="w-9 h-9 md:w-10 md:h-10 bg-slate-900 rounded-lg flex items-center justify-center rotate-3 group-hover:rotate-0 transition-all duration-500 shadow-xl">
+            <ShoppingBag className="text-gold" size={18} md:size={20} />
           </div>
 
-          <span className="text-xl sm:text-2xl font-black text-[#1A1A1A]">
-            Nirosha Sweet House
-          </span>
+          <div className="flex flex-col">
+            <span className="text-sm md:text-lg font-black text-slate-900 leading-none tracking-tight">
+              Nirosha <span className="italic font-medium text-slate-400">Sweet House</span>
+            </span>
+            <p className="text-[7px] md:text-[8px] font-black text-primary uppercase tracking-[0.3em] mt-1">Confectionary Excellence</p>
+          </div>
         </Link>
 
         {/* DESKTOP LINKS */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
-              className={`font-semibold transition ${
+              className={`text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative group/link ${
                 location.pathname === link.path
-                  ? "text-[#D92323]"
-                  : "text-[#1A1A1A] hover:text-[#D92323]"
+                  ? "text-primary"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               {link.name}
+              <span className={`absolute -bottom-1 left-0 h-[2px] bg-primary transition-all duration-500 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`}></span>
             </Link>
           ))}
         </div>
 
         {/* RIGHT ACTIONS */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
 
           {/* CART */}
           <Link
             to="/cart"
-            className="relative p-2 text-[#1A1A1A] hover:text-[#D92323]"
+            className="group relative p-2.5 text-slate-400 hover:text-primary transition-colors"
           >
-            <ShoppingBag size={24} />
-
-            {/* {cartItemCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#D92323] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                {cartItemCount}
-              </span>
-            )} */}
+            <ShoppingBag size={20} md:size={22} className="group-hover:scale-110 transition-transform" />
           </Link>
 
           {/* USER LOGGED IN */}
           {user ? (
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-4">
 
               {(user.role === "admin" || user.role === "staff") && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-2 bg-[#1A1A1A] text-white px-4 py-2 rounded-xl font-semibold hover:bg-[#D92323] transition"
+                  className="flex items-center gap-2.5 bg-slate-900 text-gold px-4 py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all duration-500 shadow-xl shadow-slate-100"
                 >
-                  <LayoutDashboard size={18} />
-                  Dashboard
+                  <LayoutDashboard size={14} md:size={16} />
+                  Registry
                 </Link>
               )}
 
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <User size={18} />
-                {user.firstName}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg md:rounded-xl border border-slate-100 group">
+                <User size={14} md:size={16} className="text-primary" />
+                <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-900 tracking-widest">{user.firstName}</span>
               </div>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl hover:bg-red-600 transition"
+                className="flex items-center gap-2.5 bg-rose-50 text-rose-500 px-4 py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white transition-all duration-500"
               >
-                <LogOut size={18} />
-                Logout
+                <LogOut size={14} md:size={16} />
+                Exit
               </button>
             </div>
           ) : (
             <Link
               to="/login"
-              className="hidden md:flex items-center gap-2 bg-[#1A1A1A] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-[#D92323] transition"
+              className="hidden md:flex items-center gap-2.5 bg-slate-900 text-gold px-5 py-2.5 md:px-6 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 shadow-xl shadow-slate-100"
             >
-              <User size={18} />
-              Login
+              <User size={14} md:size={16} />
+              Authenticate
             </Link>
           )}
 
@@ -166,45 +154,49 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white shadow-xl border-t px-6 py-5 flex flex-col gap-4">
+        <div className="md:hidden bg-slate-900 shadow-2xl border-t border-white/5 px-6 py-8 flex flex-col gap-6 animate-in slide-in-from-top-10 duration-500">
 
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
               onClick={() => setMobileMenuOpen(false)}
-              className="font-semibold text-[#1A1A1A]"
+              className={`text-[11px] font-black uppercase tracking-[0.3em] transition-colors ${
+                location.pathname === link.path ? "text-gold" : "text-slate-400 hover:text-white"
+              }`}
             >
               {link.name}
             </Link>
           ))}
 
+          <div className="h-px bg-white/5 w-full"></div>
+
           {user ? (
-            <>
+            <div className="flex flex-col gap-6">
               {(user.role === "admin" || user.role === "staff") && (
                 <Link
                   to="/admin"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="font-semibold text-[#D92323]"
+                  className="text-[11px] font-black uppercase tracking-[0.3em] text-gold"
                 >
-                  Dashboard
+                  Access Registry
                 </Link>
               )}
 
               <button
                 onClick={handleLogout}
-                className="text-left font-semibold text-red-500"
+                className="text-left text-[11px] font-black uppercase tracking-[0.3em] text-rose-500"
               >
-                Logout
+                Terminate Session
               </button>
-            </>
+            </div>
           ) : (
             <Link
               to="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="font-semibold text-[#D92323]"
+              className="text-[11px] font-black uppercase tracking-[0.3em] text-gold"
             >
-              Login
+              Authenticate
             </Link>
           )}
         </div>

@@ -9,10 +9,12 @@ import {
   User,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 export default function AuthPage() {
   const navigate = useNavigate();
-
+  const { login } = useAuth();
+  
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -49,8 +51,8 @@ export default function AuthPage() {
 
       const response = await axios.post(url, payload);
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // Use Context instead of direct localStorage
+      login(response.data.user, response.data.token);
 
       toast.success(response.data.message);
 
@@ -66,6 +68,7 @@ export default function AuthPage() {
       }
 
     } catch (error) {
+
       toast.error(
         error.response?.data?.message ||
         "Authentication failed"
@@ -76,95 +79,112 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF1F1] flex items-center justify-center px-4 sm:px-6 py-6 sm:py-10">
-      <div className="w-full max-w-6xl bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 sm:px-6 py-6 md:py-8 lg:py-12 animate-in fade-in duration-1000">
+      <div className="w-full max-w-[1300px] bg-white rounded-[32px] md:rounded-[48px] shadow-[0_64px_128px_-24px_rgba(0,0,0,0.1)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[auto] md:min-h-[750px] border border-white">
 
-        {/* LEFT IMAGE PANEL */}
-        <div className="relative hidden lg:block min-h-[650px]">
+        {/* LEFT HERO PANEL - DARK AUTHENTICITY */}
+        <div className="relative hidden lg:block lg:col-span-7 overflow-hidden">
           <img
             src="/images/login_cake.png"
-            alt="Sweet House"
-            className="w-full h-full object-cover"
+            alt="Nirosha Heritage"
+            className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[3s]"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-10 xl:p-14 text-white">
-            <h2 className="text-3xl xl:text-4xl font-black mb-4 leading-tight">
-              {isLogin
-                ? "Welcome Back to Nirosha Sweet House"
-                : "Join Nirosha Sweet House"}
-            </h2>
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/40 to-transparent flex flex-col justify-between p-12 xl:p-20 text-white">
+            <div className="flex items-center gap-3">
+               <div className="w-12 h-1 bg-primary rounded-full"></div>
+               <p className="text-[10px] font-black uppercase tracking-[0.5em] text-gold opacity-80">Established Excellence</p>
+            </div>
 
-            <p className="text-sm xl:text-base text-white/80 leading-relaxed">
-              {isLogin
-                ? "Login to manage your sweet orders and enjoy delicious moments."
-                : "Create your account and start ordering delicious cakes today."}
-            </p>
+            <div>
+              <h1 className="heading-premium text-6xl mb-6 leading-tight drop-shadow-2xl">
+                {isLogin
+                  ? "Authorize Your \nSession"
+                  : "Establish Your \nCredentials"}
+              </h1>
+
+              <div className="h-px w-20 bg-primary mb-8"></div>
+
+              <p className="text-base xl:text-lg text-slate-300 leading-relaxed max-w-md font-medium italic">
+                {isLogin
+                  ? "Access the administrative master ledger and oversee the production of culinary masterpieces."
+                  : "Join the guild of master confectioners and begin your journey into sweet optimization."}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-6">
+               <div className="flex -space-x-3">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center overflow-hidden">
+                      <User size={16} className="text-slate-400" />
+                    </div>
+                  ))}
+               </div>
+               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Trusted by over 100+ artisans</p>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT FORM PANEL */}
-        <div className="p-6 sm:p-10 md:p-14 flex flex-col justify-center">
-          <div className="mb-8 sm:mb-10 text-center lg:text-left">
-            <h1 className="text-3xl sm:text-4xl font-black text-[#1A1A1A] mb-3">
+        {/* RIGHT FORM PANEL - LIGHT REFINEMENT */}
+        <div className="lg:col-span-5 p-6 sm:p-10 md:p-12 lg:p-20 flex flex-col justify-center bg-white relative">
+          <div className="absolute top-6 md:top-10 right-6 md:right-10 flex gap-2">
+             <div className="w-2 h-2 rounded-full bg-slate-100"></div>
+             <div className="w-2 h-2 rounded-full bg-slate-200"></div>
+             <div className="w-2 h-2 rounded-full bg-primary"></div>
+          </div>
+
+          <div className="mb-10 sm:mb-12 md:mb-16">
+            <h2 className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-3 md:mb-4">Authentication Portal</h2>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-3 md:mb-5 tracking-tighter">
               {isLogin ? "Sign In" : "Register"}
             </h1>
 
-            <p className="text-sm sm:text-base text-gray-500">
+            <p className="text-sm md:text-base text-slate-400 font-medium leading-relaxed">
               {isLogin
-                ? "Don't have an account?"
-                : "Already have an account?"}
+                ? "Identity not yet established?"
+                : "Already possess credentials?"}
 
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
-                className="ml-2 text-[#D92323] font-bold hover:underline"
+                className="ml-0 sm:ml-2 block sm:inline-block mt-1 sm:mt-0 text-primary font-black hover:text-slate-900 transition-colors uppercase text-[9px] md:text-[10px] tracking-widest border-b-2 border-primary/20 hover:border-primary"
               >
-                {isLogin ? "Register Here" : "Login Here"}
+                {isLogin ? "Initiate Registry" : "Return to Login"}
               </button>
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-8">
 
             {/* REGISTER ONLY FIELDS */}
             {!isLogin && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                <div>
-                  <label className="text-xs sm:text-sm font-bold uppercase text-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in slide-in-from-top-4">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
                     First Name
                   </label>
-
-                  <div className="relative mt-2">
-                    <User
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                      size={18}
-                    />
-
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      placeholder="John"
-                      className="w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-[#D92323]"
-                      required={!isLogin}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="John"
+                    className="w-full px-6 md:px-8 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
+                    required={!isLogin}
+                  />
                 </div>
 
-                <div>
-                  <label className="text-xs sm:text-sm font-bold uppercase text-gray-700">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
                     Last Name
                   </label>
-
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
                     placeholder="Doe"
-                    className="w-full px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-[#D92323] mt-2"
+                    className="w-full px-6 md:px-8 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                     required={!isLogin}
                   />
                 </div>
@@ -172,15 +192,15 @@ export default function AuthPage() {
             )}
 
             {/* EMAIL */}
-            <div>
-              <label className="text-xs sm:text-sm font-bold uppercase text-gray-700">
-                Email
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
+                Corporate Email Address
               </label>
 
-              <div className="relative mt-2">
+              <div className="relative">
                 <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
+                  className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"
+                  size={20}
                 />
 
                 <input
@@ -188,23 +208,23 @@ export default function AuthPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="hello@example.com"
-                  className="w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-[#D92323]"
+                  placeholder="name@nirosha.com"
+                  className="w-full pl-14 md:pl-16 pr-6 md:pr-8 py-3.5 md:py-4.5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[32px] outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                   required
                 />
               </div>
             </div>
 
             {/* PASSWORD */}
-            <div>
-              <label className="text-xs sm:text-sm font-bold uppercase text-gray-700">
-                Password
+            <div className="space-y-3">
+              <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
+                Security Key (Password)
               </label>
 
-              <div className="relative mt-2">
+              <div className="relative">
                 <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={18}
+                  className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300"
+                  size={20}
                 />
 
                 <input
@@ -212,28 +232,36 @@ export default function AuthPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3 sm:py-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 focus:ring-[#D92323]"
+                  placeholder="••••••••••••"
+                  className="w-full pl-14 md:pl-16 pr-6 md:pr-8 py-3 md:py-4 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[32px] outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                   required
                 />
               </div>
             </div>
 
             {/* SUBMIT BUTTON */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-4 bg-[#1A1A1A] text-white py-3 sm:py-4 rounded-2xl font-bold text-base sm:text-lg hover:bg-[#D92323] transition-all duration-300 flex items-center justify-center gap-3"
-            >
-              {loading
-                ? "Processing..."
-                : isLogin
-                ? "Secure Login"
-                : "Create Account"}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-slate-900 text-gold py-4.5 md:py-5 rounded-2xl md:rounded-[32px] font-black text-[10px] md:text-xs uppercase tracking-[0.4em] hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-4 shadow-2xl shadow-slate-200 active:scale-95 disabled:opacity-50 border border-white/10"
+              >
+                {loading
+                  ? "Synchronizing..."
+                  : isLogin
+                  ? "Authorize Access"
+                  : "Commit Registry"}
 
-              {!loading &&
-                (isLogin ? <LogIn size={20} /> : <UserPlus size={20} />)}
-            </button>
+                {!loading &&
+                  (isLogin ? <LogIn size={16} md:size={18} /> : <UserPlus size={16} md:size={18} />)}
+              </button>
+              
+              {isLogin && (
+                <p className="mt-8 text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                  Secure End-to-End Encryption Enabled
+                </p>
+              )}
+            </div>
 
           </form>
         </div>

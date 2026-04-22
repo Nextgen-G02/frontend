@@ -9,23 +9,20 @@ const ItemProduct = ({ searchParams }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:5000/api/products/get", {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products/`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
-          // body: JSON.stringify({
-          //   search: searchParams?.search || "",
-          //   category: searchParams?.category || "all"
-          // }),
         });
         if (!response.ok) throw new Error("Failed to fetch products");
         const data = await response.json();
-        setProducts(data);
+        setProducts(data.data || data);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+
 
     fetchProducts();
   }, [searchParams]);
@@ -55,56 +52,63 @@ const ItemProduct = ({ searchParams }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6 mt-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5 px-0 mt-2">
       {products.map((product) => (
         <div
           key={product._id}
-          className="w-full max-w-[260px] rounded-2xl shadow-md overflow-hidden bg-secondary font-sans hover:shadow-lg transition"
+          className="w-full rounded-xl md:rounded-2xl shadow-sm overflow-hidden bg-white border border-slate-100 font-sans hover:shadow-xl hover:-translate-y-1 transition-all duration-500 group"
         >
-          <img
-            src={
-              product.pImg?.[0] ||
-              "https://images.unsplash.com/photo-1621303837174-89787a7d4729"
-            }
-            alt={product.pName}
-            className="w-full h-[180px] object-cover"
-          />
-
-          <div className="p-4">
-            <div className="flex justify-between items-center">
-              {/* ✅ pName from schema */}
-              <h3 className="text-[18px] font-semibold">{product.pName}</h3>
-              {/* ✅ pCategory from schema */}
-              <span className="text-xs px-2 py-1 rounded bg-primary text-gray-700">
+          <div className="relative overflow-hidden aspect-[4/3]">
+            <img
+              src={
+                product.pImg?.[0] ||
+                "https://images.unsplash.com/photo-1621303837174-89787a7d4729"
+              }
+              alt={product.pName}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            />
+            <div className="absolute top-2 right-2">
+              <span className="text-[8px] font-black px-2 py-1 rounded-full bg-white/90 backdrop-blur-sm text-slate-900 border border-slate-100 shadow-sm uppercase tracking-widest">
                 {product.pCategory}
               </span>
             </div>
+          </div>
 
-            <p className="text-sm text-gray-500 mt-2">{product.description}</p>
-
-            <div className="flex justify-between items-center mt-3 mb-3">
-              {/* ✅ price from schema */}
-              <span className="text-black font-bold text-lg">
-                Rs.{product.price?.toFixed(2)}
-              </span>
-              {/* ✅ stock + stockStatus from schema */}
-              <span className={`text-xs font-medium ${
-                  product.stockStatus === "In Stock"
-                    ? "text-green-500"
-                    : product.stockStatus === "Low Stock"
-                    ? "text-yellow-500"
-                    : "text-red-500"
-                }`}>
-                {product.stockStatus} ({product.stock})
-              </span>
+          <div className="p-3.5 md:p-4">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="text-xs md:text-sm font-black text-slate-900 uppercase tracking-tight leading-tight line-clamp-1">{product.pName}</h3>
             </div>
 
-            <div className="flex gap-2">
-              <button className="flex-1 border border-gray-300 rounded-md py-2 text-sm hover:bg-gray-100 transition">
-                View Details
+            <p className="text-[10px] text-slate-400 font-medium line-clamp-2 leading-relaxed mb-3 h-8">{product.description}</p>
+
+            <div className="flex justify-between items-end mb-4">
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Unit Val</span>
+                <span className="text-sm md:text-base font-black text-slate-900 tracking-tighter">
+                  Rs.{product.price?.toLocaleString()}
+                </span>
+              </div>
+              {/* ✅ stock + stockStatus from schema */}
+              <div className="text-right">
+                <span className={`text-[9px] font-black uppercase tracking-widest block mb-1 ${
+                    product.stockStatus === "In Stock"
+                      ? "text-emerald-500"
+                      : product.stockStatus === "Low Stock"
+                      ? "text-amber-500"
+                      : "text-rose-500"
+                  }`}>
+                  {product.stockStatus}
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">Qty: {product.stock}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 border-t border-slate-50 pt-3.5">
+              <button className="flex-1 border border-slate-100 rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-all">
+                Details
               </button>
-              <button className="flex-1 bg-accent text-white rounded-md py-2 text-sm hover:opacity-90 transition">
-                Add to Cart
+              <button className="flex-1 bg-slate-900 text-gold rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg shadow-slate-100">
+                Options
               </button>
             </div>
           </div>

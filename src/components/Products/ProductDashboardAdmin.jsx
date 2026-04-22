@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
-<<<<<<< HEAD
-=======
 import { useNavigate } from "react-router-dom";
+import { 
+  Plus, 
+  Search, 
+  Edit3, 
+  Trash2, 
+  Package, 
+  ExternalLink,
+  Loader2
+} from "lucide-react";
+import { toast } from "react-hot-toast";
 
->>>>>>> origin/develop
-
-const API_BASE = "http://localhost:5000/api/products";
+const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/products`;
 
 export default function ProductDashboardAdmin() {
-<<<<<<< HEAD
-=======
   const navigate = useNavigate();
->>>>>>> origin/develop
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,10 +24,6 @@ export default function ProductDashboardAdmin() {
   const [search, setSearch] = useState("");
   const [editForm, setEditForm] = useState({});
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/develop
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -31,23 +31,31 @@ export default function ProductDashboardAdmin() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/get`);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE}/`, {
+        headers: { 
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const data = await res.json();
-      setProducts(data);
-    } catch (err) {
+      setProducts(data.data || data);
+    } catch {
       setError("Failed to fetch products");
+      toast.error("Catalog loading failed");
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleDelete = async (id) => {
     try {
       await fetch(`${API_BASE}/delete/${id}`, { method: "DELETE" });
       setProducts((prev) => prev.filter((p) => p._id !== id));
       setDeleteId(null);
+      toast.success("Product removed");
     } catch {
-      alert("Delete failed");
+      toast.error("Delete failed");
     }
   };
 
@@ -68,8 +76,9 @@ export default function ProductDashboardAdmin() {
         prev.map((p) => (p._id === updated._id ? updated : p))
       );
       setEditProduct(null);
+      toast.success("Product updated");
     } catch {
-      alert("Update failed");
+      toast.error("Update failed");
     }
   };
 
@@ -80,369 +89,165 @@ export default function ProductDashboardAdmin() {
       p.pCategory?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const stockColor = (stock) => {
-    if (stock <= 3) return "text-red-500";
-    if (stock <= 6) return "text-amber-500";
-    return "text-emerald-500";
+  const stockStatus = (stock) => {
+    if (stock <= 3) return { label: "Low Stock", class: "bg-rose-50 text-rose-600" };
+    if (stock <= 6) return { label: "Limited", class: "bg-amber-50 text-amber-600" };
+    return { label: "In Stock", class: "bg-emerald-50 text-emerald-600" };
   };
 
   return (
-    <div className="min-h-screen p-6 font-sans" style={{ background: "#fdf2f9" }}>
-
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div className="space-y-10 max-w-[1500px] mx-auto">
+      {/* Header Area */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#2d0020" }}>Product Dashboard</h1>
-          <p className="text-sm mt-1" style={{ color: "#b07090" }}>{products.length} products in database</p>
+          <div className="flex items-center gap-2.5 mb-3">
+            <span className="w-10 h-1 bg-primary rounded-full"></span>
+            <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Catalog Infrastructure</p>
+          </div>
+          <h1 className="heading-premium text-2xl md:text-5xl leading-tight">
+            Product <span className="italic font-medium text-slate-400">Inventory</span>
+          </h1>
+          <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">
+            Manage your premium collection and real-time stock levels.
+          </p>
         </div>
-        <input
-          type="text"
-          placeholder="Search by name, ID, category..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-72 px-4 py-2 rounded-lg text-sm outline-none"
-          style={{
-            background: "#ffffff",
-            border: "1.5px solid #f0c0e0",
-            color: "#2d0020",
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = "#ff14c0";
-            e.target.style.boxShadow = "0 0 0 3px #ff14c020";
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = "#f0c0e0";
-            e.target.style.boxShadow = "none";
-          }}
-        />
-      </div>
 
-      {/* Table Card */}
-      <div
-        className="rounded-xl overflow-x-auto"
-        style={{ background: "#ffffff", border: "1px solid #f0c0e0" }}
-      >
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
+          <div className="relative group flex-1 sm:flex-none">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={16} md:size={18} />
+            <input
+              type="text"
+              placeholder="Search catalog..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-11 pr-5 py-3 rounded-lg md:rounded-xl bg-white border border-slate-200 outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary w-full sm:w-60 md:w-64 transition-all font-bold text-slate-900 placeholder:text-slate-200 shadow-sm text-xs md:text-sm"
+            />
+          </div>
+          <button
+            onClick={() => navigate("/addproduct")}
+            className="py-3 px-6 md:px-8 bg-slate-900 text-gold rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-2.5"
+          >
+            <Plus size={18} md:size={20} /> Add New Asset
+          </button>
+        </div>
+      </header>
+
+      {/* Table Container */}
+      <div className="glass-card rounded-[24px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border-none shadow-xl">
         {loading ? (
-          <div className="text-center py-16 text-sm" style={{ color: "#b07090" }}>Loading products...</div>
-        ) : error ? (
-          <div className="text-center py-16 text-sm text-red-500">{error}</div>
+          <div className="flex flex-col items-center justify-center py-20 md:py-40 gap-6">
+            <Loader2 className="w-10 h-10 md:w-14 md:h-14 text-primary animate-spin" />
+            <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-[8px] md:text-[10px] italic">Synchronizing Master Catalog...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-40 space-y-6">
+            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <Package size={48} className="text-slate-200" />
+            </div>
+            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Registry search yielded zero results.</p>
+          </div>
         ) : (
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr style={{ background: "#ff14c0" }}>
-                {["Image","Product ID","Name","Price","Category","Stock","Availability","Action"].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-4 font-semibold whitespace-nowrap text-xs uppercase tracking-wide"
-                    style={{ color: "#ffffff" }}
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={11} className="text-center py-12" style={{ color: "#b07090" }}>
-                    No products found
-                  </td>
+          <div className="overflow-x-auto no-scrollbar">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50">
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Asset Designation</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Taxonomy</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Unit Valuation</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Inventory State</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Ops Control</th>
                 </tr>
-              ) : (
-                filtered.map((p, i) => (
-                  <tr
-                    key={p._id}
-                    style={{
-                      borderBottom: "1px solid #fde8f7",
-                      background: i % 2 === 0 ? "#ffffff" : "#fdf0fb",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0f7")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 0 ? "#ffffff" : "#fdf0fb")}
-                  >
-                    {/* Image */}
-                    <td className="px-4 py-3">
-                      {p.pImg && p.pImg[0] ? (
-                        <img
-                          src={p.pImg[0]}
-                          alt={p.pName}
-                          className="w-12 h-12 rounded-lg object-cover"
-                          style={{ border: "1px solid #f0c0e0" }}
-<<<<<<< HEAD
-                          onError={(e) => (e.target.src = "https://via.placeholder.com/48")}
-                        />
-                      ) : (
-                        <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-lg"
-                          style={{ background: "#ffe0f7", color: "#b07090" }}
-                        >
-                          
+              </thead>
+
+              <tbody className="divide-y divide-slate-50">
+                {filtered.map((p) => {
+                  const status = stockStatus(p.stock);
+                  return (
+                    <tr key={p._id} className="hover:bg-white transition-all duration-300 group">
+                      <td className="px-6 md:px-10 py-4 md:py-6">
+                        <div className="flex items-center gap-4 md:gap-5">
+                          <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-[24px] overflow-hidden shadow-sm group-hover:shadow-2xl transition-all duration-700 bg-slate-100 border border-slate-50 shrink-0">
+                            <img
+                              src={p.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
+                              className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000"
+                              alt=""
+                            />
+                          </div>
+                          <div>
+                            <p className="font-black text-slate-900 group-hover:text-primary transition-colors uppercase tracking-tight text-sm md:text-base">{p.pName}</p>
+                            <div className="flex items-center gap-2 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit">
+                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{p.productId}</span>
+                            </div>
+                          </div>
                         </div>
-                      )}
-=======
-                          onError={(e) => {
-                             e.target.style.display = "none";           // ✅ hide broken image
-                             e.target.nextSibling.style.display = "flex"; // ✅ show fallback div
-                            }}
-                        />
-                      ) :  null}
-                        <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center"
-                          style={{ 
-                            background: "#ffe0f7", 
-                            color: "#b07090",
-                            display: p.pImg && p.pImg[0] ? "none" : "flex", 
-                          }}
-                        >
-                          <svg width="20" height="20" fill="none" stroke="#b07090" strokeWidth={1.5} viewBox="0 0 24 24">
-                             <rect x="3" y="3" width="18" height="18" rx="3"/>
-                             <circle cx="8.5" cy="8.5" r="1.5"/>
-                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 15l-5-5L5 21"/>
-                          </svg>
+                      </td>
+
+                      <td className="px-6 md:px-10 py-4 md:py-6 text-right">
+                        <span className="px-3.5 md:px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-slate-100 whitespace-nowrap">
+                          {p.pCategory}
+                        </span>
+                      </td>
+
+                      <td className="px-6 md:px-10 py-4 md:py-6 font-black text-slate-900 text-base md:text-lg tracking-tighter">
+                        <span className="text-primary text-[9px] mr-1 opacity-50 font-black">Rs.</span>
+                        {p.price.toLocaleString()}
+                      </td>
+
+                      <td className="px-6 md:px-10 py-4 md:py-6">
+                        <div className="space-y-2 md:space-y-2.5 min-w-[120px] md:min-w-[140px]">
+                          <div className="flex items-center justify-between">
+                             <div className={`px-2.5 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border ${status.class}`}>
+                               {status.label}
+                             </div>
+                             <span className="text-[11px] md:text-xs font-black text-slate-900">{p.stock}</span>
+                          </div>
+                          <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                            <div 
+                              className={`h-full transition-all duration-1000 shadow-[0_0_8px_rgba(0,0,0,0.1)] ${p.stock <= 3 ? 'bg-primary' : 'bg-emerald-500'}`}
+                              style={{ width: `${Math.min(100, (p.stock / 20) * 100)}%` }}
+                            ></div>
+                          </div>
                         </div>
-                    
->>>>>>> origin/develop
-                    </td>
+                      </td>
 
-                    {/* Product ID */}
-                    <td className="px-4 py-3 font-mono text-xs whitespace-nowrap" style={{ color: "#b07090" }}>
-                      {p.productId}
-                    </td>
-
-                    {/* Name */}
-                    <td className="px-4 py-3 font-semibold whitespace-nowrap" style={{ color: "#2d0020" }}>
-                      {p.pName}
-                    </td>
-
-                    {/* Price */}
-                    <td className="px-4 py-3 font-bold whitespace-nowrap" style={{ color: "#ff1493" }}>
-                      Rs.{p.price?.toLocaleString()}
-                    </td>
-
-
-                    {/* Category */}
-                    <td className="px-4 py-3">
-                      <span
-                        className="text-xs font-medium px-3 py-1 rounded-full whitespace-nowrap"
-                        style={{ background: "#ffe0f7", color: "#cc0099" }}
-                      >
-                        {p.pCategory}
-                      </span>
-                    </td>
-
-
-                    {/* Stock */}
-                    <td className={`px-4 py-3 font-bold whitespace-nowrap ${stockColor(p.stock)}`}>
-                      {p.stock}
-                    </td>
-
-                    {/* Availability */}
-                    <td className="px-4 py-3">
-                      <span
-                        className="text-xs font-semibold px-3 py-1 rounded-full whitespace-nowrap"
-                        style={
-                          p.stockStatus === "In Stock"
-                            ? { background: "#e6f9f0", color: "#0d7a4e" }
-                            : { background: "#fdecea", color: "#c0392b" }
-                        }
-                      >
-                        {p.stockStatus}
-                      </span>
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setDeleteId(p._id)}
-                          className="p-2 rounded-lg transition-colors"
-                          style={{ color: "#e00055", background: "transparent" }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "#ffe0f0")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                          title="Delete"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleEditOpen(p)}
-                          className="p-2 rounded-lg transition-colors"
-                          style={{ color: "#7c3aed", background: "transparent" }}
-                          onMouseEnter={(e) => (e.currentTarget.style.background = "#f3e8ff")}
-                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                          title="Edit"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      <td className="px-6 md:px-12 py-6 md:py-8 text-right">
+                        <div className="flex justify-end gap-2 md:gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                          <button 
+                            onClick={() => handleEditOpen(p)}
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-400 hover:text-primary hover:shadow-xl transition-all"
+                          >
+                            <Edit3 size={18} md:size={20} />
+                          </button>
+                          <button 
+                            onClick={() => setDeleteId(p._id)}
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-rose-100 text-rose-300 hover:text-rose-500 hover:shadow-xl transition-all"
+                          >
+                            <Trash2 size={18} md:size={20} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* Floating Add Button */}
-<<<<<<< HEAD
-      <button
-        onClick={() => alert("Navigate to Add Product page")}
-        className="fixed bottom-8 right-8 w-14 h-14 text-white text-3xl rounded-full flex items-center justify-center active:scale-95 transition-all"
-        style={{
-          background: "#ff14c0",
-          boxShadow: "0 4px 20px #ff14c055",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "#cc0099")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "#ff14c0")}
-        title="Add Product"
-      >
-      +
-      </button>
-
-=======
-      <button onClick={() => navigate("/addproduct")}
-      className="fixed bottom-8 right-8 w-14 h-14 text-white text-3xl rounded-full flex items-center justify-center active:scale-95 transition-all"
-      style={{
-        background: "#ff14c0",
-        boxShadow: "0 4px 20px #ff14c055",
-      }}
-  onMouseEnter={(e) => (e.currentTarget.style.background = "#cc0099")}
-  onMouseLeave={(e) => (e.currentTarget.style.background = "#ff14c0")}
-  title="Add Product"
->
-  +
-</button>
->>>>>>> origin/develop
-      {/* Delete Confirm Modal */}
+      {/* Delete Confirmation Modal */}
       {deleteId && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: "rgba(0,0,0,0.45)" }}>
-          <div className="rounded-2xl p-7 w-full max-w-sm" style={{ background: "#ffffff", boxShadow: "0 8px 40px #ff14c020" }}>
-            <div className="flex items-center gap-3 mb-3">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: "#ffe0f7" }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="#e00055" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                </svg>
-              </div>
-              <h3 className="text-base font-bold" style={{ color: "#2d0020" }}>Delete Product</h3>
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="glass-card bg-white p-12 rounded-[56px] max-w-md w-full shadow-2xl relative overflow-hidden border-none">
+            <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
+            <div className="w-20 h-20 bg-rose-50 text-primary rounded-[28px] flex items-center justify-center mb-8 mx-auto">
+               <Trash2 size={40} />
             </div>
-            <p className="text-sm mb-6 ml-13" style={{ color: "#b07090" }}>
-              Are you sure? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setDeleteId(null)}
-                className="px-4 py-2 rounded-lg text-sm transition-colors"
-                style={{ border: "1.5px solid #f0c0e0", color: "#7a3a6a", background: "transparent" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#fdf2f9")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteId)}
-                className="px-4 py-2 rounded-lg text-white text-sm font-semibold transition-colors"
-                style={{ background: "#e00055" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#b0003a")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#e00055")}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Modal */}
-      {editProduct && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: "rgba(0,0,0,0.45)" }}>
-          <div className="rounded-2xl p-7 w-full max-w-md" style={{ background: "#ffffff", boxShadow: "0 8px 40px #ff14c020" }}>
-            <h3 className="text-base font-bold mb-5" style={{ color: "#2d0020" }}>Edit Product</h3>
-            <div className="space-y-4">
-              {[
-                { label: "Product Name", key: "pName" },
-                { label: "Category", key: "pCategory" },
-                { label: "Price", key: "price", type: "number" },
-                { label: "Stock", key: "stock", type: "number" },
-                { label: "Description", key: "description" },
-              ].map(({ label, key, type }) => (
-                <div key={key}>
-                  <label className="block text-xs font-semibold mb-1" style={{ color: "#7a3a6a" }}>{label}</label>
-                  <input
-                    type={type || "text"}
-                    value={editForm[key] || ""}
-                    onChange={(e) =>
-                      setEditForm((f) => ({
-                        ...f,
-                        [key]: type === "number" ? Number(e.target.value) : e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 rounded-lg text-sm outline-none transition"
-                    style={{
-                      border: "1.5px solid #f0c0e0",
-                      color: "#2d0020",
-                      background: "#ffffff",
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "#ff14c0";
-                      e.target.style.boxShadow = "0 0 0 3px #ff14c015";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "#f0c0e0";
-                      e.target.style.boxShadow = "none";
-                    }}
-                  />
-                </div>
-              ))}
-              <div>
-                <label className="block text-xs font-semibold mb-1" style={{ color: "#7a3a6a" }}>Stock Status</label>
-                <select
-                  value={editForm.stockStatus || "In Stock"}
-                  onChange={(e) => setEditForm((f) => ({ ...f, stockStatus: e.target.value }))}
-                  className="w-full px-3 py-2 rounded-lg text-sm outline-none transition"
-                  style={{
-                    border: "1.5px solid #f0c0e0",
-                    color: "#2d0020",
-                    background: "#ffffff",
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "#ff14c0";
-                    e.target.style.boxShadow = "0 0 0 3px #ff14c015";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "#f0c0e0";
-                    e.target.style.boxShadow = "none";
-                  }}
-                >
-                  <option>In Stock</option>
-                  <option>Out of Stock</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex gap-3 justify-end mt-6">
-              <button
-                onClick={() => setEditProduct(null)}
-                className="px-4 py-2 rounded-lg text-sm transition-colors"
-                style={{ border: "1.5px solid #f0c0e0", color: "#7a3a6a", background: "transparent" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#fdf2f9")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEditSave}
-                className="px-4 py-2 rounded-lg text-white text-sm font-semibold transition-colors"
-                style={{ background: "#ff14c0" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#cc0099")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#ff14c0")}
-              >
-                Save Changes
-              </button>
+            <h3 className="text-3xl font-black text-slate-900 mb-4 text-center tracking-tight">Erase Asset?</h3>
+            <p className="text-slate-400 font-medium mb-10 text-center leading-relaxed italic">"Permanently purging this item from the master catalog is an irreversible protocol."</p>
+            <div className="flex flex-col gap-4">
+              <button onClick={() => handleDelete(deleteId)} className="w-full py-5 bg-primary text-white rounded-2xl font-black uppercase tracking-[0.4em] text-xs shadow-xl shadow-primary/20 hover:bg-slate-900 transition-all duration-500">Confirm Deletion</button>
+              <button onClick={() => setDeleteId(null)} className="w-full py-5 font-black text-slate-400 hover:text-slate-900 uppercase tracking-widest text-[10px] transition-colors">Abort Operation</button>
             </div>
           </div>
         </div>
@@ -450,3 +255,4 @@ export default function ProductDashboardAdmin() {
     </div>
   );
 }
+

@@ -1,40 +1,60 @@
 import { useState } from 'react'
 import './App.css'
 import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { Toaster } from 'react-hot-toast'
 
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Products from './pages/Products'
 import AdminProduct from './pages/AdminProduct'
-
-
 import AddProduct from './components/Products/Addproduct';
 import AdminDashboard from './pages/AdminDashboard'
-
-
 import OrderList from './pages/orders/OrderList'
 import OrderForm from './pages/orders/OrderForm'
-import OrderDetails from './pages/orders/OrderDetails'
+import AdminCategoryManagement from './pages/AdminCategoryManagement'
+import InventoryDashboard from './pages/InventoryDashboard'
+import AdminCustomerManagement from './pages/AdminCustomerManagement'
+import AdminFinancials from './pages/AdminFinancials'
+import AdminStaffManagement from './pages/AdminStaffManagement'
+import AdminSupplierManagement from './pages/AdminSupplierManagement'
+import POSTerminal from './pages/POSTerminal'
+import AdminLayout from './components/AdminLayout'
 
 function App() {
   return (
-    <Routes>
-      <Route path='/' element={<Home />} />
-      <Route path='/login' element={<Login />} />
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/products" element={<Products />} />
-      <Route path='/adminproduct' element={<AdminProduct />} />
+    <>
+      <Toaster position="top-right" reverseOrder={false} />
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/login' element={<Login />} />
+        <Route path="/products" element={<Products />} />
 
-      {/* Add Product */}
-      <Route path="/addproduct" element={<AddProduct />} />
+        {/* Global Admin Wrapper */}
+        <Route element={<AdminLayout><AdminDashboard /></AdminLayout>} path="/admin" />
+        
+        {/* Protected Admin Routes with Layout */}
+        <Route path="/adminproduct" element={<AdminLayout><AdminProduct /></AdminLayout>} />
+        <Route path="/addproduct" element={<AdminLayout><AddProduct /></AdminLayout>} />
+        <Route path="/pos" element={<AdminLayout><POSTerminal /></AdminLayout>} />
+        <Route path="/admin/categories" element={<AdminLayout><AdminCategoryManagement /></AdminLayout>} />
+        
+        {/* Order Management */}
+        <Route path='/orders' element={<AdminLayout><OrderList /></AdminLayout>} />
+        <Route path='/orders/new' element={<AdminLayout><OrderForm /></AdminLayout>} />
+        <Route path='/orders/edit/:id' element={<AdminLayout><OrderForm /></AdminLayout>} />
 
-      {/* Order Management */}
-      <Route path='/orders' element={<OrderList />} />
-      <Route path='/orders/new' element={<OrderForm />} />
-      <Route path='/orders/edit/:id' element={<OrderForm />} />
-      <Route path='/orders/:id' element={<OrderDetails />} />
-    </Routes>
+        {/* Inventory Management */}
+        <Route path="/inventory" element={<AdminLayout><InventoryDashboard /></AdminLayout>} />
+
+        {/* Customer & Financials */}
+        <Route path="/admin/customers" element={<AdminLayout><AdminCustomerManagement /></AdminLayout>} />
+        <Route path="/admin/suppliers" element={<AdminLayout><AdminSupplierManagement /></AdminLayout>} />
+        <Route path="/admin/financials" element={<AdminLayout><AdminFinancials /></AdminLayout>} />
+        <Route path="/staff" element={<AdminLayout><AdminStaffManagement /></AdminLayout>} />
+
+      </Routes>
+    </>
   )
 }
 
-export default App
+export default App

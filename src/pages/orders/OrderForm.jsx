@@ -1,7 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { 
+  ArrowLeft, 
+  Plus, 
+  Trash2, 
+  ShoppingCart, 
+  User, 
+  Calendar, 
+  Clock, 
+  CheckCircle2,
+  Package,
+  FileText,
+  Star,
+  Settings,
+  Loader2
+} from 'lucide-react';
 import orderApi from '../../api/orderApi';
 import productApi from '../../api/productApi';
+import { toast } from 'react-hot-toast';
 
 const OrderForm = () => {
     const { id } = useParams();
@@ -31,7 +47,7 @@ const OrderForm = () => {
             const data = await productApi.getProducts();
             setProducts(data);
         } catch (error) {
-            console.error('Failed to fetch products');
+            toast.error("Failed to load catalog");
         }
     };
 
@@ -40,7 +56,7 @@ const OrderForm = () => {
             const order = await orderApi.getOrderById(id);
             setFormData(order);
         } catch (error) {
-            console.error('Failed to fetch order details');
+            toast.error("Failed to retrieve order sequence");
         }
     };
 
@@ -52,7 +68,7 @@ const OrderForm = () => {
     const addItem = () => {
         setFormData(prev => ({
             ...prev,
-            items: [...prev.items, { pName: '', category: '', quantity: 1, price: 0 }]
+            items: [...prev.items, { pName: '', category: '', quantity: 1, price: 0, customization: { message: '', flavor: '', specialInstructions: '' } }]
         }));
     };
 
@@ -89,190 +105,309 @@ const OrderForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.items.length === 0) return toast.error("Transaction requires at least one item.");
+
         setLoading(true);
         try {
             if (id) {
                 await orderApi.updateOrder(id, formData);
+                toast.success("Order sequence synchronized");
             } else {
                 await orderApi.createOrder(formData);
+                toast.success("Transaction successfully committed");
             }
             navigate('/orders');
         } catch (error) {
-            alert(error.response?.data?.message || 'Error saving order');
+            toast.error(error.response?.data?.message || 'Transaction error');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 p-6">
-            <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-4 mb-8">
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
-                    >
-                        <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-slate-900">{id ? 'Edit Order' : 'Create New Order'}</h1>
-                        <p className="text-slate-500 text-sm">Fill in the details below to reach out to your customers.</p>
+        <div className="space-y-10 max-w-[1500px] mx-auto animate-in fade-in duration-1000">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+                <div>
+                    <div className="flex items-center gap-2.5 mb-3">
+                        <span className="w-10 h-1 bg-primary rounded-full"></span>
+                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Commercial Provisioning Interface</p>
                     </div>
+                    <h1 className="heading-premium text-2xl md:text-5xl leading-tight">{id ? 'Synchronize' : 'Authorize'} <span className="italic font-medium text-slate-400">Order</span></h1>
+                    <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base max-w-2xl">Manage detailed specifications and authorize order transmissions.</p>
                 </div>
+                
+                <button 
+                   onClick={() => navigate(-1)}
+                   className="flex items-center gap-2.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900 transition-all group"
+                >
+                   <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> 
+                   Return to Ledger
+                </button>
+            </header>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                        <h2 className="text-lg font-semibold text-slate-800 pb-2 border-b border-slate-100">Customer Details</h2>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Customer Name</label>
-                                <input 
-                                    type="text" name="customerName" value={formData.customerName} onChange={handleChange}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 active:bg-white outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
-                                <input 
-                                    type="text" name="phone" value={formData.phone} onChange={handleChange}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 active:bg-white outline-none"
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
-                                <textarea 
-                                    name="address" value={formData.address} onChange={handleChange} rows="2"
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 active:bg-white outline-none"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                        <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-                            <h2 className="text-lg font-semibold text-slate-800">Order Items</h2>
-                            <button 
-                                type="button" onClick={addItem}
-                                className="text-sm font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                                Add Item
-                            </button>
-                        </div>
-
-                        {formData.items.map((item, index) => (
-                            <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end bg-slate-50 p-4 rounded-lg relative group">
-                                <div className="md:col-span-4">
-                                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Product</label>
-                                    <select 
-                                        value={item.pName} 
-                                        onChange={(e) => handleItemChange(index, 'pName', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                        required
-                                    >
-                                        <option value="">Select Product</option>
-                                        {products.map(p => (
-                                            <option key={p.productId} value={p.pName}>{p.pName} (${p.price})</option>
-                                        ))}
-                                    </select>
+            <form onSubmit={handleSubmit} className="space-y-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    {/* Left Column: Form Sections */}
+                    <div className="lg:col-span-2 space-y-10">
+                        {/* Customer Details */}
+                        <div className="glass-card p-6 md:p-10 rounded-[28px] md:rounded-[40px] bg-white border-none shadow-xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-24 h-24 md:w-30 md:h-30 bg-slate-50 rounded-full -mr-12 -mt-12 md:-mr-15 md:-mt-15 opacity-50"></div>
+                            <div className="flex items-center gap-3.5 mb-8 md:mb-10 relative z-10">
+                                <div className="p-2.5 md:p-3.5 bg-slate-900 text-gold rounded-lg md:rounded-xl shadow-xl"><User size={18} md:size={22} /></div>
+                                <div>
+                                   <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight uppercase">Client Profile</h2>
+                                   <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Identification & Logistics</p>
                                 </div>
-                                <div className="md:col-span-3">
-                                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Category</label>
-                                    <input type="text" value={item.category} readOnly className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-500" />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Price</label>
-                                    <input type="number" value={item.price} readOnly className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-500" />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Qty</label>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-7 relative z-10">
+                                <div className="space-y-1.5 group">
+                                    <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Client Identification</label>
                                     <input 
-                                        type="number" min="1" value={item.quantity} 
-                                        onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
-                                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                                        required
+                                        type="text" name="customerName" value={formData.customerName} onChange={handleChange}
+                                        placeholder="Legal Name / Entity"
+                                        className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-lg md:rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs md:text-sm"
                                     />
                                 </div>
-                                <div className="md:col-span-1 text-right">
-                                    <button 
-                                        type="button" onClick={() => removeItem(index)}
-                                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                <div className="space-y-1.5 group">
+                                    <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Protocol (Phone)</label>
+                                    <input 
+                                        type="text" name="phone" value={formData.phone} onChange={handleChange}
+                                        placeholder="+94 XX XXX XXXX"
+                                        className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-lg md:rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs md:text-sm"
+                                    />
+                                </div>
+                                <div className="md:col-span-2 space-y-1.5 group">
+                                    <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Logistics Destination (Address)</label>
+                                    <textarea 
+                                        name="address" value={formData.address} onChange={handleChange} rows="2"
+                                        placeholder="Street Address, City, Administrative Region"
+                                        className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-lg md:rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-slate-900 resize-none text-xs md:text-sm"
+                                    />
                                 </div>
                             </div>
-                        ))}
-
-                        {formData.items.length === 0 && (
-                            <div className="text-center py-8 text-slate-400 border-2 border-dashed border-slate-100 rounded-xl">
-                                No items added yet. Click "Add Item" to start.
-                            </div>
-                        )}
-
-                        <div className="flex justify-end pt-4 border-t border-slate-100">
-                            <div className="text-right">
-                                <span className="text-slate-500 text-sm">Total Amount:</span>
-                                <div className="text-3xl font-bold text-slate-900">${calculateTotal().toFixed(2)}</div>
-                            </div>
                         </div>
-                    </div>
 
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
-                        <h2 className="text-lg font-semibold text-slate-800 pb-2 border-b border-slate-100">Order Settings</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Order Type</label>
-                                <select 
-                                    name="type" value={formData.type} onChange={handleChange}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 active:bg-white outline-none"
+                        {/* Order Items */}
+                        <div className="glass-card rounded-[24px] md:rounded-[40px] bg-white border-none shadow-xl overflow-hidden">
+                            <div className="p-5 md:p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-center bg-white/50 backdrop-blur-xl gap-5">
+                                <div className="flex items-center gap-3.5 w-full sm:w-auto">
+                                    <div className="p-2.5 md:p-3.5 bg-slate-900 text-gold rounded-lg md:rounded-xl shadow-xl"><ShoppingCart size={18} md:size={22} /></div>
+                                    <div>
+                                       <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight uppercase">Purchase Manifest</h2>
+                                       <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Registry of Selected Assets</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    type="button" onClick={addItem}
+                                    className="w-full sm:w-auto px-5 md:px-7 py-3 md:py-3.5 bg-slate-900 text-gold rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-2.5 active:scale-95 shadow-xl border border-white/5"
                                 >
-                                    <option value="Order">Standard Order</option>
-                                    <option value="DirectSale">Direct Sale (POS)</option>
-                                </select>
+                                    <Plus size={14} md:size={16} /> Append SKU
+                                </button>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Schedule Date</label>
-                                <input 
-                                    type="date" name="scheduleDate" value={formData.scheduleDate} onChange={handleChange}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 active:bg-white outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Schedule Time</label>
-                                <input 
-                                    type="time" name="scheduleTime" value={formData.scheduleTime} onChange={handleChange}
-                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500/20 active:bg-white outline-none"
-                                />
+
+                            <div className="p-5 md:p-8 space-y-5 md:space-y-6">
+                                {formData.items.map((item, index) => (
+                                    <div key={index} className="p-5 md:p-8 rounded-[24px] md:rounded-[32px] bg-slate-50/50 border border-slate-100 relative group/item hover:bg-white hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-slate-200 group-hover/item:bg-primary transition-colors"></div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-5 md:gap-6 items-end">
+                                            <div className="sm:col-span-2 lg:col-span-5 space-y-1.5">
+                                                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Entity selection</label>
+                                                <select 
+                                                    value={item.pName} 
+                                                    onChange={(e) => handleItemChange(index, 'pName', e.target.value)}
+                                                    className="w-full px-4 md:px-5 py-3 md:py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-slate-900 appearance-none cursor-pointer uppercase text-[9px] md:text-[10px] tracking-wider"
+                                                    required
+                                                >
+                                                    <option value="">Select Asset...</option>
+                                                    {products.map(p => (
+                                                        <option key={p.productId} value={p.pName}>{p.pName} (Rs.{p.price})</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="lg:col-span-3 space-y-1.5">
+                                                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Taxonomy Class</label>
+                                                <div className="px-4 md:px-5 py-3 md:py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed shadow-sm">
+                                                    {item.category || "---"}
+                                                </div>
+                                            </div>
+                                            <div className="lg:col-span-2 space-y-1.5">
+                                                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Valuation</label>
+                                                <div className="px-4 md:px-5 py-3 md:py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black text-slate-900 shadow-sm">
+                                                    Rs.{item.price.toLocaleString()}
+                                                </div>
+                                            </div>
+                                            <div className="lg:col-span-1 space-y-1.5">
+                                                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Qty</label>
+                                                <input 
+                                                    type="number" min="1" value={item.quantity} 
+                                                    onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value))}
+                                                    className="w-full px-3 py-3 md:py-3 bg-white border border-slate-100 rounded-lg md:rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-slate-900 text-center shadow-sm text-[11px] md:text-xs"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="lg:col-span-1 flex justify-end">
+                                                <button 
+                                                    type="button" onClick={() => removeItem(index)}
+                                                    className="p-3 md:p-3.5 bg-rose-50 text-slate-300 hover:text-primary hover:bg-rose-100 rounded-lg md:rounded-xl transition-all"
+                                                >
+                                                    <Trash2 size={16} md:size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Customization Layer */}
+                                        {(item.category?.toLowerCase()?.includes('cake')) && (
+                                            <div className="mt-8 pt-8 border-t border-slate-200/50 grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-top-4">
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2.5 mb-0.5">
+                                                       <FileText size={12} md:size={14} className="text-primary" />
+                                                       <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Inscripted Message</p>
+                                                    </div>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Happy Anniversary..."
+                                                        value={item.customization?.message || ''}
+                                                        onChange={(e) => handleItemChange(index, 'customization', { ...item.customization, message: e.target.value })}
+                                                        className="w-full px-5 py-2.5 bg-white border border-slate-100 rounded-lg text-[10px] md:text-[11px] font-bold text-slate-900 outline-none focus:ring-4 focus:ring-primary/5"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2.5 mb-0.5">
+                                                       <Star size={12} md:size={14} className="text-gold" />
+                                                       <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Flavor Profile</p>
+                                                    </div>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Velvet, Truffle..."
+                                                        value={item.customization?.flavor || ''}
+                                                        onChange={(e) => handleItemChange(index, 'customization', { ...item.customization, flavor: e.target.value })}
+                                                        className="w-full px-5 py-2.5 bg-white border border-slate-100 rounded-lg text-[10px] md:text-[11px] font-bold text-slate-900 outline-none focus:ring-4 focus:ring-primary/5"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="flex items-center gap-2.5 mb-0.5">
+                                                       <Settings size={12} md:size={14} className="text-slate-400" />
+                                                       <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Operational Notes</p>
+                                                    </div>
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="Special instructions..."
+                                                        value={item.customization?.specialInstructions || ''}
+                                                        onChange={(e) => handleItemChange(index, 'customization', { ...item.customization, specialInstructions: e.target.value })}
+                                                        className="w-full px-5 py-2.5 bg-white border border-slate-100 rounded-lg text-[10px] md:text-[11px] font-bold text-slate-900 outline-none focus:ring-4 focus:ring-primary/5"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+
+                                {formData.items.length === 0 && (
+                                    <div className="text-center py-20 bg-slate-50 border-4 border-dashed border-slate-100 rounded-[32px]">
+                                        <div className="w-16 h-16 bg-white rounded-[24px] flex items-center justify-center mx-auto mb-5 shadow-sm">
+                                            <Package size={32} className="text-slate-100" />
+                                        </div>
+                                        <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[9px]">Purchase Manifest is currently empty.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4">
-                        <button 
-                            type="button" onClick={() => navigate('/orders')}
-                            className="px-6 py-2.5 border border-slate-200 rounded-lg text-slate-600 font-medium hover:bg-slate-50 transition-all"
-                        >
-                            Cancel
-                        </button>
-                        <button 
-                            type="submit" disabled={loading}
-                            className="px-8 py-2.5 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-all shadow-md active:scale-95 disabled:bg-indigo-400"
-                        >
-                            {loading ? 'Processing...' : (id ? 'Update Order' : 'Complete Order')}
-                        </button>
+                    {/* Right Column: Totals & Settings */}
+                    <div className="space-y-10">
+                        {/* Summary Card */}
+                        <div className="glass-card p-6 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.4)] relative overflow-hidden group">
+                           <div className="absolute bottom-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-primary rounded-full blur-[80px] md:blur-[100px] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
+                            
+                           <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 mb-8 md:mb-10 relative z-10">Economic Settlement</p>
+                           <div className="space-y-5 md:space-y-6 mb-8 md:mb-10 relative z-10">
+                               <div className="flex justify-between items-center">
+                                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Asset Gross Value</span>
+                                   <span className="font-bold text-white text-xs md:text-sm">Rs.{calculateTotal().toLocaleString()}</span>
+                               </div>
+                               <div className="flex justify-between items-center">
+                                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Commission Protocol</span>
+                                   <span className="px-2.5 py-1 bg-white/10 rounded-lg font-black text-gold text-[8px] uppercase tracking-widest border border-white/5">Waived</span>
+                               </div>
+                               <div className="h-px bg-white/10" />
+                               <div className="flex flex-col gap-1.5">
+                                   <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">Final Net Settlement</span>
+                                   <span className="text-2xl md:text-4xl font-black text-white tracking-tighter">Rs.{calculateTotal().toLocaleString()}</span>
+                               </div>
+                           </div>
+
+                           <button 
+                               type="submit" disabled={loading}
+                               className="w-full py-4.5 md:py-5 bg-primary text-white rounded-xl md:rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl shadow-primary/20 hover:bg-white hover:text-slate-900 transition-all duration-500 disabled:opacity-50 relative z-10"
+                           >
+                               {loading ? (
+                                   <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                               ) : (
+                                   id ? 'Authorize Update' : 'Commit Transmission'
+                               )}
+                           </button>
+                        </div>
+
+                        {/* Scheduling Settings */}
+                        <div className="glass-card p-6 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border-none shadow-xl relative overflow-hidden">
+                            <div className="flex items-center gap-3.5 mb-8 md:mb-10">
+                                <div className="p-2.5 md:p-3.5 bg-slate-50 text-slate-900 rounded-lg md:rounded-xl border border-slate-100"><Calendar size={18} md:size={22} /></div>
+                                <div>
+                                   <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight uppercase">Timeline</h2>
+                                   <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Operational Parameters</p>
+                                 </div>
+                            </div>
+                            
+                            <div className="space-y-5 md:space-y-6">
+                                <div className="space-y-1.5 md:space-y-2">
+                                    <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Fulfillment Vector</label>
+                                    <select 
+                                        name="type" value={formData.type} onChange={handleChange}
+                                        className="w-full px-5 md:px-6 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-slate-900 appearance-none cursor-pointer uppercase text-[8px] md:text-[9px] tracking-widest shadow-sm"
+                                    >
+                                        <option value="Order">Standard Pipeline</option>
+                                        <option value="DirectSale">Direct Acquisition (POS)</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5 md:space-y-2">
+                                    <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Fulfillment Date</label>
+                                    <div className="relative group">
+                                       <Calendar className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={14} md:size={16} />
+                                       <input 
+                                            type="date" name="scheduleDate" value={formData.scheduleDate} onChange={handleChange}
+                                            className="w-full pl-12 md:pl-14 pr-5 md:pr-6 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-slate-900 text-[11px] md:text-xs shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5 md:space-y-2">
+                                    <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Operational Window (Time)</label>
+                                    <div className="relative group">
+                                       <Clock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={14} md:size={16} />
+                                       <input 
+                                            type="time" name="scheduleTime" value={formData.scheduleTime} onChange={handleChange}
+                                            className="w-full pl-12 md:pl-14 pr-5 md:pr-6 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-slate-900 text-[11px] md:text-xs shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Security Verification */}
+                        <div className="p-8 rounded-[32px] bg-emerald-50 border border-emerald-100 flex items-start gap-4 shadow-sm">
+                            <CheckCircle2 className="text-emerald-500 mt-0.5" size={20} md:size={22} />
+                            <div>
+                                <p className="text-[9px] font-black text-emerald-700 uppercase tracking-widest mb-1">Integrity Verified</p>
+                                <p className="text-[9px] font-bold text-emerald-600 leading-relaxed uppercase tracking-wider">Transmission sequence is logged and encrypted in the master registry.</p>
+                            </div>
+                        </div>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     );
 };
 
 export default OrderForm;
+

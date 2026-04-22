@@ -46,7 +46,7 @@ export default function HeroCarousel() {
   };
 
   return (
-    <div className="relative w-full h-[500px] overflow-hidden">
+    <div className="relative w-full h-[400px] md:h-[520px] overflow-hidden bg-slate-900 group/hero">
 
       {/* SLIDES */}
       <div
@@ -69,16 +69,17 @@ export default function HeroCarousel() {
             <div className="absolute inset-0 bg-black/40"></div>
 
             {/* Text Content */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start px-10 md:px-20 text-white">
-              <h1 className="text-3xl md:text-5xl font-bold mb-3">
-                {slide.title}
+            <div className="absolute inset-0 flex flex-col justify-center items-start px-10 md:px-32 text-white">
+              <div className="flex items-center gap-3 mb-4 animate-in slide-in-from-left duration-700">
+                <div className="w-8 h-[2px] bg-gold"></div>
+                <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-gold">{slide.subtitle}</p>
+              </div>
+              <h1 className="text-3xl md:text-6xl font-black mb-8 md:mb-10 leading-tight tracking-tight uppercase max-w-2xl animate-in slide-in-from-left duration-1000">
+                {slide.title.split(' ')[0]} <span className="italic font-medium text-slate-300">{slide.title.split(' ').slice(1).join(' ')}</span>
               </h1>
-              <p className="text-lg md:text-xl mb-5">
-                {slide.subtitle}
-              </p>
 
-              <button className="bg-[#c89b6d] px-6 py-3 rounded-full text-sm font-semibold hover:scale-105 transition">
-                Order Now
+              <button className="bg-white text-slate-900 px-8 py-3.5 md:px-10 md:py-4 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 shadow-2xl shadow-black/20 animate-in fade-in duration-1000 delay-500">
+                Purchase Collection
               </button>
             </div>
 
@@ -89,7 +90,7 @@ export default function HeroCarousel() {
       {/* LEFT BUTTON */}
       <button
         onClick={prev}
-        className="absolute left-5 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur w-10 h-10 rounded-full shadow-md hover:bg-white transition"
+        className="absolute left-6 md:left-10 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-md border border-white/10 w-12 h-12 md:w-16 md:h-16 rounded-full text-white shadow-2xl hover:bg-white hover:text-slate-900 transition-all duration-500 flex items-center justify-center text-2xl font-light opacity-0 group-hover/hero:opacity-100 -translate-x-10 group-hover/hero:translate-x-0"
       >
         ‹
       </button>
@@ -97,19 +98,19 @@ export default function HeroCarousel() {
       {/* RIGHT BUTTON */}
       <button
         onClick={next}
-        className="absolute right-5 top-1/2 -translate-y-1/2 bg-white/80 backdrop-blur w-10 h-10 rounded-full shadow-md hover:bg-white transition"
+        className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-md border border-white/10 w-12 h-12 md:w-16 md:h-16 rounded-full text-white shadow-2xl hover:bg-white hover:text-slate-900 transition-all duration-500 flex items-center justify-center text-2xl font-light opacity-0 group-hover/hero:opacity-100 translate-x-10 group-hover/hero:translate-x-0"
       >
         ›
       </button>
 
       {/* DOTS */}
-      <div className="absolute bottom-5 w-full flex justify-center gap-3">
+      <div className="absolute bottom-8 w-full flex justify-center gap-4">
         {slides.map((_, i) => (
-          <div
+          <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`w-3 h-3 rounded-full cursor-pointer transition ${
-              current === i ? "bg-white scale-125" : "bg-white/50"
+            className={`h-1 transition-all duration-500 rounded-full ${
+              current === i ? "bg-white w-12" : "bg-white/30 w-6 hover:bg-white/50"
             }`}
           />
         ))}
