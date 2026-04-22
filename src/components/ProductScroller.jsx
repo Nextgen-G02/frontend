@@ -63,7 +63,7 @@ export default function ProductScroller({
           </button>
 
           {/* PRODUCTS GRID */}
-          <div className="grid grid-cols-4 gap-10">
+          <div className="grid grid-cols-4 gap-10  ">
             {visibleProducts.map((p) => (
               <div key={p._id} className="text-center group">
 
@@ -72,7 +72,7 @@ export default function ProductScroller({
                   <img
                     src={p.pImg[0]}
                     alt={p.pName}
-                    className="w-full h-[260px] object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-[260px] object-cover transition-transform duration-500 group-hover:scale-105 "
                   />
                 </div>
 

@@ -17,13 +17,13 @@ export default function Home() {
         <ProductScroller
         title="Popular Items"
         category="cake"
-        bgColor="#ff149305"
+        bgColor="#fae3e8"
       />
 
       <ProductScroller
         title="Pastries"
         category="cake"
-        bgColor="#f5f5f5"
+        bgColor="#ffffff"
       />
 
       <ProductScroller

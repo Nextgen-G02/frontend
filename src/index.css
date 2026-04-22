@@ -1,5 +1,38 @@
 @import "tailwindcss";
 
+@theme{
+
+  --color-primary-burgundy: #800000;
+  --color-accent-gold: #d4af37;
+  --color-rich-black: #1a1a1a;
+  --color-soft-cream: #fdfbf7;
+  --color-glass-white: rgba(255, 255, 255, 0.7);
+  --color-glass-dark: rgba(26, 26, 26, 0.8);
+
+
+  --font-serif: "Playfair Display", "Merriweather", serif;
+  --font-sans: "Montserrat", "Inter", sans-serif;
+}
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700;900&display=swap');
+
+  
+
+  body {
+    font-family: "Montserrat", "Inter", sans-serif;
+    @apply text-rich-black bg-soft-cream antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Playfair Display", serif;
+    @apply tracking-tight;
+  }
+
+  
+}
+
+
 @layer utilities {
   /* Light pink color */
   .bg-primary {
