@@ -13,8 +13,8 @@ import {
   CakeSlice,
   ChevronRight
 } from "lucide-react";
-import productApi from "../../shared/api/productApi";
-import orderApi from "../../shared/api/orderApi";
+import productApi from "../../../api/productApi";
+import orderApi from "../../../api/orderApi";
 import { toast } from "react-hot-toast";
 
 export default function POSTerminal() {

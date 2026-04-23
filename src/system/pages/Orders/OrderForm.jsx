@@ -21,8 +21,8 @@ import {
   Cake as CakeIcon,
   Minus
 } from 'lucide-react';
-import orderApi from '../../../shared/api/orderApi';
-import productApi from '../../../shared/api/productApi';
+import orderApi from '../../../api/orderApi';
+import productApi from '../../../api/productApi';
 import { toast } from 'react-hot-toast';
 
 const OrderForm = () => {

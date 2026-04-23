@@ -13,7 +13,7 @@ import {
   Clock,
   Loader2
 } from 'lucide-react';
-import orderApi from '../../../shared/api/orderApi';
+import orderApi from '../../../api/orderApi';
 import { toast } from 'react-hot-toast';
 
 const OrderList = () => {
