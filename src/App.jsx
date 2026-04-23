@@ -26,6 +26,7 @@ import AdminStaffManagement from './system/pages/Staff/Staff'
 
 // System Components
 import AdminLayout from './system/components/Layout'
+import ProtectedRoute from './shared/components/ProtectedRoute'
 
 function App() {
   return (
@@ -37,29 +38,29 @@ function App() {
         <Route path="/products" element={<Products />} />
 
         {/* Global Admin Wrapper */}
-        <Route element={<AdminLayout><AdminDashboard /></AdminLayout>} path="/admin" />
+        <Route element={<ProtectedRoute><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} path="/admin" />
         
         {/* Protected Admin Routes with Layout */}
-        <Route path="/adminproduct" element={<AdminLayout><AdminProduct /></AdminLayout>} />
-        <Route path="/addproduct" element={<AdminLayout><AddProduct /></AdminLayout>} />
-        <Route path="/pos" element={<AdminLayout><POSTerminal /></AdminLayout>} />
-        <Route path="/admin/categories" element={<AdminLayout><AdminCategoryManagement /></AdminLayout>} />
+        <Route path="/adminproduct" element={<ProtectedRoute><AdminLayout><AdminProduct /></AdminLayout></ProtectedRoute>} />
+        <Route path="/addproduct" element={<ProtectedRoute><AdminLayout><AddProduct /></AdminLayout></ProtectedRoute>} />
+        <Route path="/pos" element={<ProtectedRoute><AdminLayout><POSTerminal /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/categories" element={<ProtectedRoute><AdminLayout><AdminCategoryManagement /></AdminLayout></ProtectedRoute>} />
         
         {/* Order Management */}
-        <Route path='/orders' element={<AdminLayout><OrderList /></AdminLayout>} />
-        <Route path='/orders/new' element={<AdminLayout><OrderForm /></AdminLayout>} />
-        <Route path='/orders/edit/:id' element={<AdminLayout><OrderForm /></AdminLayout>} />
-        <Route path='/orders/:id' element={<AdminLayout><OrderDetails /></AdminLayout>} />
+        <Route path='/orders' element={<ProtectedRoute><AdminLayout><OrderList /></AdminLayout></ProtectedRoute>} />
+        <Route path='/orders/new' element={<ProtectedRoute><AdminLayout><OrderForm /></AdminLayout></ProtectedRoute>} />
+        <Route path='/orders/edit/:id' element={<ProtectedRoute><AdminLayout><OrderForm /></AdminLayout></ProtectedRoute>} />
+        <Route path='/orders/:id' element={<ProtectedRoute><AdminLayout><OrderDetails /></AdminLayout></ProtectedRoute>} />
 
         {/* Inventory Management */}
-        <Route path="/inventory" element={<AdminLayout><InventoryDashboard /></AdminLayout>} />
+        <Route path="/inventory" element={<ProtectedRoute><AdminLayout><InventoryDashboard /></AdminLayout></ProtectedRoute>} />
 
         {/* Customer & Financials */}
-        <Route path="/admin/customers" element={<AdminLayout><AdminCustomerManagement /></AdminLayout>} />
-        <Route path="/admin/suppliers" element={<AdminLayout><AdminSupplierManagement /></AdminLayout>} />
-        <Route path="/admin/suppliers/:id/accounts" element={<AdminLayout><AdminSupplierAccounts /></AdminLayout>} />
-        <Route path="/admin/financials" element={<AdminLayout><AdminFinancials /></AdminLayout>} />
-        <Route path="/staff" element={<AdminLayout><AdminStaffManagement /></AdminLayout>} />
+        <Route path="/admin/customers" element={<ProtectedRoute><AdminLayout><AdminCustomerManagement /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/suppliers" element={<ProtectedRoute><AdminLayout><AdminSupplierManagement /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/suppliers/:id/accounts" element={<ProtectedRoute><AdminLayout><AdminSupplierAccounts /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/financials" element={<ProtectedRoute><AdminLayout><AdminFinancials /></AdminLayout></ProtectedRoute>} />
+        <Route path="/staff" element={<ProtectedRoute><AdminLayout><AdminStaffManagement /></AdminLayout></ProtectedRoute>} />
 
       </Routes>
     </>

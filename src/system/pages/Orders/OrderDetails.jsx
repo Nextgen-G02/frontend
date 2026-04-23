@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import orderApi from '../../../shared/api/orderApi';
+import orderApi from '../../../api/orderApi';
 
 const OrderDetails = () => {
     const { id } = useParams();
