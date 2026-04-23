@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, Phone, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+//footer component with contact info, internal links, and social media icons
 const Footer = () => {
   return (
     <footer className="bg-slate-900 text-slate-400 pt-12 md:pt-16 pb-8 px-6 md:px-10 border-t border-white/5">
