@@ -9,7 +9,7 @@ import {
   ArrowDownRight,
   ShieldCheck
 } from "lucide-react";
-import { useAuth } from "../../shared/context/AuthContext";
+import { useAuth } from "../../../shared/context/AuthContext";
 
 const StatCard = ({ icon: Icon, label, value, trend, trendType }) => (
   <div className="glass-card p-5 md:p-8 rounded-[24px] md:rounded-[36px] group transition-all duration-500 hover:shadow-xl">
