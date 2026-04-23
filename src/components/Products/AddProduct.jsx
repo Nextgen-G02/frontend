@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Package, 
@@ -8,7 +8,9 @@ import {
   CheckCircle2, 
   ChevronRight, 
   AlertCircle,
-  Loader2
+  Loader2,
+  X,
+  Save
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -16,33 +18,48 @@ const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/products`;
 
 export default function AddProduct() {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [form, setForm] = useState({
     productId: "",
     pName: "",
     pCategory: "",
-    description: "",
     price: "",
-    BuyPrice: "",
+    costPrice: "",
     stock: "",
-    weight: "",
-    pImg: "",
-    stockStatus: "In Stock",
-    isCustomizable: false,
-    flavors: "",
-    expiryDate: ""
+    expiryDate: "",
+    unit: "Unit (Pcs)",
+    status: "Active",
+    description: "New product entry",
+    weight: 0,
+    pImg: ""
   });
 
   const [errors, setErrors] = useState({});
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/categories`);
+        const data = await res.json();
+        setCategories(data.data || []);
+      } catch (error) {
+        toast.error("Failed to fetch categories");
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const validate = () => {
     const newErrors = {};
-    if (!form.productId) newErrors.productId = "SKU Identification required";
-    if (!form.pName) newErrors.pName = "Asset name mandatory";
-    if (!form.pCategory) newErrors.pCategory = "Taxonomy classification required";
-    if (!form.price || form.price <= 0) newErrors.price = "Valid valuation required";
-    if (!form.stock || form.stock < 0) newErrors.stock = "Inventory volume required";
+    if (!form.productId) newErrors.productId = "Product ID is required";
+    if (!form.pName) newErrors.pName = "Product name is required";
+    if (!form.price || form.price <= 0) newErrors.price = "Valid price is required";
+    if (!form.costPrice || form.costPrice <= 0) newErrors.costPrice = "Valid cost price is required";
+    if (!form.stock || form.stock < 0) newErrors.stock = "Stock quantity is required";
+    if (!form.pCategory) newErrors.pCategory = "Category is required";
+    if (!form.unit) newErrors.unit = "Unit is required";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -50,7 +67,21 @@ export default function AddProduct() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    
+    setForm(prev => {
+      const updatedForm = { ...prev, [name]: value };
+      
+      // If category changes, pre-fill productId with its prefix
+      if (name === "pCategory" && value) {
+        const selectedCat = categories.find(cat => cat.name === value);
+        if (selectedCat) {
+          updatedForm.productId = `${selectedCat.prefix}-`;
+        }
+      }
+      
+      return updatedForm;
+    });
+
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => {
@@ -64,7 +95,7 @@ export default function AddProduct() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) {
-      toast.error("Form validation requirements not met");
+      toast.error("Please fill all required fields");
       return;
     }
 
@@ -72,28 +103,30 @@ export default function AddProduct() {
     try {
       const response = await fetch(`${API_BASE}/add`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: JSON.stringify({
           ...form,
           price: Number(form.price),
-          BuyPrice: Number(form.BuyPrice),
+          costPrice: Number(form.costPrice),
           stock: Number(form.stock),
-          weight: Number(form.weight),
-          pImg: form.pImg ? [form.pImg] : []
+          images: form.pImg ? [form.pImg] : []
         })
       });
 
       if (response.ok) {
         setSuccess(true);
-        toast.success("Asset Committed to Catalog");
+        toast.success("Product added successfully");
         setTimeout(() => navigate("/adminproduct"), 2000);
       } else {
         const errData = await response.json();
-        setErrors({ submit: errData.message || "Registry entry failed" });
-        toast.error("Failed to commit asset");
+        setErrors({ submit: errData.message || "Failed to add product" });
+        toast.error(errData.message || "Failed to add product");
       }
     } catch (error) {
-      setErrors({ submit: "Communication protocol error with master server" });
+      setErrors({ submit: "Connection error" });
       toast.error("Server connection lost");
     } finally {
       setLoading(false);
@@ -113,10 +146,8 @@ export default function AddProduct() {
         <div>
           <div className="flex items-center gap-2.5 mb-3">
             <span className="w-10 h-1 bg-primary rounded-full"></span>
-            <p className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">Catalog Inventory protocols</p>
           </div>
-          <h1 className="heading-premium text-2xl md:text-5xl leading-tight">Add New <span className="italic font-medium text-slate-400">Asset</span></h1>
-          <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base max-w-2xl">Define and register a new premium sweet into the master catalog.</p>
+          <h1 className="heading-premium text-2xl md:text-5xl leading-tight">Add New <span className="italic font-medium text-slate-400">Product</span></h1>
         </div>
       </header>
 
@@ -132,45 +163,30 @@ export default function AddProduct() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Identity (ID)</label>
-                <input name="productId" value={form.productId} onChange={handleChange}
-                  placeholder="e.g. SKU-100" className={inputClass("productId")} />
-                {errors.productId && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.productId}</p>}
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Label (Name)</label>
-                <input name="pName" value={form.pName} onChange={handleChange}
-                  placeholder="e.g. Highland Chocolate Truffle" className={inputClass("pName")} />
-                {errors.pName && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.pName}</p>}
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Taxonomy (Category)</label>
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Category<span className="text-primary">*</span></label>
                 <select name="pCategory" value={form.pCategory} onChange={handleChange} className={inputClass("pCategory")}>
-                  <option value="">Select Class</option>
-                  <option>Cakes</option>
-                  <option>Beverages</option>
-                  <option>Pastries</option>
-                  <option>Snacks</option>
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat.name}>{cat.name}</option>
+                  ))}
                 </select>
                 {errors.pCategory && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.pCategory}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Degradation Threshold (Expiry)</label>
-                <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange}
-                  className={inputClass("expiryDate")} />
+                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Product ID<span className="text-primary">*</span></label>
+                <input name="productId" value={form.productId} onChange={handleChange}
+                  placeholder="Select category first..." className={inputClass("productId")} />
+                {errors.productId && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.productId}</p>}
               </div>
-            </div>
 
-            <div className="mt-6 space-y-1.5">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Scope (Description)</label>
-              <textarea name="description" value={form.description} onChange={handleChange}
-                rows={3} placeholder="Describe the characteristics of this asset..."
-                className={`${inputClass("description")} resize-none`} />
-              {errors.description && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.description}</p>}
+              <div className="space-y-1.5">
+                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name<span className="text-primary">*</span></label>
+                <input name="pName" value={form.pName} onChange={handleChange}
+                  placeholder="e.g. Highland Chocolate Truffle" className={inputClass("pName")} />
+                {errors.pName && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.pName}</p>}
+              </div>
             </div>
           </div>
 
@@ -178,107 +194,58 @@ export default function AddProduct() {
           <div className="p-5 md:p-8 bg-slate-50/50 rounded-[24px] md:rounded-[36px] border border-slate-100">
             <div className="flex items-center gap-3.5 mb-5 md:mb-6">
                <div className="p-2.5 bg-white text-primary rounded-lg shadow-sm border border-slate-100"><DollarSign className="w-4.5 h-4.5" /></div>
-               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Valuation & Liquidity</h2>
+               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Valuation & Inventory</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Yield Value (Rs.)</label>
+                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Price Rs.<span className="text-primary">*</span></label>
                 <input type="number" name="price" value={form.price} onChange={handleChange}
                   placeholder="0.00" className={inputClass("price")} />
                 {errors.price && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.price}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Procurement Cost (Rs.)</label>
-                <input type="number" name="BuyPrice" value={form.BuyPrice} onChange={handleChange}
-                  placeholder="0.00" className={inputClass("BuyPrice")} />
+                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Procurement Cost Rs.<span className="text-primary">*</span></label>
+                <input type="number" name="costPrice" value={form.costPrice} onChange={handleChange}
+                  placeholder="0.00" className={inputClass("costPrice")} />
+                {errors.costPrice && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.costPrice}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Physical Mass (kg)</label>
-                <input type="number" step="0.1" name="weight" value={form.weight} onChange={handleChange}
-                  placeholder="0.0" className={inputClass("weight")} />
-                {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Inventory Volume (Units)</label>
+                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Stock <span className="text-primary">*</span></label>
                 <input type="number" name="stock" value={form.stock} onChange={handleChange}
                   placeholder="0" className={inputClass("stock")} />
                 {errors.stock && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.stock}</p>}
               </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Availability State</label>
-                <select name="stockStatus" value={form.stockStatus} onChange={handleChange} className={inputClass("stockStatus")}>
-                  <option>In Stock</option>
-                  <option>Out of Stock</option>
-                  <option>Low Stock</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          
-          {/* Section: Customization */}
-          <div>
-            <div className="flex items-center gap-3.5 mb-6">
-               <div className="p-2.5 bg-slate-900 text-gold rounded-lg shadow-lg"><Settings className="w-4.5 h-4.5" /></div>
-               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Customization Protocols</h2>
-            </div>
-            
-            <div className="space-y-6">
-              <label className="flex items-center gap-4 p-6 bg-slate-50 border border-slate-100 rounded-3xl cursor-pointer hover:bg-white hover:shadow-xl transition-all group">
-                <div className="relative flex items-center justify-center">
-                  <input 
-                    type="checkbox" 
-                    name="isCustomizable" 
-                    checked={form.isCustomizable} 
-                    onChange={(e) => setForm({...form, isCustomizable: e.target.checked})}
-                    className="w-8 h-8 rounded-xl border-2 border-slate-200 text-primary focus:ring-primary focus:ring-offset-0 transition-all checked:bg-primary appearance-none cursor-pointer" 
-                  />
-                  {form.isCustomizable && <CheckCircle2 className="absolute text-white w-5 h-5 pointer-events-none" />}
-                </div>
-                <div>
-                   <p className="text-sm font-black text-slate-900 uppercase tracking-tight">Enable Modification Vectors</p>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Allow client-side attribute changes (e.g. messaging)</p>
-                </div>
-              </label>
-
-              {form.isCustomizable && (
-                <div className="space-y-2 animate-in slide-in-from-top-4">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Available Profiles (Comma-Separated Flavors)</label>
-                  <input 
-                    name="flavors" value={form.flavors} onChange={handleChange}
-                    placeholder="Chocolate, Vanilla, Red Velvet..." className={inputClass("flavors")} />
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Section: Image */}
-          <div>
-            <div className="flex items-center gap-3.5 mb-6">
-               <div className="p-2.5 bg-slate-900 text-gold rounded-lg shadow-lg"><Camera className="w-4.5 h-4.5" /></div>
-               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Visual Manifestation</h2>
+          {/* Section: Thresholds & Units */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Expiry Date</label>
+              <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange}
+                className={inputClass("expiryDate")} />
             </div>
-            
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-               <div className="flex-1 space-y-2 w-full">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Asset Resource (URL)</label>
-                 <input name="pImg" value={form.pImg} onChange={handleChange}
-                   placeholder="https://resource-hub.com/image.jpg" className={inputClass("pImg")} />
-               </div>
-               
-               {form.pImg && (
-                 <div className="w-32 h-32 rounded-3xl overflow-hidden border-4 border-white shadow-2xl shadow-slate-200 shrink-0 animate-in zoom-in">
-                   <img src={form.pImg} alt="preview"
-                     className="w-full h-full object-cover"
-                     onError={(e) => (e.target.style.display = "none")} />
-                 </div>
-               )}
+
+            <div className="space-y-1.5">
+              <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Measurement Unit <span className="text-primary">*</span></label>
+              <select name="unit" value={form.unit} onChange={handleChange} className={inputClass("unit")}>
+                <option>Unit (Pcs)</option>
+                <option>kg</option>
+                <option>g</option>
+                <option>ml</option>
+                <option>l</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Operational Status</label>
+              <select name="status" value={form.status} onChange={handleChange} className={inputClass("status")}>
+                <option>Active</option>
+                <option>Inactive</option>
+              </select>
             </div>
           </div>
 
@@ -293,7 +260,7 @@ export default function AddProduct() {
           {success && (
             <div className="flex items-center gap-4 p-6 bg-emerald-50 border border-emerald-100 rounded-3xl text-emerald-600 font-bold text-sm">
               <CheckCircle2 className="w-6 h-6 shrink-0" />
-              Asset registration protocols successful. Redirecting...
+              Asset registration successful. Redirecting...
             </div>
           )}
 
@@ -308,7 +275,7 @@ export default function AddProduct() {
                 onClick={() => navigate("/adminproduct")}
                 className="w-full md:w-auto px-8 py-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-lg md:rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all text-center"
               >
-                Abort
+                Cancel
               </button>
               <button 
                 type="submit" 
@@ -319,8 +286,8 @@ export default function AddProduct() {
                    <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
-                    Authorize Asset
-                    <ChevronRight className="w-4 h-4" />
+                    Add Product
+                    <Save className="w-4 h-4" />
                   </>
                 )}
               </button>

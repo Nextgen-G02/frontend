@@ -132,7 +132,7 @@ export default function Navbar() {
               className="hidden md:flex items-center gap-2.5 bg-slate-900 text-gold px-5 py-2.5 md:px-6 md:py-3 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 shadow-xl shadow-slate-100"
             >
               <User size={14} md:size={16} />
-              Authenticate
+              Sign Up
             </Link>
           )}
 

@@ -46,15 +46,18 @@ export default function AdminLayout({ children }) {
 
   const menuItems = [
     { label: "Dashboard", path: "/admin", icon: LayoutDashboard },
-    { label: "Manage Products", path: "/adminproduct", icon: Package },
     { label: "POS Terminal", path: "/pos", icon: ShoppingCart },
-    { label: "Manage Categories", path: "/admin/categories", icon: Layers },
-    { label: "Manage Orders", path: "/orders", icon: ClipboardList },
-    { label: "Manage Inventory", path: "/inventory", icon: Box },
-    { label: "Manage Suppliers", path: "/admin/suppliers", icon: Truck },
-    { label: "Manage Customers", path: "/admin/customers", icon: Users },
-    { label: "Financial Reports", path: "/admin/financials", icon: BarChart3 },
-    { label: "Manage Staff", path: "/staff", icon: UserCog },
+    { label: "Inventory", path: "/inventory", icon: Box },
+    { label: "Orders", path: "/orders", icon: ClipboardList },
+    { label: "Products", path: "/adminproduct", icon: Package },
+    { label: "Categories", path: "/admin/categories", icon: Layers },
+    // Admin Only
+    ...(user?.role === 'admin' ? [
+      { label: "Suppliers", path: "/admin/suppliers", icon: Truck },
+      { label: "Customers", path: "/admin/customers", icon: Users },
+      { label: "Financials", path: "/admin/financials", icon: BarChart3 },
+      { label: "Staff", path: "/staff", icon: UserCog },
+    ] : []),
   ];
 
   return (
@@ -67,7 +70,7 @@ export default function AdminLayout({ children }) {
           {!collapsed && (
             <div className="flex items-center gap-2">
               <h2 className="text-white text-xl md:text-2xl font-black tracking-tighter">
-                POS <span className="text-gold italic font-medium">System</span>
+                NIROSHA <span className="text-gold italic font-medium">Sweets</span>
               </h2>
             </div>
           )}
@@ -117,9 +120,9 @@ export default function AdminLayout({ children }) {
             
             <div className="flex flex-col">
               <h1 className="text-base md:text-xl font-bold text-slate-900 heading-premium leading-tight">
-                System <span className="italic font-medium text-primary">Overview</span>
+                Shop <span className="italic font-medium text-primary">Manager</span>
               </h1>
-              <p className="hidden xs:block text-[9px] md:text-[10px] text-slate-400 font-medium">Internal Intelligence Hub</p>
+              <p className="hidden xs:block text-[9px] md:text-[10px] text-slate-400 font-medium">Store Dashboard</p>
             </div>
           </div>
 
@@ -142,7 +145,7 @@ export default function AdminLayout({ children }) {
               <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
                 <div className="text-right hidden lg:block">
                   <p className="text-[11px] md:text-xs font-bold text-slate-900 leading-tight">{user?.firstName}</p>
-                  <p className="text-[8px] md:text-[9px] font-black text-primary uppercase tracking-widest mt-0.5">Admin</p>
+                  <p className="text-[8px] md:text-[9px] font-black text-primary uppercase tracking-widest mt-0.5">{user?.role === 'admin' ? 'Owner / Admin' : 'Shop Staff'}</p>
                 </div>
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shadow-lg text-xs">
                   {user?.firstName?.[0] || 'A'}

@@ -25,10 +25,10 @@ const Footer = () => {
         <div>
           <h4 className="text-[10px] font-black text-white uppercase tracking-[0.3em] mb-6">Internal Links</h4>
           <ul className="space-y-3.5">
-            <li><Link to="/" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Registry Home</Link></li>
-            <li><Link to="/products" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Asset Catalog</Link></li>
-            <li><Link to="/contact" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Comms Protocol</Link></li>
-            <li><Link to="/cart" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Transmission Cart</Link></li>
+            <li><Link to="/" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Home</Link></li>
+            <li><Link to="/products" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Cakes</Link></li>
+            <li><Link to="/contact" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Contact</Link></li>
+            <li><Link to="/cart" className="text-[11px] font-bold uppercase tracking-widest hover:text-gold transition-colors">Cart</Link></li>
           </ul>
         </div>
 

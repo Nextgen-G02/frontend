@@ -16,12 +16,32 @@ import { useNavigate } from "react-router-dom";
 const InventoryDashboard = () => {
     const navigate = useNavigate();
     const [inventory, setInventory] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
+    
+    // Filters
+    const [search, setSearch] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All");
+    const [stockStatus, setStockStatus] = useState("All");
 
     useEffect(() => {
         fetchInventory();
+        fetchCategories();
     }, []);
+
+    const fetchCategories = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/categories`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            // Fixed: categories are nested in .data.data
+            setCategories(response.data.data || []);
+        } catch (error) {
+            console.error("Failed to load categories");
+        }
+    };
 
     const fetchInventory = async () => {
         try {
@@ -32,7 +52,7 @@ const InventoryDashboard = () => {
             });
             setInventory(response.data.data);
         } catch (error) {
-            toast.error("Failed to load registry");
+            toast.error("Could not load inventory");
         } finally {
             setLoading(false);
         }
@@ -45,10 +65,10 @@ const InventoryDashboard = () => {
             await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/inventory/sync`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            toast.success("Registry synchronized");
+            toast.success("Stock refreshed from database");
             fetchInventory();
         } catch (error) {
-            toast.error("Synchronization failed");
+            toast.error("Sync failed");
         } finally {
             setSyncing(false);
         }
@@ -61,12 +81,24 @@ const InventoryDashboard = () => {
                 { lowStockLevel: parseInt(newLevel) },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            toast.success("Safety threshold updated");
+            toast.success("Alert level updated");
             fetchInventory();
         } catch (error) {
             toast.error("Update failed");
         }
     };
+
+    const filteredInventory = inventory.filter(item => {
+        const matchesSearch = item.productId?.pName?.toLowerCase().includes(search.toLowerCase()) || 
+                             item.productId?.productId?.toLowerCase().includes(search.toLowerCase());
+        
+        const matchesCategory = selectedCategory === "All" || item.productId?.pCategory === selectedCategory;
+        
+        const isLow = item.quantity <= item.lowStockLevel;
+        const matchesStock = stockStatus === "All" || (stockStatus === "Low" ? isLow : !isLow);
+
+        return matchesSearch && matchesCategory && matchesStock;
+    });
 
     return (
         <div className="space-y-10 max-w-[1500px] mx-auto">
@@ -74,10 +106,10 @@ const InventoryDashboard = () => {
                 <div>
                     <div className="flex items-center gap-2.5 mb-3">
                         <span className="w-10 h-1 bg-primary rounded-full"></span>
-                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Supply Chain Registry</p>
+                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Inventory Control</p>
                     </div>
-                    <h1 className="heading-premium text-2xl md:text-5xl">Inventory <span className="italic font-medium text-slate-400">Logistics</span></h1>
-                    <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Monitor real-time stock levels and authorize safety threshold adjustments.</p>
+                    <h1 className="heading-premium text-2xl md:text-5xl">Stock <span className="italic font-medium text-slate-400">Management</span></h1>
+                    <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Monitor product levels, update safety alerts, and sync with your shop database.</p>
                 </div>
                 
                 <button 
@@ -86,7 +118,7 @@ const InventoryDashboard = () => {
                     className="py-4 md:py-4.5 px-8 md:px-10 bg-slate-900 text-gold rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 flex items-center gap-3.5 border border-white/10"
                 >
                     <RefreshCw size={18} md:size={20} className={syncing ? "animate-spin" : ""} />
-                    {syncing ? "Synchronizing Registry..." : "Global Sync Protocol"}
+                    {syncing ? "Updating..." : "Refresh All Stock"}
                 </button>
             </div>
 
@@ -96,9 +128,9 @@ const InventoryDashboard = () => {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
                         <div className="p-3.5 bg-slate-900 text-gold rounded-xl shadow-lg"><Activity size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Active SKU</span>
+                        <span className="px-3.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Catalog</span>
                     </div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10 leading-none">Monitored Infrastructure</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10 leading-none">Total Products</p>
                     <p className="text-3xl md:text-5xl font-black text-slate-900 mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.length}</p>
                 </div>
 
@@ -106,9 +138,9 @@ const InventoryDashboard = () => {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
                         <div className="p-3.5 bg-primary text-white rounded-xl shadow-xl shadow-primary/20"><AlertTriangle size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-rose-50 text-primary border border-rose-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Priority</span>
+                        <span className="px-3.5 py-1 bg-rose-50 text-primary border border-rose-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Alerts</span>
                     </div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10 leading-none">Low Stock Protocols</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10 leading-none">Low Stock Items</p>
                     <p className="text-3xl md:text-5xl font-black text-slate-900 mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.filter(i => i.quantity <= i.lowStockLevel).length}</p>
                 </div>
 
@@ -116,31 +148,76 @@ const InventoryDashboard = () => {
                     <div className="absolute bottom-0 right-0 w-48 h-48 bg-primary rounded-full blur-[80px] opacity-10"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
                         <div className="p-3.5 bg-white/10 text-gold rounded-xl border border-white/5 backdrop-blur-xl"><ShieldCheck size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-white/5 text-gold border border-white/10 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">System Health</span>
+                        <span className="px-3.5 py-1 bg-white/5 text-gold border border-white/10 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Health</span>
                     </div>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Inventory Stability</p>
-                    <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">94.8<span className="text-xl md:text-2xl text-slate-600">%</span></p>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Inventory Health</p>
+                    <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">
+                        {inventory.length > 0 ? Math.round(((inventory.length - inventory.filter(i => i.quantity <= i.lowStockLevel).length) / inventory.length) * 100) : 100}
+                        <span className="text-xl md:text-2xl text-slate-600">%</span>
+                    </p>
+                </div>
+            </div>
+
+            {/* Filter Bar */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Search Products</label>
+                    <input 
+                        type="text"
+                        placeholder="Name or Item ID..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 text-xs font-bold text-slate-900"
+                    />
+                </div>
+                <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">By Category</label>
+                    <select 
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 text-xs font-bold text-slate-900 appearance-none"
+                    >
+                        <option value="All">All Categories</option>
+                        {categories.map(cat => (
+                            <option key={cat._id} value={cat.name}>{cat.name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="space-y-1.5">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Stock Status</label>
+                    <select 
+                        value={stockStatus}
+                        onChange={(e) => setStockStatus(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 text-xs font-bold text-slate-900 appearance-none"
+                    >
+                        <option value="All">All Items</option>
+                        <option value="Low">Low Stock Only</option>
+                        <option value="Optimal">Optimal Only</option>
+                    </select>
+                </div>
+                <div className="flex items-end pb-1 px-2">
+                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-tight">Showing {filteredInventory.length} of {inventory.length} assets</p>
                 </div>
             </div>
 
             {/* Inventory Table */}
             <div className="glass-card rounded-[32px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border border-slate-100 shadow-xl">
                 <div className="p-7 md:p-8 border-b border-slate-50 bg-white/50 flex justify-between items-center">
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">Active Master Registry</h2>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">Product Registry</h2>
                     <div className="flex items-center gap-2 text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                        Live Telemetry
+                        Live Updates
                     </div>
                 </div>
                 <div className="overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50">
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Asset Designation</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Live Quantities</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Safety Margin</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Operational Status</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Ops Control</th>
+                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Info</th>
+                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Category</th>
+                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Stock Level</th>
+                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Alert At</th>
+                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -161,22 +238,41 @@ const InventoryDashboard = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                inventory.map((item) => {
+                                filteredInventory.map((item) => {
                                     const isLow = item.quantity <= item.lowStockLevel;
+                                    const productImage = item.productId?.images?.[0];
+                                    
                                     return (
                                         <tr key={item._id} className="hover:bg-white transition-all duration-300 group border-b border-slate-50/50">
                                             <td className="px-8 md:px-10 py-5 md:py-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-2.5 h-2.5 rounded-full ${isLow ? "bg-primary animate-pulse" : "bg-emerald-500"} shadow-[0_0_8px_rgba(0,0,0,0.1)]`}></div>
-                                                    <p className="font-black text-slate-900 uppercase tracking-tight text-base leading-tight md:text-lg">{item.productId?.pName || "Undefined Asset"}</p>
+                                                <div className="flex items-center gap-5">
+                                                    <div className="relative">
+                                                        <div className={`w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:shadow-md transition-all`}>
+                                                            {productImage ? (
+                                                                <img src={productImage} alt={item.productId?.pName} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <Package size={24} className="text-slate-200" />
+                                                            )}
+                                                        </div>
+                                                        <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${isLow ? "bg-primary" : "bg-emerald-500 shadow-lg shadow-emerald-200"}`}></div>
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-black text-slate-900 uppercase tracking-tight text-sm md:text-base leading-tight">{item.productId?.pName || "Undefined Product"}</p>
+                                                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1.5">{item.productId?.productId || "NO-ID"}</p>
+                                                    </div>
                                                 </div>
+                                            </td>
+                                            <td className="px-8 md:px-10 py-5 md:py-6">
+                                                <span className="px-3.5 py-1.5 bg-slate-50 text-slate-400 border border-slate-100 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                                                    {item.productId?.pCategory || "No Category"}
+                                                </span>
                                             </td>
                                             <td className="px-8 md:px-10 py-5 md:py-6">
                                                 <div className="flex flex-col">
                                                    <span className={`text-2xl md:text-3xl font-black tracking-tighter leading-none ${isLow ? "text-primary" : "text-slate-900"}`}>
                                                        {item.quantity}
                                                    </span>
-                                                   <span className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1.5 leading-none">Available Units</span>
+                                                   <span className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1.5 leading-none">Units in Stock</span>
                                                 </div>
                                             </td>
                                             <td className="px-8 md:px-10 py-5 md:py-6">
@@ -191,31 +287,31 @@ const InventoryDashboard = () => {
                                                 </div>
                                             </td>
                                             <td className="px-8 md:px-10 py-5 md:py-6">
-                                                {isLow ? (
-                                                    <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-rose-50 text-primary border border-rose-100 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] leading-none">
-                                                        <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-primary rounded-full animate-ping"></div> CRITICAL
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] leading-none">
-                                                        <ShieldCheck size={12} md:size={14} /> OPTIMAL
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-8 md:px-10 py-5 md:py-6 text-right">
-                                                <button className="p-3 md:p-3.5 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-300 hover:text-primary hover:shadow-xl transition-all opacity-0 group-hover:opacity-100 translate-x-2 md:translate-x-4 group-hover:translate-x-0 duration-300">
-                                                    <ArrowUpRight size={18} md:size={20} />
-                                                </button>
+                                                <div className="flex flex-col gap-2">
+                                                    {isLow ? (
+                                                        <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-rose-50 text-primary border border-rose-100 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] leading-none w-fit">
+                                                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-primary rounded-full animate-ping"></div> LOW STOCK
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] leading-none w-fit">
+                                                            <ShieldCheck size={12} md:size={14} /> HEALTHY
+                                                        </span>
+                                                    )}
+                                                    <p className="text-[7px] font-black text-slate-300 uppercase tracking-widest ml-1">
+                                                        Updated: {new Date(item.lastUpdated).toLocaleDateString()}
+                                                    </p>
+                                                </div>
                                             </td>
                                         </tr>
                                     );
                                 })
                             )}
                         </tbody>
-                    </table>
-                </div>
+                </table>
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default InventoryDashboard;

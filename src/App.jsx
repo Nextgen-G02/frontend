@@ -17,6 +17,7 @@ import AdminCustomerManagement from './pages/AdminCustomerManagement'
 import AdminFinancials from './pages/AdminFinancials'
 import AdminStaffManagement from './pages/AdminStaffManagement'
 import AdminSupplierManagement from './pages/AdminSupplierManagement'
+import AdminSupplierAccounts from './pages/AdminSupplierAccounts'
 import POSTerminal from './pages/POSTerminal'
 import AdminLayout from './components/AdminLayout'
 
@@ -49,6 +50,7 @@ function App() {
         {/* Customer & Financials */}
         <Route path="/admin/customers" element={<AdminLayout><AdminCustomerManagement /></AdminLayout>} />
         <Route path="/admin/suppliers" element={<AdminLayout><AdminSupplierManagement /></AdminLayout>} />
+        <Route path="/admin/suppliers/:id/accounts" element={<AdminLayout><AdminSupplierAccounts /></AdminLayout>} />
         <Route path="/admin/financials" element={<AdminLayout><AdminFinancials /></AdminLayout>} />
         <Route path="/staff" element={<AdminLayout><AdminStaffManagement /></AdminLayout>} />
 
