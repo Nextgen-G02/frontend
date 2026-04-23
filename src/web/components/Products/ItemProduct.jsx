@@ -5,6 +5,8 @@ const ItemProduct = ({ searchParams }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+//fetch products with search and category filters from backend
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
