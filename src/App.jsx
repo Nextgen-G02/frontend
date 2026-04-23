@@ -3,23 +3,28 @@ import './App.css'
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { Toaster } from 'react-hot-toast'
 
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Products from './pages/Products'
-import AdminProduct from './pages/AdminProduct'
-import AddProduct from './components/Products/Addproduct';
-import AdminDashboard from './pages/AdminDashboard'
-import OrderList from './pages/orders/OrderList'
-import OrderForm from './pages/orders/OrderForm'
-import AdminCategoryManagement from './pages/AdminCategoryManagement'
-import InventoryDashboard from './pages/InventoryDashboard'
-import AdminCustomerManagement from './pages/AdminCustomerManagement'
-import AdminFinancials from './pages/AdminFinancials'
-import AdminStaffManagement from './pages/AdminStaffManagement'
-import AdminSupplierManagement from './pages/AdminSupplierManagement'
-import AdminSupplierAccounts from './pages/AdminSupplierAccounts'
-import POSTerminal from './pages/POSTerminal'
-import AdminLayout from './components/AdminLayout'
+// Web Pages
+import Home from './web/pages/Home'
+import Login from './web/pages/Auth/Login'
+import Products from './web/pages/Products'
+
+// System Pages
+import AdminDashboard from './system/pages/Dashboard'
+import AdminProduct from './system/pages/Products/List'
+import AddProduct from './system/pages/Products/AddProduct' // Check case: AddProduct vs Addproduct
+import POSTerminal from './system/pages/POS'
+import AdminCategoryManagement from './system/pages/Categories'
+import OrderList from './system/pages/Orders/OrderList'
+import OrderForm from './system/pages/Orders/OrderForm'
+import InventoryDashboard from './system/pages/Inventory'
+import AdminCustomerManagement from './system/pages/Customers'
+import AdminSupplierManagement from './system/pages/Suppliers/AdminSupplierManagement'
+import AdminSupplierAccounts from './system/pages/Suppliers/AdminSupplierAccounts'
+import AdminFinancials from './system/pages/Financials'
+import AdminStaffManagement from './system/pages/Staff'
+
+// System Components
+import AdminLayout from './system/components/Layout'
 
 function App() {
   return (
@@ -59,4 +64,4 @@ function App() {
   )
 }
 
-export default App
+export default App
