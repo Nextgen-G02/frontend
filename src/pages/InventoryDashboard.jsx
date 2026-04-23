@@ -43,6 +43,23 @@ const InventoryDashboard = () => {
     }
   };
 
+  const updateThreshold = async (id, newLevel) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.patch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/inventory/${id}/threshold`,
+        { lowStockLevel: parseInt(newLevel) },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success("Safety threshold updated");
+      fetchInventory();
+    } catch (error) {
+      toast.error("Update failed");
+    }
+  };
+
   const handleSync = async () => {
     try {
       setSyncing(true);
@@ -65,22 +82,7 @@ const InventoryDashboard = () => {
     }
   };
 
-  const updateThreshold = async (id, newLevel) => {
-    try {
-      const token = localStorage.getItem("token");
 
-      await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/inventory/${id}/threshold`,
-        { lowStockLevel: parseInt(newLevel) },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      toast.success("Safety threshold updated");
-      fetchInventory();
-    } catch (error) {
-      toast.error("Update failed");
-    }
-  };
 
   return (
     <div className="space-y-10 max-w-[1500px] mx-auto">
