@@ -1,11 +1,17 @@
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
+=======
 import { useNavigate } from "react-router-dom";
 
+>>>>>>> origin/develop
 
 const API_BASE = "http://localhost:5000/api/products";
 
 export default function ProductDashboardAdmin() {
+<<<<<<< HEAD
+=======
   const navigate = useNavigate();
+>>>>>>> origin/develop
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,7 +20,10 @@ export default function ProductDashboardAdmin() {
   const [search, setSearch] = useState("");
   const [editForm, setEditForm] = useState({});
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/develop
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -158,6 +167,18 @@ export default function ProductDashboardAdmin() {
                           alt={p.pName}
                           className="w-12 h-12 rounded-lg object-cover"
                           style={{ border: "1px solid #f0c0e0" }}
+<<<<<<< HEAD
+                          onError={(e) => (e.target.src = "https://via.placeholder.com/48")}
+                        />
+                      ) : (
+                        <div
+                          className="w-12 h-12 rounded-lg flex items-center justify-center text-lg"
+                          style={{ background: "#ffe0f7", color: "#b07090" }}
+                        >
+                          
+                        </div>
+                      )}
+=======
                           onError={(e) => {
                              e.target.style.display = "none";           // ✅ hide broken image
                              e.target.nextSibling.style.display = "flex"; // ✅ show fallback div
@@ -179,6 +200,7 @@ export default function ProductDashboardAdmin() {
                           </svg>
                         </div>
                     
+>>>>>>> origin/develop
                     </td>
 
                     {/* Product ID */}
@@ -265,6 +287,22 @@ export default function ProductDashboardAdmin() {
       </div>
 
       {/* Floating Add Button */}
+<<<<<<< HEAD
+      <button
+        onClick={() => alert("Navigate to Add Product page")}
+        className="fixed bottom-8 right-8 w-14 h-14 text-white text-3xl rounded-full flex items-center justify-center active:scale-95 transition-all"
+        style={{
+          background: "#ff14c0",
+          boxShadow: "0 4px 20px #ff14c055",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "#cc0099")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "#ff14c0")}
+        title="Add Product"
+      >
+      +
+      </button>
+
+=======
       <button onClick={() => navigate("/addproduct")}
       className="fixed bottom-8 right-8 w-14 h-14 text-white text-3xl rounded-full flex items-center justify-center active:scale-95 transition-all"
       style={{
@@ -277,6 +315,7 @@ export default function ProductDashboardAdmin() {
 >
   +
 </button>
+>>>>>>> origin/develop
       {/* Delete Confirm Modal */}
       {deleteId && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: "rgba(0,0,0,0.45)" }}>

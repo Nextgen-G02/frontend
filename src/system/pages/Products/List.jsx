@@ -1,5 +1,5 @@
 import React from 'react'
-import ProductDashboardAdmin from '../components/Products/ProductDashboardAdmin';
+import ProductDashboardAdmin from './ProductDashboardAdmin';
 
 
 export default function AdminProduct() {
