@@ -133,7 +133,7 @@ export default function AdminCategoryManagement() {
               </p>
             </div>
           </div>
-
+          
           <form onSubmit={editingId ? handleUpdate : handleCreate} className="space-y-6 relative z-10">
             <div className="space-y-2">
               <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
@@ -198,7 +198,7 @@ export default function AdminCategoryManagement() {
         <div className="xl:col-span-8 glass-card rounded-[32px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border border-slate-100 shadow-xl">
           <div className="p-6 md:p-8 border-b border-slate-50 bg-white/50">
             <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-4 uppercase leading-none">
-              Authorized Structure
+              All Categories
             </h2>
           </div>
           <div className="overflow-x-auto no-scrollbar">
@@ -208,7 +208,7 @@ export default function AdminCategoryManagement() {
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category Handle</th>
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">System Prefix</th>
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Operational Scope</th>
-                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em] text-right">Ops Control</th>
+                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
