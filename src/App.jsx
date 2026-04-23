@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Products from './pages/Products'
 import AdminProduct from './pages/AdminProduct'
 import AddProduct from './components/Products/Addproduct';
+import AdminDashboard from './pages/AdminDashboard'
 
 
 function App() {
