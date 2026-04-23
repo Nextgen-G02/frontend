@@ -159,7 +159,7 @@ export default function AddProduct() {
           <div>
             <div className="flex items-center gap-3.5 mb-5 md:mb-6">
                <div className="p-2.5 bg-slate-900 text-gold rounded-lg shadow-lg"><Package className="w-4.5 h-4.5" /></div>
-               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Product Definition</h2>
+               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Product Details</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -260,7 +260,7 @@ export default function AddProduct() {
           {success && (
             <div className="flex items-center gap-4 p-6 bg-emerald-50 border border-emerald-100 rounded-3xl text-emerald-600 font-bold text-sm">
               <CheckCircle2 className="w-6 h-6 shrink-0" />
-              Asset registration successful. Redirecting...
+              Product added successful. Redirecting...
             </div>
           )}
 
