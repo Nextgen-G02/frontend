@@ -159,7 +159,7 @@ export default function AddProduct() {
           <div>
             <div className="flex items-center gap-3.5 mb-5 md:mb-6">
                <div className="p-2.5 bg-slate-900 text-gold rounded-lg shadow-lg"><Package className="w-4.5 h-4.5" /></div>
-               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Registry Definition</h2>
+               <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Product Definition</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -267,7 +267,7 @@ export default function AddProduct() {
           {/* Footer actions */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 pt-8 border-t border-slate-100">
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic md:leading-none text-center md:text-left">
-              <span className="text-primary">*</span> Compulsory Registry Fields
+              <span className="text-primary">*</span> Compulsory Product Fields
             </p>
             <div className="flex flex-col sm:flex-row gap-4 md:gap-5 w-full md:w-auto">
               <button 
