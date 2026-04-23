@@ -1,11 +1,23 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/orders';
+const API_URL = 'http://127.0.0.1:5000/api/orders';
+
+const getHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+};
 
 const orderApi = {
     getAllOrders: async (params) => {
         try {
-            const response = await axios.get(API_URL, { params });
+            const response = await axios.get(API_URL, { 
+                ...getHeaders(),
+                params 
+            });
             return response.data;
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -15,7 +27,7 @@ const orderApi = {
 
     getOrderById: async (id) => {
         try {
-            const response = await axios.get(`${API_URL}/${id}`);
+            const response = await axios.get(`${API_URL}/${id}`, getHeaders());
             return response.data;
         } catch (error) {
             console.error('Error fetching order:', error);
@@ -25,7 +37,7 @@ const orderApi = {
 
     createOrder: async (orderData) => {
         try {
-            const response = await axios.post(API_URL, orderData);
+            const response = await axios.post(API_URL, orderData, getHeaders());
             return response.data;
         } catch (error) {
             console.error('Error creating order:', error);
@@ -35,7 +47,7 @@ const orderApi = {
 
     updateOrder: async (id, orderData) => {
         try {
-            const response = await axios.put(`${API_URL}/${id}`, orderData);
+            const response = await axios.put(`${API_URL}/${id}`, orderData, getHeaders());
             return response.data;
         } catch (error) {
             console.error('Error updating order:', error);
@@ -45,7 +57,7 @@ const orderApi = {
 
     updateStatus: async (id, status) => {
         try {
-            const response = await axios.patch(`${API_URL}/${id}/status`, { orderStatus: status });
+            const response = await axios.patch(`${API_URL}/${id}/status`, { orderStatus: status }, getHeaders());
             return response.data;
         } catch (error) {
             console.error('Error updating order status:', error);
@@ -55,7 +67,7 @@ const orderApi = {
 
     deleteOrder: async (id) => {
         try {
-            const response = await axios.delete(`${API_URL}/${id}`);
+            const response = await axios.delete(`${API_URL}/${id}`, getHeaders());
             return response.data;
         } catch (error) {
             console.error('Error deleting order:', error);
