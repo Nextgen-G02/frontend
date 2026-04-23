@@ -9,19 +9,20 @@ import Login from './web/pages/Auth/Login'
 import Products from './web/pages/Products'
 
 // System Pages
-import AdminDashboard from './system/pages/Dashboard'
+import AdminDashboard from './system/pages/Dashboard/Dashboard'
 import AdminProduct from './system/pages/Products/List'
-import AddProduct from './system/pages/Products/AddProduct' // Check case: AddProduct vs Addproduct
-import POSTerminal from './system/pages/POS'
-import AdminCategoryManagement from './system/pages/Categories'
+import AddProduct from './system/pages/Products/AddProduct' 
+import POSTerminal from './system/pages/POS/POS'
+import AdminCategoryManagement from './system/pages/Categories/Categories'
 import OrderList from './system/pages/Orders/OrderList'
 import OrderForm from './system/pages/Orders/OrderForm'
-import InventoryDashboard from './system/pages/Inventory'
-import AdminCustomerManagement from './system/pages/Customers'
+import OrderDetails from './system/pages/Orders/OrderDetails'
+import InventoryDashboard from './system/pages/Inventory/Inventory'
+import AdminCustomerManagement from './system/pages/Customers/Customers'
 import AdminSupplierManagement from './system/pages/Suppliers/AdminSupplierManagement'
 import AdminSupplierAccounts from './system/pages/Suppliers/AdminSupplierAccounts'
-import AdminFinancials from './system/pages/Financials'
-import AdminStaffManagement from './system/pages/Staff'
+import AdminFinancials from './system/pages/Financials/Financials'
+import AdminStaffManagement from './system/pages/Staff/Staff'
 
 // System Components
 import AdminLayout from './system/components/Layout'
@@ -48,6 +49,7 @@ function App() {
         <Route path='/orders' element={<AdminLayout><OrderList /></AdminLayout>} />
         <Route path='/orders/new' element={<AdminLayout><OrderForm /></AdminLayout>} />
         <Route path='/orders/edit/:id' element={<AdminLayout><OrderForm /></AdminLayout>} />
+        <Route path='/orders/:id' element={<AdminLayout><OrderDetails /></AdminLayout>} />
 
         {/* Inventory Management */}
         <Route path="/inventory" element={<AdminLayout><InventoryDashboard /></AdminLayout>} />

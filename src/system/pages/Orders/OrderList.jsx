@@ -182,7 +182,7 @@ const OrderList = () => {
                                         </td>
                                         <td className="px-6 md:px-10 py-4 md:py-6 text-right">
                                             <button 
-                                                onClick={() => navigate(`/orders/edit/${order._id}`)}
+                                                onClick={() => navigate(`/orders/${order._id}`)}
                                                 className="inline-flex items-center gap-2 md:gap-2.5 px-3.5 md:px-5 py-2.5 rounded-lg md:rounded-xl bg-white border border-slate-100 text-[8px] md:text-[9px] font-black text-slate-400 hover:bg-slate-900 hover:text-gold hover:border-slate-900 hover:shadow-2xl transition-all uppercase tracking-widest group/btn"
                                             >
                                                 Query
