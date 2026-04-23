@@ -127,7 +127,7 @@ export default function ProductDashboardAdmin() {
             onClick={() => navigate("/addproduct")}
             className="py-3 px-6 md:px-8 bg-slate-900 text-gold rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-2.5"
           >
-            <Plus size={18} md:size={20} /> Add New Asset
+            <Plus size={18} md:size={20} /> Add New Product
           </button>
         </div>
       </header>
@@ -144,18 +144,18 @@ export default function ProductDashboardAdmin() {
             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto shadow-inner">
               <Package size={48} className="text-slate-200" />
             </div>
-            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Registry search yielded zero results.</p>
+            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Products search yielded zero results.</p>
           </div>
         ) : (
           <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50">
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Asset Designation</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Taxonomy</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Unit Valuation</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Name</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Category</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Unit Value</th>
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Inventory State</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Ops Control</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
                 </tr>
               </thead>
 
