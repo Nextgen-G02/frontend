@@ -42,6 +42,16 @@ const OrderList = () => {
         }
     };
 
+    const handleStatusUpdate = async (id, newStatus) => {
+        try {
+            await orderApi.updateStatus(id, newStatus);
+            toast.success("Order status updated");
+            fetchOrders(); // Refresh list
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to update status");
+        }
+    };
+
     const handleSearch = (e) => {
         e.preventDefault();
         fetchOrders();
@@ -170,9 +180,17 @@ const OrderList = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 md:px-10 py-4 md:py-6">
-                                            <span className={`inline-flex items-center px-3.5 md:px-4 py-1.5 rounded-full text-[8px] md:text-[9px] font-black tracking-[0.2em] border ${getStatusStyle(order.orderStatus)}`}>
-                                                {order.orderStatus.toUpperCase()}
-                                            </span>
+                                            <select 
+                                                value={order.orderStatus}
+                                                onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
+                                                className={`px-3.5 md:px-4 py-1.5 rounded-full text-[8px] md:text-[9px] font-black tracking-[0.2em] border cursor-pointer outline-none transition-all appearance-none text-center ${getStatusStyle(order.orderStatus)}`}
+                                            >
+                                                <option value="Pending">PENDING</option>
+                                                <option value="Confirmed">CONFIRMED</option>
+                                                <option value="Preparing">PREPARING</option>
+                                                <option value="Delivered">DELIVERED</option>
+                                                <option value="Cancelled">CANCELLED</option>
+                                            </select>
                                         </td>
                                         <td className="px-6 md:px-10 py-4 md:py-6">
                                             <div className="flex flex-col">
