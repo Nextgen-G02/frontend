@@ -102,7 +102,8 @@ export default function AdminCategoryManagement() {
           <div className="flex items-center gap-2.5 mb-3">
             <span className="w-10 h-1 bg-primary rounded-full"></span>          </div>
           <h1 className="heading-premium text-2xl md:text-5xl">
-            Product <span className="italic font-medium text-slate-400">Categories</span>
+            Categories details
+            {/* <span className="italic font-medium text-slate-400">Categories</span> */}
           </h1>
         </div>
 
@@ -127,7 +128,7 @@ export default function AdminCategoryManagement() {
               {editingId ? <Edit3 size={20} /> : <Plus size={20} />}
             </div>
             <div>
-              <h2 className="text-xl font-black tracking-tight uppercase">{editingId ? 'Update Definition' : 'New Definition'}</h2>
+              <h2 className="text-xl font-black tracking-tight uppercase">{editingId ? 'Update Category' : 'New Category'}</h2>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic leading-none">
                 {editingId ? 'Modify existing schema' : 'Schema Initialization'}
               </p>
@@ -188,7 +189,7 @@ export default function AdminCategoryManagement() {
                 type="submit"
                 className={`flex-[2] py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl hover:bg-primary transition-all duration-500`}
                 >
-                {editingId ? 'Update Registry' : 'Commit to Registry'}
+                {editingId ? 'Update Registry' : 'Add'}
                 </button>
             </div>
           </form>
@@ -205,9 +206,9 @@ export default function AdminCategoryManagement() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 text-[9px]">
-                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category Handle</th>
-                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">System Prefix</th>
-                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Operational Scope</th>
+                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category name</th>
+                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Unique ID</th>
+                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category description</th>
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
                 </tr>
               </thead>

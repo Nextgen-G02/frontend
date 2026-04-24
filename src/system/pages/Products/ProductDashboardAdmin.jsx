@@ -102,14 +102,15 @@ export default function ProductDashboardAdmin() {
         <div>
           <div className="flex items-center gap-2.5 mb-3">
             <span className="w-10 h-1 bg-primary rounded-full"></span>
-            <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Catalog Infrastructure</p>
+            <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]"></p>
           </div>
           <h1 className="heading-premium text-2xl md:text-5xl leading-tight">
-            Product <span className="italic font-medium text-slate-400">Inventory</span>
+            Product Details
+            {/* <span className="italic font-medium text-slate-400">Inventory</span> */}
           </h1>
-          <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">
+          {/* <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">
             Manage your premium collection and real-time stock levels.
-          </p>
+          </p> */}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
@@ -174,7 +175,7 @@ export default function ProductDashboardAdmin() {
                             />
                           </div>
                           <div>
-                            <p className="font-black text-slate-900 group-hover:text-primary transition-colors uppercase tracking-tight text-sm md:text-base">{p.pName}</p>
+                            <p className="font-black text-slate-900 group-hover:text-primary transition-colors  text-sm md:text-base">{p.pName}</p>
                             <div className="flex items-center gap-2 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit">
                               <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{p.productId}</span>
                             </div>
@@ -243,11 +244,11 @@ export default function ProductDashboardAdmin() {
             <div className="w-20 h-20 bg-rose-50 text-primary rounded-[28px] flex items-center justify-center mb-8 mx-auto">
                <Trash2 size={40} />
             </div>
-            <h3 className="text-3xl font-black text-slate-900 mb-4 text-center tracking-tight">Erase Asset?</h3>
+            <h3 className="text-3xl font-black text-slate-900 mb-4 text-center tracking-tight">Erase Product?</h3>
             <p className="text-slate-400 font-medium mb-10 text-center leading-relaxed italic">"Permanently purging this item from the master catalog is an irreversible protocol."</p>
             <div className="flex flex-col gap-4">
               <button onClick={() => handleDelete(deleteId)} className="w-full py-5 bg-primary text-white rounded-2xl font-black uppercase tracking-[0.4em] text-xs shadow-xl shadow-primary/20 hover:bg-slate-900 transition-all duration-500">Confirm Deletion</button>
-              <button onClick={() => setDeleteId(null)} className="w-full py-5 font-black text-slate-400 hover:text-slate-900 uppercase tracking-widest text-[10px] transition-colors">Abort Operation</button>
+              <button onClick={() => setDeleteId(null)} className="w-full py-5 font-black text-slate-400 hover:text-slate-900 uppercase tracking-widest text-[10px] transition-colors">Cancel</button>
             </div>
           </div>
         </div>
