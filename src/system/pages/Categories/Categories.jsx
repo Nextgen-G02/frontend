@@ -102,7 +102,8 @@ export default function AdminCategoryManagement() {
           <div className="flex items-center gap-2.5 mb-3">
             <span className="w-10 h-1 bg-primary rounded-full"></span>          </div>
           <h1 className="heading-premium text-2xl md:text-5xl">
-            Product <span className="italic font-medium text-slate-400">Categories</span>
+            Categories details
+            <span className="italic font-medium text-slate-400">Categories</span>
           </h1>
         </div>
 
