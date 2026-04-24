@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import orderApi from '../../../api/orderApi';
+import { toast } from 'react-hot-toast';
 
 const OrderDetails = () => {
     const { id } = useParams();
@@ -28,9 +29,10 @@ const OrderDetails = () => {
         setUpdating(true);
         try {
             await orderApi.updateStatus(id, newStatus);
+            toast.success(`Status updated to ${newStatus}`);
             fetchOrder(); // Refresh data
         } catch (error) {
-            alert('Failed to update status');
+            toast.error(error.response?.data?.message || 'Failed to update status');
         } finally {
             setUpdating(false);
         }
@@ -40,9 +42,10 @@ const OrderDetails = () => {
         if (window.confirm('Are you sure you want to delete this order?')) {
             try {
                 await orderApi.deleteOrder(id);
+                toast.success('Order transmission purged');
                 navigate('/orders');
             } catch (error) {
-                alert('Failed to delete order');
+                toast.error('Failed to purge order');
             }
         }
     };
