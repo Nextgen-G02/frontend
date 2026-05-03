@@ -13,7 +13,7 @@ import {
   Clock,
   Loader2
 } from 'lucide-react';
-import orderApi from '../../../api/orderApi';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
 const OrderList = () => {
@@ -30,13 +30,25 @@ const OrderList = () => {
     const fetchOrders = async () => {
         setLoading(true);
         try {
-            const data = await orderApi.getAllOrders({ 
-                customerName: search,
-                status: statusFilter
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: {
+                    customerName: search,
+                    status: statusFilter
+                }
             });
-            setOrders(data);
+            setOrders(response.data);
         } catch (error) {
-            toast.error("Failed to fetch orders");
+            console.error("Order Fetch Error:", error);
+            if (error.response && error.response.status === 401) {
+                toast.error("Session expired. Please log in again.");
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            } else {
+                toast.error("Failed to fetch orders: " + error.message + (error.response ? " (" + error.response.status + ")" : ""));
+            }
         } finally {
             setLoading(false);
         }
@@ -44,7 +56,10 @@ const OrderList = () => {
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
-            await orderApi.updateStatus(id, newStatus);
+            const token = localStorage.getItem('token');
+            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}/status`, { orderStatus: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             toast.success("Order status updated");
             fetchOrders(); // Refresh list
         } catch (error) {
