@@ -21,8 +21,7 @@ import {
   Cake as CakeIcon,
   Minus
 } from 'lucide-react';
-import orderApi from '../../../api/orderApi';
-import productApi from '../../../api/productApi';
+
 import { toast } from 'react-hot-toast';
 
 const OrderForm = () => {
@@ -65,8 +64,8 @@ const OrderForm = () => {
 
     const fetchProducts = async () => {
         try {
-            const data = await productApi.getProducts();
-            setProducts(data);
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`);
+            setProducts(response.data.data);
         } catch (error) {
             toast.error("Failed to load catalog");
         }
@@ -74,8 +73,11 @@ const OrderForm = () => {
 
     const fetchOrder = async () => {
         try {
-            const order = await orderApi.getOrderById(id);
-            setFormData(order);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setFormData(response.data);
         } catch (error) {
             toast.error("Failed to retrieve order sequence");
         }
@@ -200,11 +202,16 @@ const OrderForm = () => {
 
         setLoading(true);
         try {
+            const token = localStorage.getItem('token');
             if (id) {
-                await orderApi.updateOrder(id, formData);
+                await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}`, formData, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 toast.success("Order sequence synchronized");
             } else {
-                await orderApi.createOrder(formData);
+                await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, formData, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 toast.success("Transaction successfully committed");
             }
             navigate('/orders');

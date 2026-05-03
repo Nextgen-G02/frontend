@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import orderApi from '../../../api/orderApi';
+import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
 const OrderDetails = () => {
@@ -16,8 +16,11 @@ const OrderDetails = () => {
 
     const fetchOrder = async () => {
         try {
-            const data = await orderApi.getOrderById(id);
-            setOrder(data);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setOrder(response.data);
         } catch (error) {
             console.error('Failed to fetch order');
         } finally {
@@ -28,7 +31,10 @@ const OrderDetails = () => {
     const handleStatusUpdate = async (newStatus) => {
         setUpdating(true);
         try {
-            await orderApi.updateStatus(id, newStatus);
+            const token = localStorage.getItem('token');
+            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}/status`, { orderStatus: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             toast.success(`Status updated to ${newStatus}`);
             fetchOrder(); // Refresh data
         } catch (error) {
@@ -41,7 +47,10 @@ const OrderDetails = () => {
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this order?')) {
             try {
-                await orderApi.deleteOrder(id);
+                const token = localStorage.getItem('token');
+                await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 toast.success('Order transmission purged');
                 navigate('/orders');
             } catch (error) {
