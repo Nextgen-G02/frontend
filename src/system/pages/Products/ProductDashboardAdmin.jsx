@@ -22,11 +22,24 @@ export default function ProductDashboardAdmin() {
   const [deleteId, setDeleteId] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
   const [search, setSearch] = useState("");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [editForm, setEditForm] = useState({});
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/categories`);
+      const data = await res.json();
+      setCategories(data.data || []);
+    } catch {
+      toast.error("Failed to load categories");
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -82,11 +95,26 @@ export default function ProductDashboardAdmin() {
     }
   };
 
+  const toggleCategory = (cat) => {
+    setSelectedCategory(cat);
+    if (cat !== "All") setSearch("");
+  };
+
   const filtered = products.filter(
-    (p) =>
-      p.pName?.toLowerCase().includes(search.toLowerCase()) ||
-      p.productId?.toLowerCase().includes(search.toLowerCase()) ||
-      p.pCategory?.toLowerCase().includes(search.toLowerCase())
+    (p) => {
+      const matchesCat = selectedCategory === "All" || 
+                        (p.pCategory && (
+                          Array.isArray(p.pCategory) 
+                            ? p.pCategory.some(pCat => pCat.trim().toLowerCase() === selectedCategory.toLowerCase())
+                            : p.pCategory.trim().toLowerCase() === selectedCategory.toLowerCase()
+                        ));
+      
+      const matchesSearch = p.pName?.toLowerCase().includes(search.toLowerCase()) ||
+                           p.productId?.toLowerCase().includes(search.toLowerCase()) ||
+                           p.pCategory?.toLowerCase().includes(search.toLowerCase());
+      
+      return matchesCat && matchesSearch;
+    }
   );
 
   const stockStatus = (stock) => {
@@ -120,7 +148,10 @@ export default function ProductDashboardAdmin() {
               type="text"
               placeholder="Search catalog..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                if (e.target.value) setSelectedCategory("All");
+              }}
               className="pl-11 pr-5 py-3 rounded-lg md:rounded-xl bg-white border border-slate-200 outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary w-full sm:w-60 md:w-64 transition-all font-bold text-slate-900 placeholder:text-slate-200 shadow-sm text-xs md:text-sm"
             />
           </div>
@@ -132,6 +163,33 @@ export default function ProductDashboardAdmin() {
           </button>
         </div>
       </header>
+
+      {/* Categories Scroller */}
+      <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar border-b border-slate-100">
+        <button
+          onClick={() => toggleCategory("All")}
+          className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${
+            selectedCategory === "All"
+            ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5" 
+            : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
+          }`}
+        >
+          All Assets
+        </button>
+        {categories.map(cat => (
+          <button
+            key={cat._id}
+            onClick={() => toggleCategory(cat.name)}
+            className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${
+              selectedCategory === cat.name
+              ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5" 
+              : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
 
       {/* Table Container */}
       <div className="glass-card rounded-[24px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border-none shadow-xl">
@@ -184,9 +242,19 @@ export default function ProductDashboardAdmin() {
                       </td>
 
                       <td className="px-6 md:px-10 py-4 md:py-6 text-right">
-                        <span className="px-3.5 md:px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-slate-100 whitespace-nowrap">
-                          {p.pCategory}
-                        </span>
+                        <div className="flex flex-wrap justify-end gap-1.5">
+                          {Array.isArray(p.pCategory) ? (
+                            p.pCategory.map((cat, idx) => (
+                              <span key={idx} className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 text-[8px] font-black uppercase tracking-widest border border-slate-100 whitespace-nowrap">
+                                {cat}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="px-3.5 md:px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-slate-100 whitespace-nowrap">
+                              {p.pCategory}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       <td className="px-6 md:px-10 py-4 md:py-6 font-black text-slate-900 text-base md:text-lg tracking-tighter">

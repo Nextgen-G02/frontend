@@ -71,15 +71,16 @@ export default function AddProduct() {
     setForm(prev => {
       const updatedForm = { ...prev, [name]: value };
       
-      // If category changes, pre-fill productId with its prefix
-      if (name === "pCategory" && value) {
-        const selectedCat = categories.find(cat => cat.name === value);
-        if (selectedCat) {
-          updatedForm.productId = `${selectedCat.prefix}-`;
-        }
+    // If category changes, update productId with the prefix
+    if (name === "pCategory") {
+      const selectedCat = categories.find(cat => cat.name === value);
+      if (selectedCat && (!form.productId || form.productId.endsWith('-'))) {
+        setForm(prev => ({ ...prev, productId: `${selectedCat.prefix}-`, pCategory: value }));
+        return;
       }
-      
-      return updatedForm;
+      setForm(prev => ({ ...prev, pCategory: value }));
+      return;
+    }
     });
 
     // Clear error for this field
@@ -163,14 +164,35 @@ export default function AddProduct() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1">Category<span className="text-primary">*</span></label>
-                <select name="pCategory" value={form.pCategory} onChange={handleChange} className={inputClass("pCategory")}>
-                  <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat.name}>{cat.name}</option>
-                  ))}
-                </select>
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-[15px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                  Product Category
+                  <span className="text-primary">*</span>
+                </label>
+                
+                <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-2xl border border-slate-100 min-h-[60px]">
+                  {categories.length === 0 ? (
+                    <p className="text-slate-300 text-xs italic">Loading categories...</p>
+                  ) : (
+                    categories.map((cat) => {
+                      const isSelected = form.pCategory === cat.name;
+                      return (
+                        <button
+                          key={cat._id}
+                          type="button"
+                          onClick={() => handleChange({ target: { name: 'pCategory', value: cat.name } })}
+                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${
+                            isSelected
+                            ? "bg-slate-900 text-gold border-slate-900 shadow-md -translate-y-0.5"
+                            : "bg-white text-slate-400 border-slate-100 hover:border-slate-200"
+                          }`}
+                        >
+                          {cat.name}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
                 {errors.pCategory && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.pCategory}</p>}
               </div>
 
