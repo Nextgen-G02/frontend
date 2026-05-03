@@ -28,7 +28,8 @@ export default function AdminSupplierManagement() {
   const [formData, setFormData] = useState({
     name: "",
     productsSupplied: "",
-    phone: "",
+    phone1: "",
+    phone2: "",
     email: "",
     address: "",
     status: "Active"
@@ -106,7 +107,8 @@ export default function AdminSupplierManagement() {
     setFormData({
       name: supplier.name,
       productsSupplied: supplier.productsSupplied || "",
-      phone: supplier.phone,
+      phone1: supplier.phone1 || "",
+      phone2: supplier.phone2 || "",
       email: supplier.email || "",
       address: supplier.address || "",
       status: supplier.status
@@ -120,7 +122,8 @@ export default function AdminSupplierManagement() {
     setFormData({
       name: "",
       productsSupplied: "",
-      phone: "",
+      phone1: "",
+      phone2: "",
       email: "",
       address: "",
       status: "Active"
@@ -175,7 +178,7 @@ export default function AdminSupplierManagement() {
             <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
             
             <div className="flex items-center gap-4 mb-8 relative z-10">
-              <div className="p-3.5 bg-primary text-white rounded-xl shadow-lg shadow-primary/20">
+              <div className="p-3.5 bg-slate-900 text-gold rounded-xl shadow-lg">
                 <Truck size={20} md:size={24} />
               </div>
               <div>
@@ -204,11 +207,19 @@ export default function AdminSupplierManagement() {
                 />
               </div>
               <div className="space-y-1.5 md:space-y-2">
-                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
+                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number 1 (Optional)</label>
                 <input 
-                  name="phone" value={formData.phone} onChange={handleChange} required
+                  name="phone1" value={formData.phone1} onChange={handleChange}
                   className="w-full px-5 md:px-6 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs md:text-sm placeholder:text-slate-300"
-                  placeholder="+(123) 456-7890"
+                  placeholder="Primary Phone"
+                />
+              </div>
+              <div className="space-y-1.5 md:space-y-2">
+                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number 2 (Optional)</label>
+                <input 
+                  name="phone2" value={formData.phone2} onChange={handleChange}
+                  className="w-full px-5 md:px-6 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs md:text-sm placeholder:text-slate-300"
+                  placeholder="Secondary Phone"
                 />
               </div>
               <div className="space-y-1.5 md:space-y-2">
@@ -256,7 +267,7 @@ export default function AdminSupplierManagement() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Supplier</th>
+                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">ID & Supplier</th>
                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Products Supplied</th>
                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Contact Details</th>
                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
@@ -287,6 +298,11 @@ export default function AdminSupplierManagement() {
                           {s.name[0]}
                         </div>
                         <div className="max-w-[200px]">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="px-2 py-0.5 bg-slate-900 text-gold text-[8px] font-black rounded-md tracking-widest uppercase">
+                              {s.supplierId || "NEW"}
+                            </span>
+                          </div>
                           <p className="font-black text-slate-900 uppercase tracking-tight text-base leading-tight">{s.name}</p>
                           <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit break-all">
                             <MapPin size={10} className="text-primary flex-shrink-0"/> {s.address || "No address"}
@@ -305,9 +321,19 @@ export default function AdminSupplierManagement() {
                     </td>
                     <td className="px-8 md:px-10 py-5 md:py-6">
                       <div className="space-y-1.5">
-                        <p className="text-[10px] font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-tight">
-                          <Phone size={10} className="text-primary" /> {s.phone}
-                        </p>
+                        {s.phone1 && (
+                          <p className="text-[10px] font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-tight">
+                            <Phone size={10} className="text-primary" /> {s.phone1}
+                          </p>
+                        )}
+                        {s.phone2 && (
+                          <p className="text-[10px] font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-tight">
+                            <Phone size={10} className="text-slate-400" /> {s.phone2}
+                          </p>
+                        )}
+                        {!s.phone1 && !s.phone2 && (
+                          <p className="text-[10px] font-bold text-slate-300 italic">No phone recorded</p>
+                        )}
                         {s.email && (
                           <p className="text-[10px] font-bold text-slate-400 flex items-center gap-1.5 break-all">
                             <Mail size={10} className="text-primary flex-shrink-0" /> {s.email}
@@ -326,7 +352,7 @@ export default function AdminSupplierManagement() {
                       </div>
                     </td>
                     <td className="px-8 md:px-10 py-5 md:py-6 text-right">
-                      <div className="flex justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                      <div className="flex justify-end gap-2.5 transition-all duration-300">
                         <button 
                           onClick={() => openSupplierAccount(s._id)}
                           className="p-3 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-emerald-500 hover:shadow-xl transition-all group"
