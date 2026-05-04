@@ -106,10 +106,10 @@ const InventoryDashboard = () => {
                 <div>
                     <div className="flex items-center gap-2.5 mb-3">
                         <span className="w-10 h-1 bg-primary rounded-full"></span>
-                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Inventory Control</p>
+                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Stock Management</p>
                     </div>
-                    <h1 className="heading-premium text-2xl md:text-5xl">Stock <span className="italic font-medium text-slate-400">Management</span></h1>
-                    <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Monitor product levels, update safety alerts, and sync with your shop database.</p>
+                    <h1 className="heading-premium text-2xl md:text-5xl">Stock <span className="italic font-medium text-slate-400">Overview</span></h1>
+                    <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Check your stock levels and set low stock alerts.</p>
                 </div>
                 
                 <button 
@@ -128,7 +128,7 @@ const InventoryDashboard = () => {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
                         <div className="p-3.5 bg-slate-900 text-gold rounded-xl shadow-lg"><Activity size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Catalog</span>
+                        <span className="px-3.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Products</span>
                     </div>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10 leading-none">Total Products</p>
                     <p className="text-3xl md:text-5xl font-black text-slate-900 mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.length}</p>
@@ -148,9 +148,9 @@ const InventoryDashboard = () => {
                     <div className="absolute bottom-0 right-0 w-48 h-48 bg-primary rounded-full blur-[80px] opacity-10"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
                         <div className="p-3.5 bg-white/10 text-gold rounded-xl border border-white/5 backdrop-blur-xl"><ShieldCheck size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-white/5 text-gold border border-white/10 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Health</span>
+                        <span className="px-3.5 py-1 bg-white/5 text-gold border border-white/10 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Status</span>
                     </div>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Inventory Health</p>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Stock Health</p>
                     <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">
                         {inventory.length > 0 ? Math.round(((inventory.length - inventory.filter(i => i.quantity <= i.lowStockLevel).length) / inventory.length) * 100) : 100}
                         <span className="text-xl md:text-2xl text-slate-600">%</span>
@@ -196,14 +196,14 @@ const InventoryDashboard = () => {
                     </select>
                 </div>
                 <div className="flex items-end pb-1 px-2">
-                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-tight">Showing {filteredInventory.length} of {inventory.length} assets</p>
+                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-tight">Showing {filteredInventory.length} of {inventory.length} items</p>
                 </div>
             </div>
 
             {/* Inventory Table */}
             <div className="glass-card rounded-[32px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border border-slate-100 shadow-xl">
                 <div className="p-7 md:p-8 border-b border-slate-50 bg-white/50 flex justify-between items-center">
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">Product Registry</h2>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">Stock List</h2>
                     <div className="flex items-center gap-2 text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">
                         <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
                         Live Updates
@@ -225,7 +225,7 @@ const InventoryDashboard = () => {
                                 <tr>
                                     <td colSpan="5" className="px-12 py-40 text-center">
                                         <Loader2 className="animate-spin text-primary mx-auto mb-6" size={56} />
-                                        <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400">Loading Registry Protocol State...</p>
+                                        <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400">Loading Stock...</p>
                                     </td>
                                 </tr>
                             ) : inventory.length === 0 ? (
@@ -234,7 +234,7 @@ const InventoryDashboard = () => {
                                         <div className="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center mx-auto mb-6 shadow-inner">
                                             <Package size={48} className="text-slate-200" />
                                         </div>
-                                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Registry is void. Await synchronization.</p>
+                                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No stock found. Please refresh.</p>
                                     </td>
                                 </tr>
                             ) : (

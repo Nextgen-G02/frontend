@@ -29,7 +29,7 @@ export default function AdminExpenses() {
     category: ""
   });
 
-  const categories = ['Ingredients', 'Salaries', 'Utilities', 'Rent', 'Other'];
+  const categories = ['Ingredients', 'Salaries', 'Utilities', 'Other'];
 
   useEffect(() => {
     fetchExpenses();
@@ -92,7 +92,7 @@ export default function AdminExpenses() {
         <div>
           <div className="flex items-center gap-2.5 mb-3">
             <span className="w-10 h-1 bg-rose-500 rounded-full"></span>
-            <p className="text-rose-500 font-black uppercase tracking-[0.4em] text-[10px]">Operational Burn Management</p>
+            <p className="text-rose-500 font-black uppercase tracking-[0.4em] text-[10px]">Expense Records</p>
           </div>
           <h1 className="heading-premium text-4xl">Expense <span className="italic font-medium text-slate-400">Tracking</span></h1>
         </div>
@@ -102,7 +102,7 @@ export default function AdminExpenses() {
           className="flex items-center gap-3 px-8 py-4 bg-slate-900 text-white rounded-2xl shadow-xl hover:bg-rose-600 transition-all font-black text-xs uppercase tracking-widest"
         >
           <Plus size={18} />
-          Record Expense
+          Add Expense
         </button>
       </div>
 
@@ -153,7 +153,7 @@ export default function AdminExpenses() {
         {loading ? (
           <div className="h-96 flex flex-col items-center justify-center gap-4">
             <Loader2 className="animate-spin text-rose-500" size={40} />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Syncing Ledger...</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Loading Expenses...</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -181,7 +181,6 @@ export default function AdminExpenses() {
                         expense.category === 'Ingredients' ? 'bg-emerald-50 text-emerald-600' :
                         expense.category === 'Salaries' ? 'bg-indigo-50 text-indigo-600' :
                         expense.category === 'Utilities' ? 'bg-amber-50 text-amber-600' :
-                        expense.category === 'Rent' ? 'bg-rose-50 text-rose-600' :
                         'bg-slate-100 text-slate-600'
                       }`}>
                         {expense.category}
@@ -227,7 +226,7 @@ export default function AdminExpenses() {
                 <div className="p-4 bg-rose-50 text-rose-500 rounded-2xl"><DollarSign size={24} /></div>
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">New Expense</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entry Protocol</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Add details below</p>
                 </div>
               </div>
 
@@ -292,7 +291,7 @@ export default function AdminExpenses() {
                     type="submit"
                     className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-rose-600 transition-all"
                   >
-                    Authorize Entry
+                    Save Expense
                   </button>
                 </div>
               </form>
