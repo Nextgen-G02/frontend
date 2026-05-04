@@ -11,7 +11,7 @@ import {
   Loader2,
   Calendar,
   ArrowRight,
-  Edit2
+  Pencil
 } from "lucide-react";
 
 export default function CashDrawer() {
@@ -25,6 +25,8 @@ export default function CashDrawer() {
     notes: ""
   });
   const [editData, setEditData] = useState({
+    id: "",
+    actualBalance: "",
     openingBalance: "",
     notes: ""
   });
@@ -42,10 +44,6 @@ export default function CashDrawer() {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDrawer(res.data.data);
-      setEditData({
-        openingBalance: res.data.data.openingBalance,
-        notes: res.data.data.notes || ""
-      });
     } catch (error) {
       toast.error("Failed to fetch drawer data");
     } finally {
@@ -81,14 +79,14 @@ export default function CashDrawer() {
     }
   };
 
-  const handleUpdateDrawer = async (e) => {
+  const handleEditDrawer = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/cash-drawer/${drawer._id}`, editData, {
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/cash-drawer/${editData.id}`, editData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success("Drawer details updated");
+      toast.success("Drawer record updated");
       setShowEditModal(false);
       fetchTodayDrawer();
       fetchHistory();
@@ -97,13 +95,23 @@ export default function CashDrawer() {
     }
   };
 
+  const openEditModal = (log) => {
+    setEditData({
+      id: log._id,
+      actualBalance: log.actualBalance,
+      openingBalance: log.openingBalance,
+      notes: log.notes || ""
+    });
+    setShowEditModal(true);
+  };
+
   return (
     <div className="space-y-10 max-w-[1400px] mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2.5 mb-3">
             <span className="w-10 h-1 bg-amber-500 rounded-full"></span>
-            <p className="text-amber-500 font-black uppercase tracking-[0.4em] text-[10px]">Currency Reconciliation System</p>
+            <p className="text-amber-500 font-black uppercase tracking-[0.4em] text-[10px]">Daily Cash Management</p>
           </div>
           <h1 className="heading-premium text-4xl">Cash <span className="italic font-medium text-slate-400">Drawer</span></h1>
         </div>
@@ -112,7 +120,7 @@ export default function CashDrawer() {
       {loading ? (
         <div className="h-96 flex flex-col items-center justify-center gap-6">
           <Loader2 className="animate-spin text-amber-500" size={56} />
-          <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400 italic">Accessing Secure Vault...</p>
+          <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400 italic">Opening Drawer...</p>
         </div>
       ) : drawer ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -129,25 +137,27 @@ export default function CashDrawer() {
                     {drawer.status === 'Open' ? <Unlock size={24} /> : <Lock size={24} />}
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black tracking-tight uppercase leading-none">Vault {drawer.status}</h2>
+                    <h2 className="text-2xl font-black tracking-tight uppercase leading-none">Drawer {drawer.status}</h2>
                     <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mt-1 italic">
                       {new Date(drawer.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-4">
-                  <button 
-                    onClick={() => setShowEditModal(true)}
-                    className="p-4 bg-white/10 text-white rounded-2xl hover:bg-white/20 transition-all border border-white/10"
-                  >
-                    <Edit2 size={20} />
-                  </button>
-                  {drawer.status === 'Open' && (
+                  {drawer.status === 'Open' ? (
                     <button 
                       onClick={() => setShowCloseModal(true)}
                       className="px-8 py-4 bg-amber-500 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white transition-all shadow-xl shadow-amber-500/20"
                     >
-                      Close Session
+                      Close Drawer
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => openEditModal(drawer)}
+                      className="px-8 py-4 bg-white/10 text-white border border-white/20 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-white/20 transition-all flex items-center gap-2"
+                    >
+                      <Pencil size={14} />
+                      Edit Record
                     </button>
                   )}
                 </div>
@@ -175,11 +185,11 @@ export default function CashDrawer() {
                 </div>
                 {drawer.status === 'Closed' && (
                   <div className="text-right">
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-1">Variance Detected</p>
-                    <p className={`text-2xl font-black ${drawer.difference === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {drawer.difference === 0 ? 'Zero Variance' : `Rs.${drawer.difference.toLocaleString()}`}
-                    </p>
-                  </div>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-1">Difference</p>
+                  <p className={`text-2xl font-black ${drawer.difference === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {drawer.difference === 0 ? 'No Difference' : `Rs.${drawer.difference.toLocaleString()}`}
+                  </p>
+                </div>
                 )}
               </div>
             </div>
@@ -189,9 +199,9 @@ export default function CashDrawer() {
                <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-slate-50 text-slate-900 rounded-xl"><History size={20} /></div>
-                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Audit Logs</h3>
+                    <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">History Logs</h3>
                   </div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Last 30 Sessions</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Last 30 Days</span>
                </div>
                <div className="overflow-x-auto">
                  <table className="w-full text-left">
@@ -200,7 +210,7 @@ export default function CashDrawer() {
                         <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Date</th>
                         <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Expected</th>
                         <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Actual</th>
-                        <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Variance</th>
+                        <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Difference</th>
                         <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Status</th>
                      </tr>
                    </thead>
@@ -221,13 +231,19 @@ export default function CashDrawer() {
                               {log.difference > 0 ? '+' : ''}{log.difference.toLocaleString()}
                             </span>
                          </td>
-                         <td className="px-10 py-6 text-right">
-                           <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                             log.status === 'Open' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
-                           }`}>
-                             {log.status}
-                           </span>
-                         </td>
+                          <td className="px-10 py-6 text-right flex items-center justify-end gap-4">
+                            <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                              log.status === 'Open' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+                            }`}>
+                              {log.status}
+                            </span>
+                            <button 
+                              onClick={() => openEditModal(log)}
+                              className="p-2 text-slate-300 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          </td>
                        </tr>
                      ))}
                    </tbody>
@@ -239,12 +255,12 @@ export default function CashDrawer() {
           {/* Right Info Sidebar */}
           <div className="space-y-8">
             <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-xl">
-               <div className="flex items-center gap-4 mb-6">
+                 <div className="flex items-center gap-4 mb-6">
                  <div className="p-3 bg-amber-50 text-amber-500 rounded-xl"><AlertCircle size={20} /></div>
-                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Protocol Warning</h3>
+                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Quick Note</h3>
                </div>
                <p className="text-xs text-slate-500 leading-relaxed font-medium italic">
-                 "Reconciliation is mandatory at the end of every business cycle. Ensure all physical currency is counted twice before finalizing the audit entry."
+                 "Please close the drawer at the end of the day. Count your cash carefully before saving."
                </p>
             </div>
 
@@ -269,63 +285,6 @@ export default function CashDrawer() {
         </div>
       ) : null}
 
-      {/* Edit Drawer Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-indigo-50 text-indigo-500 rounded-2xl"><Edit2 size={24} /></div>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Session</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manual Correction</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleUpdateDrawer} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Opening Balance (Rs.)</label>
-                  <input 
-                    required
-                    type="number" 
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold"
-                    value={editData.openingBalance}
-                    onChange={(e) => setEditData({...editData, openingBalance: e.target.value})}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Observations / Notes</label>
-                  <textarea 
-                    rows="3"
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold resize-none"
-                    placeholder="Document any corrections..."
-                    value={editData.notes}
-                    onChange={(e) => setEditData({...editData, notes: e.target.value})}
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <button 
-                    type="button"
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1 py-4 text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-slate-900 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit"
-                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-indigo-600 transition-all"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Close Drawer Modal */}
       {showCloseModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -334,8 +293,8 @@ export default function CashDrawer() {
               <div className="flex items-center gap-4 mb-8">
                 <div className="p-4 bg-amber-50 text-amber-500 rounded-2xl"><Lock size={24} /></div>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Audit Closure</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reconciliation Phase</p>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Close Drawer</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reconcile Cash</p>
                 </div>
               </div>
 
@@ -378,7 +337,76 @@ export default function CashDrawer() {
                     type="submit"
                     className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-amber-500 hover:text-slate-900 transition-all"
                   >
-                    Finalize Audit
+                    Close Drawer
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Drawer Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-10">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-4 bg-amber-50 text-amber-500 rounded-2xl"><Pencil size={24} /></div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Record</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Update Session Data</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleEditDrawer} className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Opening Balance (Rs.)</label>
+                    <input 
+                      required
+                      type="number" 
+                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold"
+                      value={editData.openingBalance}
+                      onChange={(e) => setEditData({...editData, openingBalance: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Physical Cash Count (Rs.)</label>
+                    <input 
+                      required
+                      type="number" 
+                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold"
+                      value={editData.actualBalance}
+                      onChange={(e) => setEditData({...editData, actualBalance: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Observations / Notes</label>
+                  <textarea 
+                    rows="3"
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold resize-none"
+                    placeholder="Document any discrepancies or notes..."
+                    value={editData.notes}
+                    onChange={(e) => setEditData({...editData, notes: e.target.value})}
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="flex-1 py-4 text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-slate-900 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-amber-500 hover:text-slate-900 transition-all"
+                  >
+                    Update Record
                   </button>
                 </div>
               </form>
