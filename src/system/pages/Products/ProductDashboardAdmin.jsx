@@ -7,7 +7,10 @@ import {
   Trash2, 
   Package, 
   ExternalLink,
-  Loader2
+  Loader2,
+  X,
+  Save,
+  Settings
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -25,6 +28,7 @@ export default function ProductDashboardAdmin() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [editForm, setEditForm] = useState({});
+  const [allProducts, setAllProducts] = useState([]);
 
   useEffect(() => {
     fetchProducts();
@@ -81,7 +85,10 @@ export default function ProductDashboardAdmin() {
     try {
       const res = await fetch(`${API_BASE}/update/${editProduct._id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
         body: JSON.stringify(editForm),
       });
       const updated = await res.json();
@@ -90,6 +97,7 @@ export default function ProductDashboardAdmin() {
       );
       setEditProduct(null);
       toast.success("Product updated");
+      fetchProducts(); // Refresh to ensure all data is synced
     } catch {
       toast.error("Update failed");
     }
@@ -304,19 +312,154 @@ export default function ProductDashboardAdmin() {
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {deleteId && (
+      {/* Edit Modal */}
+      {editProduct && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="glass-card bg-white p-12 rounded-[56px] max-w-md w-full shadow-2xl relative overflow-hidden border-none">
-            <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
-            <div className="w-20 h-20 bg-rose-50 text-primary rounded-[28px] flex items-center justify-center mb-8 mx-auto">
-               <Trash2 size={40} />
+          <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+            <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between shrink-0">
+               <div className="flex items-center gap-4">
+                  <div className="p-3 bg-slate-900 text-gold rounded-2xl"><Edit3 size={24} /></div>
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Product</h2>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Update Master Registry</p>
+                  </div>
+               </div>
+               <button onClick={() => setEditProduct(null)} className="p-4 hover:bg-slate-50 rounded-2xl transition-colors text-slate-400">
+                 <X size={24} />
+               </button>
             </div>
-            <h3 className="text-3xl font-black text-slate-900 mb-4 text-center tracking-tight">Erase Product?</h3>
-            <p className="text-slate-400 font-medium mb-10 text-center leading-relaxed italic">"Permanently purging this item from the master catalog is an irreversible protocol."</p>
-            <div className="flex flex-col gap-4">
-              <button onClick={() => handleDelete(deleteId)} className="w-full py-5 bg-primary text-white rounded-2xl font-black uppercase tracking-[0.4em] text-xs shadow-xl shadow-primary/20 hover:bg-slate-900 transition-all duration-500">Confirm Deletion</button>
-              <button onClick={() => setDeleteId(null)} className="w-full py-5 font-black text-slate-400 hover:text-slate-900 uppercase tracking-widest text-[10px] transition-colors">Cancel</button>
+
+            <div className="flex-1 overflow-y-auto p-8 md:p-10 space-y-10 no-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
+                  <input 
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    value={editForm.pName}
+                    onChange={(e) => setEditForm({...editForm, pName: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Price (Rs.)</label>
+                  <input 
+                    type="number"
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    value={editForm.price}
+                    onChange={(e) => setEditForm({...editForm, price: Number(e.target.value)})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Stock Quantity</label>
+                  <input 
+                    type="number"
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    value={editForm.stock}
+                    onChange={(e) => setEditForm({...editForm, stock: Number(e.target.value)})}
+                  />
+                </div>
+                <div className="space-y-2 flex flex-col justify-end">
+                   <label className="flex items-center gap-3 cursor-pointer group mb-2">
+                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">Raw Ingredient Status</span>
+                      <div className="relative">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer"
+                          checked={editForm.isIngredient}
+                          onChange={(e) => setEditForm({...editForm, isIngredient: e.target.checked})}
+                        />
+                        <div className="w-11 h-6 bg-slate-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                      </div>
+                   </label>
+                </div>
+              </div>
+
+              {!editForm.isIngredient && (
+                <div className="p-8 bg-slate-900 rounded-[32px] text-white">
+                  <div className="flex items-center justify-between mb-8">
+                     <div className="flex items-center gap-3">
+                        <div className="p-2.5 bg-white/10 text-gold rounded-lg border border-white/10"><Settings size={18} /></div>
+                        <h3 className="text-base font-black text-white tracking-tight uppercase">Recipe Configuration</h3>
+                     </div>
+                     <button 
+                        type="button"
+                        onClick={() => setEditForm(prev => ({
+                          ...prev,
+                          recipe: [...(prev.recipe || []), { ingredientId: "", quantity: 1 }]
+                        }))}
+                        className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                      >
+                        + Add Ingredient
+                      </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(editForm.recipe || []).map((item, index) => (
+                      <div key={index} className="flex items-end gap-4">
+                        <div className="flex-1 space-y-2">
+                          <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Ingredient</label>
+                          <select 
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-gold transition-all font-bold text-white text-sm"
+                            value={item.ingredientId?._id || item.ingredientId}
+                            onChange={(e) => {
+                              const newRecipe = [...editForm.recipe];
+                              newRecipe[index].ingredientId = e.target.value;
+                              setEditForm({...editForm, recipe: newRecipe});
+                            }}
+                          >
+                            <option value="" className="bg-slate-900">Choose...</option>
+                            {products.filter(p => p.isIngredient).map(p => (
+                              <option key={p._id} value={p._id} className="bg-slate-900">{p.pName} ({p.unit})</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="w-24 space-y-2">
+                          <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Qty</label>
+                          <input 
+                            type="number"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-sm"
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const newRecipe = [...editForm.recipe];
+                              newRecipe[index].quantity = Number(e.target.value);
+                              setEditForm({...editForm, recipe: newRecipe});
+                            }}
+                          />
+                        </div>
+                        <button 
+                          onClick={() => {
+                            const newRecipe = editForm.recipe.filter((_, i) => i !== index);
+                            setEditForm({...editForm, recipe: newRecipe});
+                          }}
+                          className="p-3 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                    {(!editForm.recipe || editForm.recipe.length === 0) && (
+                      <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[24px]">
+                        <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">No recipe ingredients assigned</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-8 md:p-10 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-4 shrink-0">
+               <button 
+                onClick={() => setEditProduct(null)}
+                className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
+               >
+                 Discard
+               </button>
+               <button 
+                onClick={handleEditSave}
+                className="px-10 py-4 bg-slate-900 text-gold rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-3 hover:bg-primary hover:text-white transition-all shadow-xl shadow-slate-200"
+               >
+                 Save Changes
+                 <Save size={16} />
+               </button>
             </div>
           </div>
         </div>
