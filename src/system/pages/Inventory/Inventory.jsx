@@ -457,11 +457,6 @@ const InventoryDashboard = () => {
                                             </td>
                                             <td className="px-10 py-6">
                                                 <p className="text-[10px] font-bold text-slate-400 leading-relaxed italic">"{log.reason}"</p>
-                                                {log.type === 'OUT' && (log.reason === 'Expired Cake' || log.reason === 'Damaged') && (
-                                                    <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mt-1">
-                                                        Loss: Rs.{(log.quantity * (log.productId?.costPrice || 0)).toLocaleString()}
-                                                    </p>
-                                                )}
                                             </td>
                                         </tr>
                                     ))
