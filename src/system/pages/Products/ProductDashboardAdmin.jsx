@@ -10,7 +10,9 @@ import {
   Loader2,
   X,
   Save,
-  Settings
+  Settings,
+  Image,
+  Upload
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -115,6 +117,21 @@ export default function ProductDashboardAdmin() {
     } catch (error) {
       console.error("Update error:", error);
       toast.error(error.message || "Failed to update product");
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be less than 5MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditForm(prev => ({ ...prev, images: [reader.result] }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -248,7 +265,7 @@ export default function ProductDashboardAdmin() {
                         <div className="flex items-center gap-4 md:gap-5">
                           <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-[24px] overflow-hidden shadow-sm group-hover:shadow-2xl transition-all duration-700 bg-slate-100 border border-slate-50 shrink-0">
                             <img
-                              src={p.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
+                              src={p.images?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
                               className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000"
                               alt=""
                             />
@@ -361,7 +378,56 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-4">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Image size={12} />
+                    Product Image
+                  </label>
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary'); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-primary'); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-primary');
+                      const file = e.dataTransfer.files[0];
+                      if (file) handleFileChange({ target: { files: [file] } });
+                    }}
+                    onClick={() => document.getElementById('editFileInput').click()}
+                    className="w-full aspect-video rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center bg-white hover:bg-slate-50 transition-all cursor-pointer group relative overflow-hidden"
+                  >
+                    {editForm.images?.[0] ? (
+                      <div className="absolute inset-0 group">
+                        <img
+                          src={editForm.images[0]}
+                          alt="Preview"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="p-3 bg-white/20 rounded-full text-white"><Upload size={20} /></div>
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest">Drop image to update</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-500">
+                          <Upload className="text-slate-400 w-6 h-6" />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Add Product Image</p>
+                      </>
+                    )}
+                    <input
+                      id="editFileInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock Quantity</label>
                   <input
                     type="number"
