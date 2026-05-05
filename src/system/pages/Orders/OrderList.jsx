@@ -11,7 +11,8 @@ import {
   Phone,
   Store,
   Clock,
-  Loader2
+  Loader2,
+  ChefHat
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -94,12 +95,22 @@ const OrderList = () => {
                 <h1 className="heading-premium text-2xl md:text-5xl leading-tight">Sales & <span className="italic font-medium text-slate-400">Orders</span></h1>
                 <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Track requests, transmissions, and settlement states.</p>
             </div>
-            <Link 
-                to="/orders/new" 
-                className="py-3.5 md:py-4 px-6 md:px-10 bg-slate-900 text-gold rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-3 border border-white/10"
-            >
-                <Plus size={18} md:size={20} /> Initiate New Order
-            </Link>
+            <div className="flex flex-wrap gap-4">
+                <Link 
+                    to="/orders/summary" 
+                    className="py-3.5 md:py-4 px-6 md:px-8 bg-white border border-slate-200 text-slate-600 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.3em] hover:bg-slate-50 transition-all flex items-center justify-center gap-3 shadow-sm"
+                >
+                    <ChefHat size={18} />
+                    Production Sheet
+                </Link>
+                <Link 
+                    to="/orders/new" 
+                    className="py-3.5 md:py-4 px-6 md:px-10 bg-slate-900 text-gold rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-3 border border-white/10"
+                >
+                    <Plus size={18} />
+                    Initiate New Order
+                </Link>
+            </div>
         </div>
 
         <div className="glass-card rounded-[24px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border-none shadow-xl">
