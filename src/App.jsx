@@ -23,6 +23,8 @@ import AdminSupplierManagement from './system/pages/Suppliers/AdminSupplierManag
 import AdminSupplierAccounts from './system/pages/Suppliers/AdminSupplierAccounts'
 import AdminFinancials from './system/pages/Financials/Financials'
 import AdminStaffManagement from './system/pages/Staff/Staff'
+import AdminExpenses from './system/pages/Expenses/Expenses'
+import CashDrawer from './system/pages/CashDrawer/CashDrawer'
 
 // System Components
 import AdminLayout from './system/components/Layout'
@@ -60,6 +62,8 @@ function App() {
         <Route path="/admin/suppliers" element={<ProtectedRoute><AdminLayout><AdminSupplierManagement /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/suppliers/:id/accounts" element={<ProtectedRoute><AdminLayout><AdminSupplierAccounts /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/financials" element={<ProtectedRoute><AdminLayout><AdminFinancials /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/expenses" element={<ProtectedRoute><AdminLayout><AdminExpenses /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/cash-drawer" element={<ProtectedRoute><AdminLayout><CashDrawer /></AdminLayout></ProtectedRoute>} />
         <Route path="/staff" element={<ProtectedRoute><AdminLayout><AdminStaffManagement /></AdminLayout></ProtectedRoute>} />
 
       </Routes>
