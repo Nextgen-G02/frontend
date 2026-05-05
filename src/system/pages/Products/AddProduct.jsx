@@ -84,11 +84,30 @@ export default function AddProduct() {
     setForm(prev => {
       let updatedForm = { ...prev, [name]: value };
 
-      // If category changes, update productId with the prefix
+      // If category changes, update productId with the next sequential ID
       if (name === "pCategory") {
         const selectedCat = categories.find(cat => cat.name === value);
-        if (selectedCat && (!prev.productId || prev.productId.endsWith('-') || !prev.productId.includes('-'))) {
-          updatedForm.productId = `${selectedCat.prefix}-`;
+        if (selectedCat) {
+          const prefix = selectedCat.prefix;
+          
+          // Find all existing products with this prefix
+          const relatedIds = allProducts
+            .map(p => p.productId)
+            .filter(id => id && id.startsWith(`${prefix}-`));
+          
+          let nextNum = 1;
+          if (relatedIds.length > 0) {
+            // Extract numeric parts and find the maximum
+            const nums = relatedIds.map(id => {
+              const parts = id.split('-');
+              const num = parseInt(parts[parts.length - 1]);
+              return isNaN(num) ? 0 : num;
+            });
+            nextNum = Math.max(...nums) + 1;
+          }
+          
+          // Format as PREFIX-00X
+          updatedForm.productId = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
         }
       }
 
