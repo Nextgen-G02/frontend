@@ -6,13 +6,16 @@ import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './shared/context/AuthContext';
 import { ThemeProvider } from './shared/context/ThemeContext';
 import { ToastProvider } from './shared/context/ToastContext';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </AuthProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <AuthProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   </StrictMode>,
 )

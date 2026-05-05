@@ -1,38 +1,40 @@
 import React, { useEffect, useState } from "react";
+import { ArrowRight, Play } from "lucide-react";
 
 const slides = [
   {
+    image: "/images/img1.png",
+    titlePart1: "Delight in Every",
+    titlePart2: "Bite of Happiness",
+    description: "Indulge in our handcrafted cakes, made with the finest ingredients and a sprinkle of love.",
+    lightText: false, // Use dark text for this slide as it has a light background area
+  },
+  {
+    image: "/images/hero_2.png",
+    titlePart1: "Heavenly",
+    titlePart2: "Gourmet Cakes",
+    description: "Exquisite flavors crafted with precision and passion for your special moments.",
+    lightText: true,
+  },
+  {
     image: "https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg",
-    title: "Delicious Cakes",
-    subtitle: "Freshly baked with love",
-  },
-  {
-    image: "https://images.pexels.com/photos/3026808/pexels-photo-3026808.jpeg",
-    title: "Sweet Pastries",
-    subtitle: "Perfect for every moment",
-  },
-  {
-    image: "https://images.pexels.com/photos/1055272/pexels-photo-1055272.jpeg",
-    title: "Chocolate Heaven",
-    subtitle: "Rich taste you’ll love",
-  },
-  {
-    image: "https://images.pexels.com/photos/1854652/pexels-photo-1854652.jpeg",
-    title: "Celebrate With Us",
-    subtitle: "Make your day special",
-  },
+    titlePart1: "Signature",
+    titlePart2: "Sweet Treats",
+    description: "Freshly baked daily using only the finest premium ingredients.",
+    lightText: true,
+  }
 ];
 
 export default function HeroCarousel() {
   const [current, setCurrent] = useState(0);
 
-  // 🔥 AUTO SLIDE
+  // AUTO SLIDE
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrent((prev) =>
         prev === slides.length - 1 ? 0 : prev + 1
       );
-    }, 4000);
+    }, 10000); // Slower interval for better readability
 
     return () => clearInterval(interval);
   }, []);
@@ -46,71 +48,91 @@ export default function HeroCarousel() {
   };
 
   return (
-    <div className="relative w-full h-[400px] md:h-[520px] overflow-hidden bg-slate-900 group/hero">
-
+    <div className="relative w-full h-[500px] md:h-[650px] lg:h-[750px] overflow-hidden bg-white group/hero">
+      
       {/* SLIDES */}
       <div
-        className="flex h-full transition-transform duration-700 ease-in-out"
+        className="flex h-full transition-transform duration-1000 ease-in-out"
         style={{
           transform: `translateX(-${current * 100}%)`,
         }}
       >
         {slides.map((slide, index) => (
-          <div key={index} className="w-full h-full flex-shrink-0 relative">
-
-            {/* Image */}
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-full object-cover"
-            />
-
-            {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-black/40"></div>
+          <div key={index} className="w-full h-full flex-shrink-0 relative overflow-hidden">
+            
+            {/* Image Container with Responsive Handling */}
+            <div className="absolute inset-0 w-full h-full">
+              <img
+                src={slide.image}
+                alt={`${slide.titlePart1} ${slide.titlePart2}`}
+                className={`w-full h-full object-cover ${index === 0 ? 'object-right md:object-center' : 'object-center'}`}
+              />
+              
+              {/* Gradient Overlay for Readability - Modern Look */}
+              <div className={`absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent ${!slide.lightText ? 'from-white/60 via-white/30' : ''}`}></div>
+            </div>
 
             {/* Text Content */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start px-10 md:px-32 text-white">
-              <div className="flex items-center gap-3 mb-4 animate-in slide-in-from-left duration-700">
-                <div className="w-8 h-[2px] bg-gold"></div>
-                <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-gold">{slide.subtitle}</p>
-              </div>
-              <h1 className="text-3xl md:text-6xl font-black mb-8 md:mb-10 leading-tight tracking-tight uppercase max-w-2xl animate-in slide-in-from-left duration-1000">
-                {slide.title.split(' ')[0]} <span className="italic font-medium text-slate-300">{slide.title.split(' ').slice(1).join(' ')}</span>
-              </h1>
+            <div className="absolute inset-0 flex flex-col justify-center items-start px-6 md:px-20 lg:px-32">
+              <div className="max-w-2xl animate-in fade-in slide-in-from-left duration-1000">
+                <h1 className={`text-4xl md:text-6xl lg:text-8xl font-serif font-bold leading-[1.1] mb-6 drop-shadow-sm ${slide.lightText ? 'text-white' : 'text-slate-900'}`}>
+                  {slide.titlePart1} <br />
+                  <span className="text-[#B38B59] drop-shadow-none">{slide.titlePart2}</span>
+                </h1>
+                
+                <p className={`text-base md:text-lg lg:text-xl mb-10 max-w-lg leading-relaxed font-medium ${slide.lightText ? 'text-white/90' : 'text-slate-700'}`}>
+                  {slide.description}
+                </p>
 
-              <button className="bg-white text-slate-900 px-8 py-3.5 md:px-10 md:py-4 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 shadow-2xl shadow-black/20 animate-in fade-in duration-1000 delay-500">
-                Purchase Collection
-              </button>
+                <div className="flex flex-wrap items-center gap-6">
+                  {/* ORDER NOW Button */}
+                  <button className="group flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-[#B38B59] transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5">
+                    Order Now
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+
+                  {/* WATCH OUR STORY Button */}
+                  <button className={`group flex items-center gap-3 px-2 py-2 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 ${slide.lightText ? 'text-white' : 'text-slate-900'}`}>
+                    <div className="w-12 h-12 rounded-full border-2 border-[#B38B59]/30 flex items-center justify-center group-hover:border-[#B38B59] transition-all duration-500 bg-white/10 backdrop-blur-sm">
+                      <Play className="w-4 h-4 fill-[#B38B59] text-[#B38B59] group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="group-hover:text-[#B38B59] transition-colors">Watch Our Story</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
           </div>
         ))}
       </div>
 
-      {/* LEFT BUTTON */}
-      <button
-        onClick={prev}
-        className="absolute left-6 md:left-10 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-md border border-white/10 w-12 h-12 md:w-16 md:h-16 rounded-full text-white shadow-2xl hover:bg-white hover:text-slate-900 transition-all duration-500 flex items-center justify-center text-2xl font-light opacity-0 group-hover/hero:opacity-100 -translate-x-10 group-hover/hero:translate-x-0"
-      >
-        ‹
-      </button>
+      {/* NAVIGATION BUTTONS */}
+      <div className="absolute inset-y-0 left-4 flex items-center">
+        <button
+          onClick={prev}
+          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-opacity hover:bg-white hover:text-slate-900"
+        >
+          <span className="text-2xl">‹</span>
+        </button>
+      </div>
+      
+      <div className="absolute inset-y-0 right-4 flex items-center">
+        <button
+          onClick={next}
+          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-opacity hover:bg-white hover:text-slate-900"
+        >
+          <span className="text-2xl">›</span>
+        </button>
+      </div>
 
-      {/* RIGHT BUTTON */}
-      <button
-        onClick={next}
-        className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-md border border-white/10 w-12 h-12 md:w-16 md:h-16 rounded-full text-white shadow-2xl hover:bg-white hover:text-slate-900 transition-all duration-500 flex items-center justify-center text-2xl font-light opacity-0 group-hover/hero:opacity-100 translate-x-10 group-hover/hero:translate-x-0"
-      >
-        ›
-      </button>
-
-      {/* DOTS */}
-      <div className="absolute bottom-8 w-full flex justify-center gap-4">
+      {/* INDICATORS */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`h-1 transition-all duration-500 rounded-full ${
-              current === i ? "bg-white w-12" : "bg-white/30 w-6 hover:bg-white/50"
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              current === i ? "bg-[#B38B59] w-10" : "bg-white/40 w-5 hover:bg-white/60"
             }`}
           />
         ))}
