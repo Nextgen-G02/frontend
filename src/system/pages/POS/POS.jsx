@@ -12,10 +12,12 @@ import {
   Banknote, 
   CakeSlice,
   ChevronRight,
-  Package
+  Package,
+  X
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import Receipt from "./Receipt";
 
 export default function POSTerminal() {
   const navigate = useNavigate();
@@ -25,8 +27,10 @@ export default function POSTerminal() {
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedItem, setExpandedItem] = useState(null);
   const [customerName, setCustomerName] = useState("Walk-in Customer");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
+  const [completedOrder, setCompletedOrder] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -66,7 +70,9 @@ export default function POSTerminal() {
   const updateQuantity = (id, delta) => {
     setCart(prev => prev.map(item => {
       if (item._id === id) {
-        const newQty = Math.max(1, item.quantity + delta);
+        const isWeight = item.unit?.toLowerCase() === 'kg' || item.unit?.toLowerCase() === 'g';
+        const step = isWeight ? 0.1 : 1;
+        const newQty = Math.max(0, Math.round((item.quantity + (delta * step)) * 100) / 100);
         return { ...item, quantity: newQty };
       }
       return item;
@@ -92,6 +98,7 @@ export default function POSTerminal() {
           pName: item.pName,
           category: Array.isArray(item.pCategory) ? item.pCategory.join(', ') : (item.pCategory || 'General'),
           quantity: item.quantity,
+          unit: item.unit || 'pcs',
           price: item.price,
           customization: item.customization
         })),
@@ -103,10 +110,12 @@ export default function POSTerminal() {
       };
 
       const token = localStorage.getItem('token');
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, orderData, {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, orderData, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
       toast.success("Sale completed successfully!");
+      setCompletedOrder(response.data); // Use the real data from backend (with ID)
       setCart([]);
       setCustomerName("Walk-in Customer");
     } catch (error) {
@@ -134,24 +143,17 @@ export default function POSTerminal() {
 
   return (
     <div 
-      className="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-6 w-full max-w-full mx-auto px-6 bg-slate-50/20"
-      style={{ height: 'calc(100vh - 150px)', overflow: 'hidden' }}
+      className="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-6 w-full max-w-full mx-auto px-6 pt-6 bg-slate-50/20"
+      style={{ height: 'calc(100vh - 24px)', overflow: 'hidden' }}
     >
       {/* Left Side: Product Selection */}
       <div className="min-w-0 flex flex-col gap-6 overflow-hidden pr-2">
-        <header className="flex flex-col gap-4">
-          <div className="flex items-center gap-2.5">
-             <span className="w-10 h-1 bg-primary rounded-full"></span>
-             <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Terminal Interface / Direct Transmission</p>
-          </div>
-          
+        <header className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-1">
-              <h1 className="heading-premium text-3xl md:text-5xl leading-tight">POS <span className="italic font-medium text-slate-400">Terminal</span></h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2">
-                <span className="w-8 h-px bg-slate-200"></span> Live Catalog Interface
-              </p>
-            </div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+              <div className="w-2 h-8 bg-primary rounded-full"></div>
+              POS <span className="text-slate-400 italic">Terminal</span>
+            </h1>
             
             {/* Search Bar */}
             <div className="relative group w-full md:w-96">
@@ -164,22 +166,21 @@ export default function POSTerminal() {
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
-                  if (e.target.value) setSelectedCategory("All");
                 }}
-                className="w-full pl-14 pr-6 py-4 bg-white border border-slate-100 outline-none focus:ring-8 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-300 font-bold shadow-sm rounded-2xl text-sm"
+                className="w-full pl-14 pr-6 py-3.5 bg-white border border-slate-100 outline-none focus:ring-8 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-300 font-bold shadow-sm rounded-xl text-sm"
               />
             </div>
           </div>
 
-          <div className="flex gap-2.5 overflow-x-auto pb-4 no-scrollbar">
+          <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar border-b border-slate-50">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => toggleCategory(cat)}
-                className={`px-7 py-3 rounded-xl whitespace-nowrap font-black text-[10px] uppercase tracking-widest transition-all duration-500 border-2 ${
+                className={`px-6 py-2 rounded-lg whitespace-nowrap font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
                   selectedCategory === cat
-                  ? "bg-slate-900 text-gold border-slate-900 shadow-xl -translate-y-1 scale-105" 
-                  : "bg-white text-slate-400 hover:bg-slate-50 border-slate-50 hover:border-slate-100 shadow-sm"
+                  ? "bg-slate-900 text-gold shadow-lg" 
+                  : "bg-white text-slate-400 hover:text-slate-600"
                 }`}
               >
                 {cat}
@@ -208,34 +209,18 @@ export default function POSTerminal() {
               <button
                 key={product._id}
                 onClick={() => addToCart(product)}
-                className="glass-card p-4 rounded-[32px] text-left group border-none shadow-md hover:shadow-2xl transition-all duration-700 bg-white relative overflow-hidden flex flex-col gap-4 min-h-[260px]"
+                className="bg-white p-4 rounded-[24px] text-center group border border-slate-50 hover:border-primary/20 hover:shadow-2xl transition-all duration-500 flex flex-col gap-4"
               >
-                <div className="relative w-full rounded-[24px] overflow-hidden bg-slate-50 border border-slate-100 shrink-0" style={{ aspectNumbers: "1/1", aspectRatio: "1/1", minHeight: "150px" }}>
+                <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-slate-50 p-1 border border-slate-100">
                   <img 
                     src={product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"} 
                     alt={product.pName}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                    className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/40 transition-all duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-2xl scale-50 group-hover:scale-100 transition-transform duration-500">
-                      <Plus className="text-primary" size={24} />
-                    </div>
-                  </div>
-                  <div className="absolute top-2.5 right-2.5 px-2.5 py-1.5 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-white/20">
-                    <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none">Rs.{product.price}</span>
-                  </div>
                 </div>
-                <div className="px-1 space-y-1.5">
-                  <h3 className="font-black text-slate-900 text-[13px] uppercase tracking-tight line-clamp-2 group-hover:text-primary transition-colors h-9">{product.pName}</h3>
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    {Array.isArray(product.pCategory) ? (
-                      product.pCategory.map((cat, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md text-[8px] font-black uppercase tracking-widest">{cat}</span>
-                      ))
-                    ) : (
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-400 rounded-md text-[8px] font-black uppercase tracking-widest">{product.pCategory || "Asset"}</span>
-                    )}
-                  </div>
+                <div className="space-y-1">
+                  <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-tight line-clamp-2 h-8">{product.pName}</h3>
+                  <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-400 font-bold uppercase">/ {product.unit || 'pcs'}</span></p>
                 </div>
               </button>
             ))
@@ -279,35 +264,67 @@ export default function POSTerminal() {
                 </div>
               </div>
             ) : (
-              cart.map(item => (
-                <div key={item._id} className="flex gap-4 p-4 rounded-[24px] bg-slate-50 border border-slate-100 group transition-all hover:bg-white hover:shadow-lg hover:-translate-y-0.5">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-white flex-shrink-0 border border-slate-100 shadow-sm">
-                    <img src={item.images?.[0] || item.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
-                  </div>
-                  <div className="flex-1 flex flex-col justify-between py-0.5">
-                    <div className="flex justify-between items-start">
-                      <h4 className="font-black text-slate-900 text-[11px] uppercase tracking-wider leading-tight line-clamp-2 pr-4">{item.pName}</h4>
-                      <button 
-                        onClick={() => removeFromCart(item._id)}
-                        className="p-1 text-slate-300 hover:text-primary transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                    <div className="flex justify-between items-end">
-                      <div className="space-y-0.5">
-                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Yield Valuation</p>
-                         <p className="font-black text-primary text-base tracking-tighter leading-none">Rs.{item.price * item.quantity}</p>
+              <div className="space-y-1">
+                {cart.map((item, idx) => (
+                  <div key={item._id} className="bg-white border-b border-slate-50 py-3 group">
+                    <div className="flex items-center justify-between gap-4">
+                      {/* Name - Left Aligned */}
+                      <div className="flex-1 min-w-0 flex items-center gap-3">
+                        <span className="text-[10px] font-black text-slate-300 w-4 shrink-0">{idx + 1}</span>
+                        <input 
+                          type="text" 
+                          value={item.pName}
+                          onChange={(e) => {
+                            const newName = e.target.value;
+                            setCart(prev => prev.map(c => c._id === item._id ? { ...c, pName: newName } : c));
+                          }}
+                          className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] uppercase tracking-wider w-full focus:ring-0 p-0 h-4"
+                        />
                       </div>
-                      <div className="flex items-center gap-3 bg-white px-2.5 py-1 rounded-lg border border-slate-100 shadow-sm scale-90 origin-right transition-transform group-hover:scale-100">
-                        <button onClick={() => updateQuantity(item._id, -1)} className="p-0.5 text-slate-300 hover:text-primary transition-colors"><Minus size={12} /></button>
-                        <span className="text-[11px] font-black text-slate-900 w-4 text-center">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item._id, 1)} className="p-0.5 text-slate-300 hover:text-primary transition-colors"><Plus size={12} /></button>
+
+                      {/* Quantity Controls - Center */}
+                      <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-100 shrink-0">
+                        <button 
+                          onClick={() => updateQuantity(item._id, -1)}
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded transition-all"
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <div className="flex flex-col items-center">
+                          <input 
+                            type="number"
+                            step={item.unit?.toLowerCase() === 'kg' ? "0.01" : "1"}
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              setCart(prev => prev.map(c => c._id === item._id ? { ...c, quantity: val } : c));
+                            }}
+                            className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] w-12 text-center focus:ring-0 p-0"
+                          />
+                          <span className="text-[7px] font-black text-primary uppercase leading-none">{item.unit || 'pcs'}</span>
+                        </div>
+                        <button 
+                          onClick={() => updateQuantity(item._id, 1)}
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded transition-all"
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                      
+                      {/* Price - Right Aligned */}
+                      <div className="flex items-center gap-4 shrink-0">
+                        <span className="font-black text-slate-900 text-xs w-20 text-right">Rs.{item.price * item.quantity}</span>
+                        <button 
+                          onClick={() => removeFromCart(item._id)}
+                          className="p-1.5 text-slate-200 hover:text-primary transition-all"
+                        >
+                          <X size={14} />
+                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
 
@@ -333,28 +350,32 @@ export default function POSTerminal() {
               </div>
             </div>
 
-            <div className="flex justify-between items-end border-t border-slate-100/50 pt-3">
-               <div className="space-y-0.5">
-                  <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[8px]">Grand Total</p>
-                  <span className="text-2xl font-black text-slate-900 tracking-tighter">Rs.{calculateTotal().toLocaleString()}</span>
-               </div>
-               <div className="p-3 bg-slate-100 rounded-xl text-slate-300">
-                  <Banknote size={20} />
-               </div>
+            <div className="flex justify-between items-center py-2">
+                <p className="text-slate-900 font-black uppercase tracking-widest text-[11px]">Payable Amount</p>
+                <span className="text-2xl font-black text-primary tracking-tighter">Rs.{calculateTotal().toLocaleString()}</span>
             </div>
 
-            <button 
-              onClick={handleCheckout}
-              disabled={loading || cart.length === 0}
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl shadow-slate-200 hover:bg-primary transition-all duration-500 flex items-center justify-center gap-3 group relative overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-primary translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
-              <span className="relative z-10">{loading ? "Synchronizing..." : "Complete Checkout"}</span>
-              {!loading && <CheckCircle2 className="relative z-10 group-hover:scale-110 transition-transform" size={18} />}
-            </button>
+            <div className="flex gap-3">
+              <button 
+                onClick={handleCheckout}
+                disabled={loading || cart.length === 0}
+                className="flex-1 py-4 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-3"
+              >
+                {loading ? "Synchronizing..." : "Proceed to Checkout"}
+                {!loading && <CheckCircle2 size={18} />}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Receipt Modal */}
+      {completedOrder && (
+        <Receipt 
+          order={completedOrder} 
+          onClose={() => setCompletedOrder(null)} 
+        />
+      )}
     </div>
   );
 }

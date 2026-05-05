@@ -122,7 +122,7 @@ export default function AdminCategoryManagement() {
         {/* Add/Edit Category Form */}
         <div className="xl:col-span-4 glass-card p-8 md:p-10 rounded-[32px] md:rounded-[40px] bg-white relative overflow-hidden group border border-slate-100 shadow-xl">
           <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
-          
+
           <div className="flex items-center gap-4 mb-8 text-slate-900 relative z-10">
             <div className="p-3.5 bg-slate-900 text-gold rounded-xl shadow-xl shadow-slate-200">
               {editingId ? <Edit3 size={20} /> : <Plus size={20} />}
@@ -130,67 +130,67 @@ export default function AdminCategoryManagement() {
             <div>
               <h2 className="text-xl font-black tracking-tight uppercase">{editingId ? 'Update Category' : 'New Category'}</h2>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic leading-none">
-                {editingId ? 'Modify existing schema' : 'Schema Initialization'}
+                {/* {editingId ? 'Modify existing schema' : 'Schema Initialization'} */}
               </p>
             </div>
           </div>
-          
+
           <form onSubmit={editingId ? handleUpdate : handleCreate} className="space-y-6 relative z-10">
             <div className="space-y-2">
-              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                Class Designation (Name)
+              <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                Category Name
               </label>
               <input
                 type="text"
                 value={editingId ? editForm.name : newCategory.name}
-                onChange={(e) => editingId ? setEditForm({...editForm, name: e.target.value}) : setNewCategory({ ...newCategory, name: e.target.value })}
-                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm"
+                onChange={(e) => editingId ? setEditForm({ ...editForm, name: e.target.value }) : setNewCategory({ ...newCategory, name: e.target.value })}
+                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm"
                 placeholder="e.g. Handmade Chocolates"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                System Prefix (e.g. CAKE)
+              <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                Category Prefix (e.g. CAKE)
               </label>
               <input
                 type="text"
                 value={editingId ? editForm.prefix : newCategory.prefix}
                 onChange={(e) => {
-                    const val = e.target.value.toUpperCase();
-                    editingId ? setEditForm({...editForm, prefix: val}) : setNewCategory({ ...newCategory, prefix: val });
+                  const val = e.target.value.toUpperCase();
+                  editingId ? setEditForm({ ...editForm, prefix: val }) : setNewCategory({ ...newCategory, prefix: val });
                 }}
-                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm uppercase"
+                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm uppercase"
                 placeholder="e.g. CHOCO"
               />
             </div>
             <div className="space-y-2">
-              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                Contextual scope
+              <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                Description
               </label>
               <textarea
                 value={editingId ? editForm.description : newCategory.description}
-                onChange={(e) => editingId ? setEditForm({...editForm, description: e.target.value}) : setNewCategory({ ...newCategory, description: e.target.value })}
-                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 h-28 md:h-32 resize-none text-xs md:text-sm"
+                onChange={(e) => editingId ? setEditForm({ ...editForm, description: e.target.value }) : setNewCategory({ ...newCategory, description: e.target.value })}
+                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 h-28 md:h-32 resize-none text-xs md:text-sm"
                 placeholder="Describe the scope of this category..."
               />
             </div>
-            
+
             <div className="flex gap-3">
-                {editingId && (
-                    <button
-                        type="button"
-                        onClick={() => setEditingId(null)}
-                        className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
-                    >
-                        Cancel
-                    </button>
-                )}
+              {editingId && (
                 <button
+                  type="button"
+                  onClick={() => setEditingId(null)}
+                  className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+                >
+                  Cancel
+                </button>
+              )}
+              <button
                 type="submit"
                 className={`flex-[2] py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl hover:bg-primary transition-all duration-500`}
-                >
-                {editingId ? 'Update Registry' : 'Add'}
-                </button>
+              >
+                {editingId ? 'Update Category' : 'Add'}
+              </button>
             </div>
           </form>
         </div>
@@ -216,8 +216,8 @@ export default function AdminCategoryManagement() {
                 {loading ? (
                   <tr>
                     <td colSpan="4" className="px-12 py-32 text-center">
-                       <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-6" />
-                       <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px]">Accessing Registry Protocols...</p>
+                      <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-6" />
+                      <p className="text-slate-400 font-black uppercase tracking-[0.4em] text-[10px]">Accessing Registry Protocols...</p>
                     </td>
                   </tr>
                 ) : categories.length === 0 ? (
@@ -242,22 +242,22 @@ export default function AdminCategoryManagement() {
                         <span className="px-3 py-1 bg-slate-900 text-gold text-[10px] font-black rounded-lg uppercase tracking-widest">{cat.prefix}</span>
                       </td>
                       <td className="px-8 md:px-10 py-5 md:py-6">
-                        <p className="text-slate-400 font-medium text-xs italic">"{cat.description || "No scope defined."}"</p>
+                        <p className="text-slate-900 font-medium text-xs">{cat.description || "No scope defined."}</p>
                       </td>
                       <td className="px-8 md:px-10 py-5 md:py-6 text-right">
-                        <div className="flex justify-end gap-2">
-                            <button
+                        <div className="flex justify-end gap-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300">
+                          <button
                             onClick={() => startEdit(cat)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-slate-900 hover:bg-slate-100 transition-all opacity-0 group-hover:opacity-100 duration-300 border border-slate-100 shadow-sm"
-                            >
+                            className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-slate-900 hover:bg-slate-100 transition-all duration-300 border border-slate-100 shadow-sm"
+                          >
                             <Edit3 size={18} />
-                            </button>
-                            <button
+                          </button>
+                          <button
                             onClick={() => handleDeleteClick(cat._id)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-primary hover:bg-primary/5 transition-all opacity-0 group-hover:opacity-100 duration-300 border border-slate-100 shadow-sm"
-                            >
+                            className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-primary hover:bg-primary/5 transition-all duration-300 border border-slate-100 shadow-sm"
+                          >
                             <Trash2 size={18} />
-                            </button>
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -273,29 +273,29 @@ export default function AdminCategoryManagement() {
       {showDeleteModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-0">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
             onClick={() => setShowDeleteModal(false)}
           ></div>
-          
+
           {/* Modal Card */}
           <div className="relative w-full max-w-[440px] bg-white rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 fade-in duration-300">
             {/* Top Bar Accent */}
             <div className="h-2 w-full bg-primary"></div>
-            
+
             <div className="p-8 md:p-12 text-center">
               <div className="w-20 h-20 bg-rose-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-inner">
                 <Trash2 size={36} className="text-primary animate-pulse" />
               </div>
-              
+
               <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase leading-tight mb-4">
                 Confirm <span className="text-primary italic">Deletion</span>
               </h2>
-              
+
               <p className="text-sm font-medium text-slate-400 mb-10 leading-relaxed px-4">
                 Permanently erase this definition? This action is irreversible and may impact linked catalog assets.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => setShowDeleteModal(false)}
@@ -311,7 +311,7 @@ export default function AdminCategoryManagement() {
                 </button>
               </div>
             </div>
-            
+
             {/* Background Decor */}
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-slate-50 rounded-full opacity-50 -z-10"></div>
           </div>
