@@ -108,55 +108,57 @@ export default function AdminLayout({ children }) {
 
       {/* Main Content Area */}
       <main className={`flex-1 flex flex-col transition-all duration-500 ${collapsed ? 'md:ml-20' : 'md:ml-72'}`}>
-        {/* Top Header */}
-        <header className="h-16 md:h-20 bg-white sticky top-0 z-40 px-6 md:px-10 flex items-center justify-between shadow-sm">
-          <div className="flex items-center gap-6">
-            <button 
-              className="md:hidden p-2 rounded-xl bg-slate-100 text-slate-600"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              <Menu size={22} />
-            </button>
-            
-            <div className="flex flex-col">
-              <h1 className="text-base md:text-xl font-bold text-slate-900 heading-premium leading-tight">
-                Shop <span className="italic font-medium text-primary">Manager</span>
-              </h1>
-              <p className="hidden xs:block text-[9px] md:text-[10px] text-slate-400 font-medium">Store Dashboard</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl border border-slate-100">
-              <Search size={16} className="text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-300 w-32 md:w-40 font-medium"
-              />
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <button className="relative p-1.5 text-slate-400 hover:text-slate-900 transition-colors">
-                <Bell size={18} md:size={20} />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
+        {/* Top Header - Hidden on POS and Orders */}
+        {!(location.pathname === '/pos' || location.pathname.startsWith('/orders')) && (
+          <header className="h-16 md:h-20 bg-white sticky top-0 z-40 px-6 md:px-10 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-6">
+              <button 
+                className="md:hidden p-2 rounded-xl bg-slate-100 text-slate-600"
+                onClick={() => setMobileOpen(!mobileOpen)}
+              >
+                <Menu size={22} />
               </button>
               
-              <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
-                <div className="text-right hidden lg:block">
-                  <p className="text-[11px] md:text-xs font-bold text-slate-900 leading-tight">{user?.firstName}</p>
-                  <p className="text-[8px] md:text-[9px] font-black text-primary uppercase tracking-widest mt-0.5">{user?.role === 'admin' ? 'Owner / Admin' : 'Shop Staff'}</p>
-                </div>
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shadow-lg text-xs">
-                  {user?.firstName?.[0] || 'A'}
+              <div className="flex flex-col">
+                <h1 className="text-base md:text-xl font-bold text-slate-900 heading-premium leading-tight">
+                  Shop <span className="italic font-medium text-primary">Manager</span>
+                </h1>
+                <p className="hidden xs:block text-[9px] md:text-[10px] text-slate-400 font-medium">Store Dashboard</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl border border-slate-100">
+                <Search size={16} className="text-slate-400" />
+                <input 
+                  type="text" 
+                  placeholder="Search..." 
+                  className="bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-300 w-32 md:w-40 font-medium"
+                />
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <button className="relative p-1.5 text-slate-400 hover:text-slate-900 transition-colors">
+                  <Bell size={18} md:size={20} />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
+                </button>
+                
+                <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
+                  <div className="text-right hidden lg:block">
+                    <p className="text-[11px] md:text-xs font-bold text-slate-900 leading-tight">{user?.firstName}</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-primary uppercase tracking-widest mt-0.5">{user?.role === 'admin' ? 'Owner / Admin' : 'Shop Staff'}</p>
+                  </div>
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold shadow-lg text-xs">
+                    {user?.firstName?.[0] || 'A'}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
+        )}
 
         {/* Page Content */}
-        <div className="px-6 md:px-10 py-6 md:py-8 lg:px-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className={`${(location.pathname === '/pos' || location.pathname.startsWith('/orders')) ? 'p-0' : 'px-6 md:px-10 py-6 md:py-8 lg:px-10'} animate-in fade-in slide-in-from-bottom-2 duration-500`}>
           {children}
         </div>
       </main>

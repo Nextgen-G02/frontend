@@ -69,18 +69,17 @@ export default function AddProduct() {
     const { name, value } = e.target;
     
     setForm(prev => {
-      const updatedForm = { ...prev, [name]: value };
+      let updatedForm = { ...prev, [name]: value };
       
-    // If category changes, update productId with the prefix
-    if (name === "pCategory") {
-      const selectedCat = categories.find(cat => cat.name === value);
-      if (selectedCat && (!form.productId || form.productId.endsWith('-'))) {
-        setForm(prev => ({ ...prev, productId: `${selectedCat.prefix}-`, pCategory: value }));
-        return;
+      // If category changes, update productId with the prefix
+      if (name === "pCategory") {
+        const selectedCat = categories.find(cat => cat.name === value);
+        if (selectedCat && (!prev.productId || prev.productId.endsWith('-') || !prev.productId.includes('-'))) {
+          updatedForm.productId = `${selectedCat.prefix}-`;
+        }
       }
-      setForm(prev => ({ ...prev, pCategory: value }));
-      return;
-    }
+      
+      return updatedForm;
     });
 
     // Clear error for this field
@@ -175,7 +174,7 @@ export default function AddProduct() {
                     <p className="text-slate-300 text-xs italic">Loading categories...</p>
                   ) : (
                     categories.map((cat) => {
-                      const isSelected = form.pCategory === cat.name;
+                      const isSelected = form?.pCategory === cat.name;
                       return (
                         <button
                           key={cat._id}

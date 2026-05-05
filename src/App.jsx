@@ -17,6 +17,7 @@ import AdminCategoryManagement from './system/pages/Categories/Categories'
 import OrderList from './system/pages/Orders/OrderList'
 import OrderForm from './system/pages/Orders/OrderForm'
 import OrderDetails from './system/pages/Orders/OrderDetails'
+import ProductionSummary from './system/pages/Orders/ProductionSummary'
 import InventoryDashboard from './system/pages/Inventory/Inventory'
 import AdminCustomerManagement from './system/pages/Customers/Customers'
 import AdminSupplierManagement from './system/pages/Suppliers/AdminSupplierManagement'
@@ -50,6 +51,7 @@ function App() {
         <Route path='/orders' element={<ProtectedRoute><AdminLayout><OrderList /></AdminLayout></ProtectedRoute>} />
         <Route path='/orders/new' element={<ProtectedRoute><AdminLayout><OrderForm /></AdminLayout></ProtectedRoute>} />
         <Route path='/orders/edit/:id' element={<ProtectedRoute><AdminLayout><OrderForm /></AdminLayout></ProtectedRoute>} />
+        <Route path='/orders/summary' element={<ProtectedRoute><AdminLayout><ProductionSummary /></AdminLayout></ProtectedRoute>} />
         <Route path='/orders/:id' element={<ProtectedRoute><AdminLayout><OrderDetails /></AdminLayout></ProtectedRoute>} />
 
         {/* Inventory Management */}
