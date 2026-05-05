@@ -9,11 +9,13 @@ import {
   AlertCircle,
   Loader2,
   X,
-  Save
+  Save,
+  Image,
+  Upload
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
-// const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/products`;
+const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/products`;
 
 
 export default function AddProduct() {
@@ -68,8 +70,8 @@ export default function AddProduct() {
     const newErrors = {};
     if (!form.productId) newErrors.productId = "Product ID is required";
     if (!form.pName) newErrors.pName = "Product name is required";
-    if (!form.price || form.price <= 0) newErrors.price = "Valid price is required";
-    if (!form.costPrice || form.costPrice <= 0) newErrors.costPrice = "Valid cost price is required";
+    if (form.price === "") newErrors.price = "Price is required";
+    if (form.costPrice === "") newErrors.costPrice = "Cost price is required";
     if (!form.stock || form.stock < 0) newErrors.stock = "Stock quantity is required";
     if (!form.pCategory) newErrors.pCategory = "Category is required";
     if (!form.unit) newErrors.unit = "Unit is required";
@@ -121,6 +123,21 @@ export default function AddProduct() {
         delete updated[name];
         return updated;
       });
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be less than 5MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm(prev => ({ ...prev, pImg: reader.result }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -293,98 +310,82 @@ export default function AddProduct() {
             </div>
           </div>
 
-          {/* Section: Ingredient & Recipe Configuration */}
-          {/* <div className="p-5 md:p-8 bg-slate-900 rounded-[24px] md:rounded-[36px] text-white">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3.5">
-                <div className="p-2.5 bg-white/10 text-gold rounded-lg border border-white/10"><Settings className="w-4.5 h-4.5" /></div>
-                <h2 className="text-base md:text-lg font-black text-white tracking-tight uppercase">Supply Configuration</h2>
+          {/* Section: Product Image */}
+          <div className="p-5 md:p-8 bg-slate-50 border border-slate-100 rounded-[24px] md:rounded-[36px]">
+            <div className="flex items-center gap-3.5 mb-6">
+              <div className="p-2.5 bg-slate-900 text-gold rounded-lg shadow-lg">
+                <Image className="w-4.5 h-4.5" />
               </div>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-gold transition-colors">Mark as Raw Ingredient</span>
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={form.isIngredient}
-                    onChange={(e) => setForm({ ...form, isIngredient: e.target.checked })}
-                  />
-                  <div className="w-11 h-6 bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold"></div>
-                </div>
-              </label>
+              <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Product Media</h2>
             </div>
 
-            {!form.isIngredient && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Recipe / BOM (Bill of Materials)</p>
-                  <button
-                    type="button"
-                    onClick={() => setForm(prev => ({
-                      ...prev,
-                      recipe: [...(prev.recipe || []), { ingredientId: "", quantity: 1 }]
-                    }))}
-                    className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                  >
-                    + Add Ingredient
-                  </button>
-                </div>
+            <div className="space-y-6">
+              <div
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary'); }}
+                onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-primary'); }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('border-primary');
+                  const file = e.dataTransfer.files[0];
+                  if (file) handleFileChange({ target: { files: [file] } });
+                }}
+                onClick={() => document.getElementById('fileInput').click()}
+                className="w-full aspect-video rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center bg-white hover:bg-slate-50 transition-all cursor-pointer group relative overflow-hidden"
+              >
+                {form.pImg ? (
+                  <div className="absolute inset-0 group">
+                    <img
+                      src={form.pImg}
+                      alt="Preview"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="p-3 bg-white/20 rounded-full text-white"><Upload className="w-6 h-6" /></div>
+                        <p className="text-[10px] font-black text-white uppercase tracking-widest">Drop new image to replace</p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                      <Upload className="text-slate-400 w-8 h-8" />
+                    </div>
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Drag & Drop Image Here</p>
+                    <p className="text-[9px] text-slate-300 mt-2 font-medium">Or click to browse from device</p>
+                  </>
+                )}
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </div>
 
-                <div className="space-y-4">
-                  {(form.recipe || []).map((item, index) => (
-                    <div key={index} className="flex items-end gap-4 animate-in slide-in-from-left duration-300">
-                      <div className="flex-1 space-y-2">
-                        <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Select Ingredient</label>
-                        <select
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-gold transition-all font-bold text-white text-sm appearance-none"
-                          value={item.ingredientId}
-                          onChange={(e) => {
-                            const newRecipe = [...form.recipe];
-                            newRecipe[index].ingredientId = e.target.value;
-                            setForm({ ...form, recipe: newRecipe });
-                          }}
-                        >
-                          <option value="" className="bg-slate-900">Choose...</option>
-                          {allProducts.filter(p => p.isIngredient).map(p => (
-                            <option key={p._id} value={p._id} className="bg-slate-900">{p.pName} ({p.unit})</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="w-32 space-y-2">
-                        <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Quantity</label>
-                        <input
-                          type="number"
-                          step="0.01"
-                          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-gold transition-all font-bold text-white text-sm"
-                          value={item.quantity}
-                          onChange={(e) => {
-                            const newRecipe = [...form.recipe];
-                            newRecipe[index].quantity = Number(e.target.value);
-                            setForm({ ...form, recipe: newRecipe });
-                          }}
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newRecipe = form.recipe.filter((_, i) => i !== index);
-                          setForm({ ...form, recipe: newRecipe });
-                        }}
-                        className="p-3 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
-                  {(!form.recipe || form.recipe.length === 0) && (
-                    <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[32px]">
-                      <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">No ingredients assigned to this product</p>
-                    </div>
-                  )}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-100"></div>
+                </div>
+                <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-black">
+                  <span className="bg-slate-50 px-4 text-slate-300">Or use URL</span>
                 </div>
               </div>
-            )}
-          </div> */}
+
+              <div className="space-y-1.5">
+                <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Image URL</label>
+                <input
+                  type="text"
+                  name="pImg"
+                  value={form.pImg && !form.pImg.startsWith('data:') ? form.pImg : ""}
+                  onChange={handleChange}
+                  placeholder="Paste image link here..."
+                  className={inputClass("pImg")}
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Messages */}
           {errors.submit && (
