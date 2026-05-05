@@ -67,7 +67,13 @@ export default function ProductDashboardAdmin() {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`${API_BASE}/delete/${id}`, { method: "DELETE" });
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE}/delete/${id}`, { 
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       setProducts((prev) => prev.filter((p) => p._id !== id));
       setDeleteId(null);
       toast.success("Product removed");
@@ -91,15 +97,24 @@ export default function ProductDashboardAdmin() {
         },
         body: JSON.stringify(editForm),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Update failed");
+      }
+
       const updated = await res.json();
+      
       setProducts((prev) =>
         prev.map((p) => (p._id === updated._id ? updated : p))
       );
+      
       setEditProduct(null);
-      toast.success("Product updated");
-      fetchProducts(); // Refresh to ensure all data is synced
-    } catch {
-      toast.error("Update failed");
+      toast.success("Product updated successfully");
+      fetchProducts(); 
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error(error.message || "Failed to update product");
     }
   };
 
@@ -295,10 +310,7 @@ export default function ProductDashboardAdmin() {
                           </button>
                           <button
                             onClick={() => setDeleteId(p._id)}
-                            className={`p-3 md:p-4 rounded-xl md:rounded-2xl transition-all border ${deleteId === p._id
-                                ? 'bg-primary text-white border-primary shadow-xl'
-                                : 'bg-white border-rose-100 text-rose-500 hover:text-rose-600 hover:shadow-xl'
-                              }`}
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl transition-all border bg-white border-rose-100 text-rose-500 hover:text-rose-600 hover:shadow-xl"
                           >
                             <Trash2 size={18} md:size={20} />
                           </button>
@@ -341,7 +353,7 @@ export default function ProductDashboardAdmin() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Selling Price (Rs.)</label>
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Selling Price Rs.</label>
                   <input
                     type="number"
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
@@ -462,6 +474,49 @@ export default function ProductDashboardAdmin() {
                 <Save size={16} />
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-0">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setDeleteId(null)}
+          ></div>
+
+          <div className="relative w-full max-w-[440px] bg-white rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+            <div className="h-2 w-full bg-primary"></div>
+
+            <div className="p-8 md:p-12 text-center">
+              <div className="w-20 h-20 bg-rose-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <Trash2 size={36} className="text-primary animate-pulse" />
+              </div>
+
+              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase leading-tight mb-4">
+                Confirm <span className="text-primary italic">Deletion</span>
+              </h2>
+
+              <p className="text-sm font-medium text-slate-400 mb-10 leading-relaxed px-4">
+                Permanently erase this product from the inventory? This action is irreversible.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => setDeleteId(null)}
+                  className="flex-1 py-4.5 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(deleteId)}
+                  className="flex-1 py-4.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 hover:bg-primary transition-all duration-500"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-slate-50 rounded-full opacity-50 -z-10"></div>
           </div>
         </div>
       )}
