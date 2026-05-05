@@ -16,7 +16,9 @@ import {
   ChevronRight,
   Search,
   Bell,
-  Menu
+  Menu,
+  Receipt,
+  Vault
 } from "lucide-react";
 import { useAuth } from "../../shared/context/AuthContext";
 
@@ -56,6 +58,8 @@ export default function AdminLayout({ children }) {
       { label: "Suppliers", path: "/admin/suppliers", icon: Truck },
       { label: "Customers", path: "/admin/customers", icon: Users },
       { label: "Financials", path: "/admin/financials", icon: BarChart3 },
+      { label: "Expenses", path: "/admin/expenses", icon: Receipt },
+      { label: "Cash Drawer", path: "/admin/cash-drawer", icon: Vault },
       { label: "Staff", path: "/staff", icon: UserCog },
     ] : []),
   ];

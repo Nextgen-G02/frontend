@@ -62,7 +62,15 @@ export default function AdminSupplierAccounts() {
         })
       ]);
       setSupplier(suppRes.data.data);
-      setSupplyLogs(logsRes.data.data);
+      const sortedLogs = logsRes.data.data.sort((a, b) => {
+        // Priority 1: Status (Pending/Unsettled first)
+        if (a.balance > 0 && b.balance === 0) return -1;
+        if (a.balance === 0 && b.balance > 0) return 1;
+        
+        // Priority 2: Date (Newest first)
+        return new Date(b.supplyDate) - new Date(a.supplyDate);
+      });
+      setSupplyLogs(sortedLogs);
     } catch (error) {
       toast.error("Unable to load supplier account details.");
       navigate("/admin/suppliers");
@@ -103,24 +111,24 @@ export default function AdminSupplierAccounts() {
 
   const handleEditOpen = (log) => {
     setEditingLog(log);
-    setEditPaidAmount(log.paidAmount);
+    setEditPaidAmount(log.balance || ""); // Pre-fill with remaining balance
     setIsEditModalOpen(true);
   };
 
-  const handleUpdatePayment = async (e) => {
+  const handleAddPayment = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/purchases/${editingLog._id}`, {
-        paidAmount: editPaidAmount
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/purchases/${editingLog._id}/payments`, {
+        amount: editPaidAmount
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      toast.success("Payment details updated successfully.");
+      toast.success("Installment payment recorded successfully.");
       setIsEditModalOpen(false);
       fetchData();
     } catch (error) {
-      toast.error("Failed to update payment.");
+      toast.error("Failed to add payment installment.");
     }
   };
 
@@ -140,6 +148,109 @@ export default function AdminSupplierAccounts() {
     }
   };
 
+  const renderLogRow = (log) => {
+    const isCompleted = log.balance === 0;
+    return (
+      <tr key={log._id} className="group hover:bg-white transition-all duration-300 border-b border-slate-50/50">
+        <td className="px-8 md:px-10 py-6">
+          <div className="flex flex-col">
+            <p className="font-black text-slate-900 text-sm md:text-base leading-none mb-1">
+              {new Date(log.supplyDate).toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' })}
+            </p>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">ID: {log._id.slice(-6).toUpperCase()}</p>
+          </div>
+        </td>
+        <td className="px-8 md:px-10 py-6">
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col">
+              <p className="font-black text-slate-900 uppercase tracking-tight text-base leading-tight flex items-center gap-2">
+                {log.productName}
+                {isCompleted && <CheckCircle2 size={14} className="text-emerald-500" />}
+              </p>
+              <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
+                {log.quantity} units @ Rs. {log.unitPrice}
+              </p>
+            </div>
+          </div>
+        </td>
+        <td className="px-8 md:px-10 py-6">
+          <div className="space-y-3 min-w-[200px]">
+            <div className="space-y-1.5 pb-3 border-b border-dashed border-slate-100">
+              <div className="flex justify-between w-48">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total:</span>
+                <span className="text-xs font-black text-slate-900">Rs. {log.cost.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between w-48">
+                <span className="text-xs font-bold text-emerald-400 uppercase">{isCompleted ? 'Total Paid:' : 'Total Paid:'}</span>
+                <span className="text-sm font-black text-emerald-600">Rs. {log.paidAmount.toLocaleString()}</span>
+              </div>
+              {log.paymentHistory?.length > 0 && (log.paymentHistory.length > 1 || log.balance > 0) && (
+                <div className="pt-3 mt-3 border-t border-slate-100 space-y-2">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Detailed Payment Ledger</p>
+                  {log.paymentHistory.map((pmt, pidx) => (
+                    <div key={pidx} className="flex justify-between items-center bg-slate-50/50 p-2 rounded-lg border border-slate-50">
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-black text-slate-900 uppercase">
+                          {pidx === 0 ? "Initial Payment" : `Installment #${pidx}`}
+                        </span>
+                        <span className="text-[8px] font-medium text-slate-400">
+                          {new Date(pmt.date).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })} • {new Date(pmt.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <span className="text-xs font-black text-emerald-600">Rs. {pmt.amount.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </td>
+        <td className="px-8 md:px-10 py-6">
+          {isCompleted ? (
+            <div className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-500 text-white rounded-xl shadow-lg shadow-emerald-100/50">
+              <CheckCircle2 size={14} />
+              <span className="text-xs font-black uppercase tracking-[0.2em]">Settled</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100">
+              <Clock size={14} />
+              <span className="text-xs font-black uppercase tracking-widest">Pending: Rs. {log.balance.toLocaleString()}</span>
+            </div>
+          )}
+        </td>
+        <td className="px-8 md:px-10 py-6 text-right">
+          <div className="flex items-center justify-end gap-2">
+            {!isCompleted && (
+              <button 
+                onClick={() => {
+                  handleEditOpen(log);
+                  setEditPaidAmount(log.balance);
+                }}
+                className="px-4 py-2 rounded-xl bg-emerald-500 text-white hover:bg-emerald-600 transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-100"
+              >
+                Pay Balance
+              </button>
+            )}
+            <button 
+              onClick={() => handleEditOpen(log)}
+              className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
+              title="Edit Payment"
+            >
+              <Edit2 size={16} />
+            </button>
+            <button 
+              onClick={() => confirmDeleteLog(log._id)}
+              className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
+              title="Delete Record"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -154,7 +265,7 @@ export default function AdminSupplierAccounts() {
   const totalBalance = supplyLogs.reduce((acc, log) => acc + log.balance, 0);
 
   return (
-    <div className="space-y-10 max-w-[1500px] mx-auto pb-20">
+    <div className="space-y-10 max-w-[1500px] mx-auto pb-20 px-4 md:px-8 lg:px-10">
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
         <div>
@@ -180,39 +291,43 @@ export default function AdminSupplierAccounts() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Supplies</p>
-            <p className="text-lg font-black text-slate-900">Rs. {totalCost.toLocaleString()}</p>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Supplies</p>
+            <p className="text-xl font-black text-slate-900">Rs. {totalCost.toLocaleString()}</p>
           </div>
           <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl shadow-sm">
-            <p className="text-[8px] font-black text-emerald-400 uppercase tracking-widest mb-1">Total Paid</p>
-            <p className="text-lg font-black text-emerald-600">Rs. {totalPaid.toLocaleString()}</p>
+            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Total Paid</p>
+            <p className="text-xl font-black text-emerald-600">Rs. {totalPaid.toLocaleString()}</p>
           </div>
           <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl shadow-sm">
-            <p className="text-[8px] font-black text-rose-400 uppercase tracking-widest mb-1">Pending Balance</p>
-            <p className="text-lg font-black text-rose-600">Rs. {totalBalance.toLocaleString()}</p>
+            <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Pending Balance</p>
+            <p className="text-xl font-black text-rose-600">Rs. {totalBalance.toLocaleString()}</p>
+          </div>
+          <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl shadow-sm">
+            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Available Credit</p>
+            <p className="text-xl font-black text-indigo-600">Rs. {supplier?.creditBalance?.toLocaleString() || "0"}</p>
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+      <div className="flex flex-col gap-10">
         {/* Add Record Sidebar */}
-        <div className="xl:col-span-1">
-          <div className="glass-card p-8 rounded-[32px] bg-white border border-slate-100 shadow-xl sticky top-10">
+        <div className="w-full">
+          <div className="glass-card p-5 md:p-8 rounded-[24px] md:rounded-[32px] bg-white border border-slate-100 shadow-xl lg:sticky lg:top-10">
             <div className="flex items-center gap-3 mb-8">
               <div className="p-3 bg-slate-900 text-white rounded-xl shadow-lg">
                 <Plus size={20} />
               </div>
               <div>
-                <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Record Supply</h2>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Enter new delivery details</p>
+                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Add Product</h2>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">Enter product details</p>
               </div>
             </div>
 
             <form onSubmit={handleSupplySubmit} className="space-y-5">
               <div className="space-y-1.5">
-                <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
                 <input 
                   type="text" required
                   value={newSupply.productName}
@@ -223,9 +338,9 @@ export default function AdminSupplierAccounts() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
                   <input 
-                    type="number" required
+                    type="number" required min="0"
                     value={newSupply.quantity}
                     onChange={(e) => setNewSupply({...newSupply, quantity: e.target.value})}
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
@@ -233,9 +348,9 @@ export default function AdminSupplierAccounts() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Unit Price</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Unit Price</label>
                   <input 
-                    type="number" required
+                    type="number" required min="0" step="0.01"
                     value={newSupply.unitPrice}
                     onChange={(e) => setNewSupply({...newSupply, unitPrice: e.target.value})}
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
@@ -244,7 +359,7 @@ export default function AdminSupplierAccounts() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Total Cost (Calculated)</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Total Cost (Calculated)</label>
                 <input 
                   type="number" readOnly
                   value={newSupply.cost}
@@ -252,14 +367,24 @@ export default function AdminSupplierAccounts() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Paid Amount (Rs.)</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">
+                  Paid Amount (Rs.) 
+                  {supplier?.creditBalance > 0 && (
+                    <span className="text-indigo-500 ml-2"> (Credit Rs. {supplier.creditBalance} will be applied)</span>
+                  )}
+                </label>
                 <input 
-                  type="number" required
+                  type="number" min="0" step="0.01"
                   value={newSupply.paidAmount}
                   onChange={(e) => setNewSupply({...newSupply, paidAmount: e.target.value})}
                   className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
                   placeholder="0.00"
                 />
+                {newSupply.cost > 0 && (
+                  <p className="text-[9px] font-bold text-slate-400 mt-1 italic">
+                    Net Payable: Rs. {Math.max(0, parseFloat(newSupply.cost) - (supplier?.creditBalance || 0)).toLocaleString()}
+                  </p>
+                )}
               </div>
               <button type="submit" className="w-full py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary transition-all duration-500 mt-2">
                 Save Entry
@@ -269,96 +394,77 @@ export default function AdminSupplierAccounts() {
         </div>
 
         {/* History Table Area */}
-        <div className="xl:col-span-2">
-          <div className="glass-card rounded-[32px] overflow-hidden bg-white border border-slate-100 shadow-xl">
-            <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Calendar size={18} className="text-primary" />
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Supply History</h3>
+        <div className="w-full space-y-12">
+          {/* Pending Section */}
+          {supplyLogs.filter(l => l.balance > 0).length > 0 && (
+            <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center gap-3 px-2">
+                <div className="w-1.5 h-6 bg-amber-500 rounded-full shadow-lg shadow-amber-200"></div>
+                <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.3em]">Pending Settlements</h2>
+                <span className="px-2.5 py-0.5 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black border border-amber-100">
+                  {supplyLogs.filter(l => l.balance > 0).length} Records
+                </span>
               </div>
+              
+              <div className="glass-card rounded-[32px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border border-slate-100 shadow-xl">
+                <div className="overflow-x-auto no-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50/50 border-b border-slate-100/50">
+                        <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Date & ID</th>
+                        <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Details</th>
+                        <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Financials & Ledger</th>
+                        <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
+                        <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {supplyLogs.filter(l => l.balance > 0).map((log) => renderLogRow(log))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Settled Section */}
+          <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center gap-3 px-2">
+              <div className="w-1.5 h-6 bg-emerald-500 rounded-full shadow-lg shadow-emerald-200"></div>
+              <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.3em]">Settled History</h2>
+              <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black border border-emerald-100">
+                {supplyLogs.filter(l => l.balance === 0).length} Completed
+              </span>
             </div>
-            <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50/50">
-                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Product</th>
-                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Financials</th>
-                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {supplyLogs.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="px-8 py-20 text-center">
-                        <Truck className="mx-auto mb-4 opacity-10" size={60} />
-                        <p className="text-xs font-black text-slate-300 uppercase tracking-widest italic">No ledger entries found.</p>
-                      </td>
+
+            <div className="glass-card rounded-[32px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border border-slate-100 shadow-xl opacity-90 hover:opacity-100 transition-all duration-500">
+              <div className="overflow-x-auto no-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50/50 border-b border-slate-100/50">
+                      <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Date & ID</th>
+                      <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Details</th>
+                      <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Financials & Ledger</th>
+                      <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
+                      <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Action</th>
                     </tr>
-                  ) : (
-                    supplyLogs.map((log) => (
-                      <tr key={log._id} className="group hover:bg-slate-50/30 transition-colors">
-                        <td className="px-8 py-6">
-                          <p className="text-[11px] font-black text-slate-900 leading-none">
-                            {new Date(log.supplyDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
-                          </p>
-                          <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">ID: {log._id.slice(-6)}</p>
-                        </td>
-                        <td className="px-8 py-6">
-                          <p className="text-[12px] font-black text-slate-900 uppercase tracking-tight">{log.productName}</p>
-                          <p className="text-[9px] font-bold text-slate-400 mt-0.5">{log.quantity} units @ Rs. {log.unitPrice?.toLocaleString()}</p>
-                        </td>
-                        <td className="px-8 py-6">
-                          <div className="space-y-1">
-                            <div className="flex justify-between w-32">
-                              <span className="text-[9px] font-bold text-slate-400 uppercase">Total:</span>
-                              <span className="text-[10px] font-black text-slate-900">Rs. {log.cost.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between w-32">
-                              <span className="text-[9px] font-bold text-emerald-400 uppercase">Paid:</span>
-                              <span className="text-[10px] font-black text-emerald-600">Rs. {log.paidAmount.toLocaleString()}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-8 py-6">
-                          {log.balance <= 0 ? (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100">
-                              <CheckCircle2 size={12} />
-                              <span className="text-[9px] font-black uppercase tracking-widest">Fully Settled</span>
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100">
-                              <Clock size={12} />
-                              <span className="text-[9px] font-black uppercase tracking-widest">Pending: Rs. {log.balance.toLocaleString()}</span>
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-8 py-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button 
-                              onClick={() => handleEditOpen(log)}
-                              className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
-                              title="Update Payment"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button 
-                              onClick={() => confirmDeleteLog(log._id)}
-                              className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
-                              title="Delete Record"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {supplyLogs.filter(l => l.balance === 0).length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="px-12 py-24 text-center text-slate-300">
+                          <Truck className="mx-auto mb-4 opacity-10" size={60} />
+                          <p className="font-black uppercase tracking-[0.4em] text-[10px]">No settled records in the archive.</p>
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      supplyLogs.filter(l => l.balance === 0).map((log) => renderLogRow(log))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          </section>
         </div>
       </div>
 
@@ -387,18 +493,46 @@ export default function AdminSupplierAccounts() {
                   <span>Total Cost:</span>
                   <span className="text-slate-900">Rs. {editingLog?.cost.toLocaleString()}</span>
                 </div>
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                  <span>Currently Paid:</span>
+                  <span className="text-emerald-600">Rs. {editingLog?.paidAmount.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-[10px] font-bold text-rose-500 uppercase tracking-widest pt-2 border-t border-slate-100">
+                  <span>Remaining Balance:</span>
+                  <span>Rs. {editingLog?.balance.toLocaleString()}</span>
+                </div>
+                {editingLog?.appliedCredit > 0 && (
+                  <div className="flex justify-between text-[10px] font-bold text-indigo-500 uppercase tracking-widest">
+                    <span>Credit Used:</span>
+                    <span>Rs. {editingLog?.appliedCredit.toLocaleString()}</span>
+                  </div>
+                )}
               </div>
 
-              <form onSubmit={handleUpdatePayment} className="space-y-6">
+              <form onSubmit={handleAddPayment} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">New Paid Amount (Rs.)</label>
+
                   <input 
                     type="number" required
                     value={editPaidAmount}
                     onChange={(e) => setEditPaidAmount(e.target.value)}
                     className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-slate-900"
+                    placeholder="Enter amount to pay"
                     autoFocus
                   />
+                  {editPaidAmount !== "" && (
+                    <div className="mt-2 ml-1">
+                      {parseFloat(editPaidAmount) > editingLog?.balance ? (
+                        <p className="text-[10px] font-bold text-indigo-500 italic">
+                          Overpayment: Rs. {(parseFloat(editPaidAmount) - editingLog?.balance).toLocaleString()} will be added to credit.
+                        </p>
+                      ) : (
+                        <p className="text-[10px] font-bold text-slate-500 italic">
+                          Remaining after payment: Rs. {(Math.max(0, editingLog?.balance - parseFloat(editPaidAmount))).toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-3">
                   <button 
@@ -412,7 +546,7 @@ export default function AdminSupplierAccounts() {
                     type="submit"
                     className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-primary transition-all"
                   >
-                    Confirm Change
+                    Record Installment
                   </button>
                 </div>
               </form>

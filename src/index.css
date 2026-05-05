@@ -120,3 +120,14 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary-accent) / 0.3);
 }
+
+/* Hide number input spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}

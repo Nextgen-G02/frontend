@@ -126,12 +126,12 @@ export default function AdminFinancials() {
         <div>
           <div className="flex items-center gap-2.5 mb-3">
             <span className="w-10 h-1 bg-primary rounded-full"></span>
-            <p className="text-primary font-black uppercase tracking-[0.4em] text-[8px] md:text-[9px]">Performance Ledger infrastructure</p>
+            <p className="text-primary font-black uppercase tracking-[0.4em] text-[8px] md:text-[9px]">Store Financial Overview</p>
           </div>
           <h1 className="heading-premium text-2xl md:text-5xl leading-tight">
-             Financial <span className="italic font-medium text-slate-400">Intelligence</span>
+             Money <span className="italic font-medium text-slate-400">Tracker</span>
           </h1>
-          <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Comprehensive analysis of revenue streams and operational burn rates.</p>
+          <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">A simple overview of your sales, costs, and profits.</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
@@ -178,55 +178,87 @@ export default function AdminFinancials() {
       ) : summary ? (
         <div className="space-y-10 animate-in fade-in duration-1000">
           {/* Top Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-150 transition-transform duration-1000" />
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="bg-slate-900 text-emerald-400 p-4 rounded-[22px] shadow-2xl"><TrendingUp size={24} /></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="glass-card p-8 rounded-[32px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-150 transition-transform duration-1000" />
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="bg-slate-900 text-emerald-400 p-3 rounded-[18px] shadow-2xl"><TrendingUp size={20} /></div>
                 <div>
-                   <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none">Gross Yield</h3>
-                   <p className="text-[8px] font-bold text-emerald-500 uppercase tracking-widest mt-1 italic">Registry Validated</p>
+                   <h3 className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none">Total Sales</h3>
                 </div>
               </div>
               <div className="flex flex-col relative z-10">
-                <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">Rs.{(summary?.grossYield || 0).toLocaleString()}</span>
-                <span className="mt-3 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-50 py-1.5 px-3.5 rounded-full w-fit">{(summary?.orderCount || 0)} Transactions</span>
+                <span className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">Rs.{(summary?.grossYield || 0).toLocaleString()}</span>
+                <span className="mt-3 text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-50 py-1 px-3 rounded-full w-fit">{(summary?.orderCount || 0)} Transactions</span>
               </div>
             </div>
 
-            <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-40 h-40 bg-rose-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-150 transition-transform duration-1000" />
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="bg-slate-900 text-rose-400 p-4 rounded-[22px] shadow-2xl"><TrendingDown size={24} /></div>
+            <div className="glass-card p-8 rounded-[32px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-150 transition-transform duration-1000" />
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="bg-slate-900 text-rose-400 p-3 rounded-[18px] shadow-2xl"><TrendingDown size={20} /></div>
                 <div>
-                   <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none">Ops Burn</h3>
-                   <p className="text-[8px] font-bold text-rose-500 uppercase tracking-widest mt-1 italic">Outflow Metrics</p>
+                   <h3 className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none">Purchase Costs</h3>
                 </div>
               </div>
               <div className="flex flex-col relative z-10">
-                <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">Rs.{(summary?.opsBurn || 0).toLocaleString()}</span>
-                <span className="mt-3 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-50 py-1.5 px-3.5 rounded-full w-fit">Procurement Costs</span>
+                <span className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">Rs.{(summary?.opsBurn || 0).toLocaleString()}</span>
+                <span className="mt-3 text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-50 py-1 px-3 rounded-full w-fit">Procurement</span>
               </div>
             </div>
 
-            <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 text-white border-none shadow-2xl relative overflow-hidden group">
-              <div className="absolute bottom-0 right-0 w-64 h-64 bg-primary rounded-full blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity" />
-              <div className="flex items-center gap-4 mb-8 relative z-10">
-                <div className="bg-white/10 text-gold p-4 rounded-[22px] backdrop-blur-xl border border-white/5"><DollarSign size={24} /></div>
+            <div className="glass-card p-8 rounded-[32px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-150 transition-transform duration-1000" />
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="bg-slate-900 text-indigo-400 p-3 rounded-[18px] shadow-2xl"><DollarSign size={20} /></div>
                 <div>
-                   <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] leading-none">Net Retained</h3>
-                   <p className="text-[8px] font-bold text-gold uppercase tracking-widest mt-1 italic">Capital Surplus</p>
+                   <h3 className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none">Other Expenses</h3>
                 </div>
               </div>
               <div className="flex flex-col relative z-10">
-                <span className="text-3xl md:text-4xl font-black tracking-tighter text-white">Rs.{(summary?.netRetained || 0).toLocaleString()}</span>
-                <span className={`mt-3 text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-2 ${(summary?.netRetained || 0) >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                <span className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter">Rs.{(summary?.totalManualExpenses || 0).toLocaleString()}</span>
+                <span className="mt-3 text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] bg-slate-50 py-1 px-3 rounded-full w-fit">Operational Costs</span>
+              </div>
+            </div>
+
+            <div className="glass-card p-8 rounded-[32px] bg-slate-900 text-white border-none shadow-2xl relative overflow-hidden group">
+              <div className="absolute bottom-0 right-0 w-48 h-48 bg-primary rounded-full blur-[80px] opacity-10 group-hover:opacity-20 transition-opacity" />
+              <div className="flex items-center gap-4 mb-6 relative z-10">
+                <div className="bg-white/10 text-gold p-3 rounded-[18px] backdrop-blur-xl border border-white/5"><DollarSign size={20} /></div>
+                <div>
+                   <h3 className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] leading-none">Net Profit</h3>
+                </div>
+              </div>
+              <div className="flex flex-col relative z-10">
+                <span className="text-2xl md:text-3xl font-black tracking-tighter text-white">Rs.{(summary?.netRetained || 0).toLocaleString()}</span>
+                <span className={`mt-3 text-[9px] font-black uppercase tracking-[0.3em] flex items-center gap-2 ${(summary?.netRetained || 0) >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
                   <div className={`w-1.5 h-1.5 rounded-full ${(summary?.netRetained || 0) >= 0 ? "bg-emerald-400" : "bg-rose-400"} shadow-[0_0_8px]`} />
-                  {(summary?.netRetained || 0) >= 0 ? "Surplus Threshold Met" : "Capital Variance"}
+                  {(summary?.netRetained || 0) >= 0 ? "Profit" : "Loss"}
                 </span>
               </div>
             </div>
           </div>
+
+          {/* Expense Breakdown */}
+          {summary?.expenseBreakdown && (
+            <div className="glass-card p-10 rounded-[48px] bg-white border border-slate-100 shadow-xl">
+               <div className="flex items-center gap-4 mb-10">
+                 <div className="p-4 bg-slate-50 text-slate-900 rounded-2xl"><PieChart size={24} /></div>
+                 <div>
+                    <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Cost <span className="text-slate-400 italic">Breakdown</span></h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Where your money is spent</p>
+                 </div>
+               </div>
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                 {Object.entries(summary.expenseBreakdown).map(([category, amount]) => (
+                   <div key={category} className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50 hover:bg-slate-900 hover:text-white transition-all group">
+                     <p className="text-[9px] font-black text-slate-400 group-hover:text-white/50 uppercase tracking-[0.3em] mb-3">{category}</p>
+                     <p className="text-xl font-black tracking-tighter">Rs.{amount.toLocaleString()}</p>
+                   </div>
+                 ))}
+               </div>
+            </div>
+          )}
 
           {/* Charts Section */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
@@ -235,8 +267,8 @@ export default function AdminFinancials() {
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-slate-50 text-primary rounded-xl border border-slate-100"><BarChart3 size={20} /></div>
                     <div>
-                      <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Daily Trajectory</h2>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Revenue Velocity (30 Days)</p>
+                      <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Daily Sales</h2>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Revenue for the last 30 days</p>
                     </div>
                   </div>
                   <TrendingUp size={20} className="text-emerald-500" />
@@ -255,8 +287,8 @@ export default function AdminFinancials() {
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-slate-50 text-indigo-500 rounded-xl border border-slate-100"><TrendingUp size={20} /></div>
                     <div>
-                      <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Monthly Scale</h2>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Yearly Yield Aggregation</p>
+                      <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Monthly Sales</h2>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total sales per month</p>
                     </div>
                   </div>
                   <PieChart size={20} className="text-indigo-400" />
