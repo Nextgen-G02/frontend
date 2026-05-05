@@ -70,7 +70,9 @@ export default function POSTerminal() {
   const updateQuantity = (id, delta) => {
     setCart(prev => prev.map(item => {
       if (item._id === id) {
-        const newQty = Math.max(1, item.quantity + delta);
+        const isWeight = item.unit?.toLowerCase() === 'kg' || item.unit?.toLowerCase() === 'g';
+        const step = isWeight ? 0.1 : 1;
+        const newQty = Math.max(0, Math.round((item.quantity + (delta * step)) * 100) / 100);
         return { ...item, quantity: newQty };
       }
       return item;
@@ -96,6 +98,7 @@ export default function POSTerminal() {
           pName: item.pName,
           category: Array.isArray(item.pCategory) ? item.pCategory.join(', ') : (item.pCategory || 'General'),
           quantity: item.quantity,
+          unit: item.unit || 'pcs',
           price: item.price,
           customization: item.customization
         })),
@@ -217,7 +220,7 @@ export default function POSTerminal() {
                 </div>
                 <div className="space-y-1">
                   <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-tight line-clamp-2 h-8">{product.pName}</h3>
-                  <p className="text-[12px] font-black text-primary">Rs.{product.price}</p>
+                  <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-400 font-bold uppercase">/ {product.unit || 'pcs'}</span></p>
                 </div>
               </button>
             ))
@@ -287,7 +290,19 @@ export default function POSTerminal() {
                         >
                           <Minus size={12} />
                         </button>
-                        <span className="text-[11px] font-black text-slate-900 w-4 text-center">{item.quantity}</span>
+                        <div className="flex flex-col items-center">
+                          <input 
+                            type="number"
+                            step={item.unit?.toLowerCase() === 'kg' ? "0.01" : "1"}
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value) || 0;
+                              setCart(prev => prev.map(c => c._id === item._id ? { ...c, quantity: val } : c));
+                            }}
+                            className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] w-12 text-center focus:ring-0 p-0"
+                          />
+                          <span className="text-[7px] font-black text-primary uppercase leading-none">{item.unit || 'pcs'}</span>
+                        </div>
                         <button 
                           onClick={() => updateQuantity(item._id, 1)}
                           className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded transition-all"
