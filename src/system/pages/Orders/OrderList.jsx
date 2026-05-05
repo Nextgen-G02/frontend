@@ -85,7 +85,7 @@ const OrderList = () => {
     };
 
     return (
-        <div className="space-y-12 max-w-[1600px] mx-auto animate-in fade-in duration-1000">
+        <div className="space-y-12 max-w-[1600px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
             <div>
                 <div className="flex items-center gap-2.5 mb-3">
