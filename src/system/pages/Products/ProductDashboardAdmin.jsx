@@ -349,6 +349,16 @@ export default function ProductDashboardAdmin() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Cost Price (Rs.)</label>
+                  <input 
+                    type="number"
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 border border-indigo-100"
+                    value={editForm.costPrice}
+                    onChange={(e) => setEditForm({...editForm, costPrice: Number(e.target.value)})}
+                  />
+                  <p className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest ml-1 italic">Used for auto-loss calculations</p>
+                </div>
+                <div className="space-y-2">
                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Stock Quantity</label>
                   <input 
                     type="number"
