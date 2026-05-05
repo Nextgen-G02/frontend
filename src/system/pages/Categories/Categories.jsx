@@ -207,7 +207,7 @@ export default function AdminCategoryManagement() {
                     setEditingId(null);
                     setIsFormOpen(false);
                   }}
-                  className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+                  className="flex-1 py-4 bg-primary text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all shadow-lg"
                 >
                   Cancel
                 </button>
