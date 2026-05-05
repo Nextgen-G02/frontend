@@ -13,6 +13,7 @@ export default function AdminCategoryManagement() {
   const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "" });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   useEffect(() => {
     fetchCategories();
@@ -43,6 +44,7 @@ export default function AdminCategoryManagement() {
       );
       toast.success("Category created successfully");
       setNewCategory({ name: "", prefix: "", description: "" });
+      setIsFormOpen(false);
       fetchCategories();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to create category");
@@ -63,6 +65,7 @@ export default function AdminCategoryManagement() {
       );
       toast.success("Category updated successfully");
       setEditingId(null);
+      setIsFormOpen(false);
       fetchCategories();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to update category");
@@ -93,6 +96,7 @@ export default function AdminCategoryManagement() {
   const startEdit = (cat) => {
     setEditingId(cat._id);
     setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description });
+    setIsFormOpen(true);
   };
 
   return (
@@ -107,96 +111,119 @@ export default function AdminCategoryManagement() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-3.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
-          <div className="p-2.5 bg-white rounded-lg shadow-sm">
-            <Layers className="text-primary" size={20} md:size={22} />
-          </div>
-          <div className="pr-4">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Global Schema</p>
-            <p className="text-xs font-bold text-slate-900 mt-1">{categories.length} Active Classes</p>
+        <div className="flex flex-wrap items-center gap-4">
+          <button
+            onClick={() => {
+              if (editingId) {
+                setEditingId(null);
+                setNewCategory({ name: "", prefix: "", description: "" });
+              } else {
+                setIsFormOpen(!isFormOpen);
+              }
+            }}
+            className={`flex items-center gap-2.5 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-500 shadow-xl ${isFormOpen && !editingId
+              ? 'bg-white border border-slate-200 text-slate-400 hover:bg-slate-50'
+              : 'bg-slate-900 text-white hover:bg-primary'
+              }`}
+          >
+            {isFormOpen && !editingId ? <X size={18} /> : <Plus size={18} />}
+            {isFormOpen && !editingId ? 'Close Panel' : 'New Category'}
+          </button>
+
+          <div className="flex items-center gap-3.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
+            <div className="p-2.5 bg-white rounded-lg shadow-sm">
+              <Layers className="text-primary" size={20} md:size={22} />
+            </div>
+            <div className="pr-4">
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Categories</p>
+              <p className="text-xs font-bold text-slate-900 mt-1">{categories.length} Active Classes</p>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-10 items-start">
         {/* Add/Edit Category Form */}
-        <div className="xl:col-span-4 glass-card p-8 md:p-10 rounded-[32px] md:rounded-[40px] bg-white relative overflow-hidden group border border-slate-100 shadow-xl">
-          <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
+        {isFormOpen && (
+          <div className="xl:col-span-4 glass-card p-8 md:p-10 rounded-[32px] md:rounded-[40px] bg-white relative overflow-hidden group border border-slate-100 shadow-xl animate-in slide-in-from-left duration-500">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
 
-          <div className="flex items-center gap-4 mb-8 text-slate-900 relative z-10">
-            <div className="p-3.5 bg-slate-900 text-gold rounded-xl shadow-xl shadow-slate-200">
-              {editingId ? <Edit3 size={20} /> : <Plus size={20} />}
-            </div>
-            <div>
-              <h2 className="text-xl font-black tracking-tight uppercase">{editingId ? 'Update Category' : 'New Category'}</h2>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic leading-none">
-                {/* {editingId ? 'Modify existing schema' : 'Schema Initialization'} */}
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={editingId ? handleUpdate : handleCreate} className="space-y-6 relative z-10">
-            <div className="space-y-2">
-              <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
-                Category Name
-              </label>
-              <input
-                type="text"
-                value={editingId ? editForm.name : newCategory.name}
-                onChange={(e) => editingId ? setEditForm({ ...editForm, name: e.target.value }) : setNewCategory({ ...newCategory, name: e.target.value })}
-                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm"
-                placeholder="e.g. Handmade Chocolates"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
-                Category Prefix (e.g. CAKE)
-              </label>
-              <input
-                type="text"
-                value={editingId ? editForm.prefix : newCategory.prefix}
-                onChange={(e) => {
-                  const val = e.target.value.toUpperCase();
-                  editingId ? setEditForm({ ...editForm, prefix: val }) : setNewCategory({ ...newCategory, prefix: val });
-                }}
-                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm uppercase"
-                placeholder="e.g. CHOCO"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
-                Description
-              </label>
-              <textarea
-                value={editingId ? editForm.description : newCategory.description}
-                onChange={(e) => editingId ? setEditForm({ ...editForm, description: e.target.value }) : setNewCategory({ ...newCategory, description: e.target.value })}
-                className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 h-28 md:h-32 resize-none text-xs md:text-sm"
-                placeholder="Describe the scope of this category..."
-              />
+            <div className="flex items-center gap-4 mb-8 text-slate-900 relative z-10">
+              <div className="p-3.5 bg-slate-900 text-gold rounded-xl shadow-xl shadow-slate-200">
+                {editingId ? <Edit3 size={20} /> : <Plus size={20} />}
+              </div>
+              <div>
+                <h2 className="text-xl font-black tracking-tight uppercase">{editingId ? 'Update Category' : 'New Category'}</h2>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic leading-none">
+                  {/* {editingId ? 'Modify existing schema' : 'Schema Initialization'} */}
+                </p>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              {editingId && (
+            <form onSubmit={editingId ? handleUpdate : handleCreate} className="space-y-6 relative z-10">
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                  Category Name
+                </label>
+                <input
+                  type="text"
+                  value={editingId ? editForm.name : newCategory.name}
+                  onChange={(e) => editingId ? setEditForm({ ...editForm, name: e.target.value }) : setNewCategory({ ...newCategory, name: e.target.value })}
+                  className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm"
+                  placeholder="e.g. Handmade Chocolates"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                  Category Prefix (e.g. CAKE)
+                </label>
+                <input
+                  type="text"
+                  value={editingId ? editForm.prefix : newCategory.prefix}
+                  onChange={(e) => {
+                    const val = e.target.value.toUpperCase();
+                    editingId ? setEditForm({ ...editForm, prefix: val }) : setNewCategory({ ...newCategory, prefix: val });
+                  }}
+                  className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm uppercase"
+                  placeholder="e.g. CHOCO"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                  Description
+                </label>
+                <textarea
+                  value={editingId ? editForm.description : newCategory.description}
+                  onChange={(e) => editingId ? setEditForm({ ...editForm, description: e.target.value }) : setNewCategory({ ...newCategory, description: e.target.value })}
+                  className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 h-28 md:h-32 resize-none text-xs md:text-sm"
+                  placeholder="Describe the scope of this category..."
+                />
+              </div>
+
+              <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setEditingId(null)}
-                  className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all"
+                  onClick={() => {
+                    setEditingId(null);
+                    setIsFormOpen(false);
+                  }}
+                  className="flex-1 py-4 bg-primary text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all shadow-lg"
                 >
                   Cancel
                 </button>
-              )}
-              <button
-                type="submit"
-                className={`flex-[2] py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl hover:bg-primary transition-all duration-500`}
-              >
-                {editingId ? 'Update Category' : 'Add'}
-              </button>
-            </div>
-          </form>
-        </div>
+                <button
+                  type="submit"
+                  className={`flex-[2] py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl hover:bg-primary transition-all duration-500`}
+                >
+                  {editingId ? 'Update Category' : 'Add'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Categories List */}
-        <div className="xl:col-span-8 glass-card rounded-[32px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border border-slate-100 shadow-xl">
+        <div className={`${isFormOpen ? 'xl:col-span-8' : 'xl:col-span-12'} glass-card rounded-[32px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border border-slate-100 shadow-xl transition-all duration-500`}>
           <div className="p-6 md:p-8 border-b border-slate-50 bg-white/50">
             <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-4 uppercase leading-none">
               All Categories
@@ -208,8 +235,8 @@ export default function AdminCategoryManagement() {
                 <tr className="bg-slate-50/50 text-[9px]">
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category name</th>
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Unique ID</th>
-                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category description</th>
-                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
+                  <th className="pl-8 md:pl-10 pr-4 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category description</th>
+                  <th className="px-4 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -241,20 +268,20 @@ export default function AdminCategoryManagement() {
                       <td className="px-8 md:px-10 py-5 md:py-6">
                         <span className="px-3 py-1 bg-slate-900 text-gold text-[10px] font-black rounded-lg uppercase tracking-widest">{cat.prefix}</span>
                       </td>
-                      <td className="px-8 md:px-10 py-5 md:py-6">
-                        <p className="text-slate-900 font-medium text-xs">{cat.description || "No scope defined."}</p>
+                      <td className="pl-8 md:pl-10 pr-4 py-5 md:py-6">
+                        <p className="text-slate-900 font-medium text-sm">{cat.description || "No scope defined."}</p>
                       </td>
-                      <td className="px-8 md:px-10 py-5 md:py-6 text-right">
-                        <div className="flex justify-end gap-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-300">
+                      <td className="px-4 py-5 md:py-6">
+                        <div className="flex justify-start gap-2 transition-all duration-300">
                           <button
                             onClick={() => startEdit(cat)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-slate-900 hover:bg-slate-100 transition-all duration-300 border border-slate-100 shadow-sm"
+                            className="p-3 rounded-xl bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white transition-all duration-300 border border-slate-100 shadow-sm"
                           >
                             <Edit3 size={18} />
                           </button>
                           <button
                             onClick={() => handleDeleteClick(cat._id)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-primary hover:bg-primary/5 transition-all duration-300 border border-slate-100 shadow-sm"
+                            className="p-3 rounded-xl bg-slate-50 text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-300 border border-slate-100 shadow-sm"
                           >
                             <Trash2 size={18} />
                           </button>
