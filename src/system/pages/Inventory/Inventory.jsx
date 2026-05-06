@@ -116,7 +116,7 @@ const InventoryDashboard = () => {
             }
 
             // Reason Consistency Validation
-            if (updateQty > 0 && (updateReason === 'Expired Cake' || updateReason === 'Damaged')) {
+            if (updateQty > 0 && (updateReason === 'Expired' || updateReason === 'Damaged')) {
                 toast.error("Alert: You cannot select 'Expired' or 'Damaged' when ADDING stock!");
                 return;
             }
@@ -526,7 +526,7 @@ const InventoryDashboard = () => {
                                         className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary appearance-none transition-all"
                                     >
                                         <option value="Restock">Restock from Supplier</option>
-                                        <option value="Expired Cake">Expired Cake</option>
+                                        <option value="Expired">Expired</option>
                                         <option value="Damaged">Damaged / Waste</option>
                                     </select>
                                 </div>

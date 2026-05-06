@@ -47,6 +47,22 @@ const OrderDetails = () => {
         }
     };
 
+    const handlePaymentUpdate = async (newPaymentStatus) => {
+        setUpdating(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}/payment`, { paymentStatus: newPaymentStatus }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success(`Payment marked as ${newPaymentStatus}`);
+            fetchOrder(); // Refresh data
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to update payment');
+        } finally {
+            setUpdating(false);
+        }
+    };
+
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this order?')) {
             try {
@@ -250,6 +266,27 @@ const OrderDetails = () => {
                                         )}
                                     </button>
                                 ))}
+                            </div>
+
+                            <div className="mt-8 pt-8 border-t border-slate-100">
+                                <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Payment Control</h3>
+                                {order.paymentStatus === 'Unpaid' ? (
+                                    <button 
+                                        onClick={() => handlePaymentUpdate('Paid')}
+                                        disabled={updating}
+                                        className="w-full py-4 bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <CheckCircle2 size={16} /> Mark as Paid
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={() => handlePaymentUpdate('Unpaid')}
+                                        disabled={updating}
+                                        className="w-full py-4 bg-slate-100 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-rose-50 hover:text-rose-500 transition-all"
+                                    >
+                                        Revert to Unpaid
+                                    </button>
+                                )}
                             </div>
                         </div>
 

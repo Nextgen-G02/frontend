@@ -222,7 +222,9 @@ const OrderList = () => {
                                         <td className="px-6 md:px-10 py-4 md:py-6">
                                             <div className="flex flex-col">
                                                 <span className="font-black text-slate-900 text-lg md:text-xl tracking-tighter">Rs.{order.totalAmount.toLocaleString()}</span>
-                                                <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mt-0.5">Settled</span>
+                                                <span className={`text-[8px] font-black uppercase tracking-widest mt-0.5 ${order.paymentStatus === 'Paid' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                    {order.paymentStatus}
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="px-6 md:px-10 py-4 md:py-6 text-right">
