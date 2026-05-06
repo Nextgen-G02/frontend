@@ -436,6 +436,22 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => setEditForm({ ...editForm, stock: Number(e.target.value) })}
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Measurement Unit</label>
+                  <select 
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 appearance-none cursor-pointer"
+                    value={editForm.unit}
+                    onChange={(e) => setEditForm({...editForm, unit: e.target.value})}
+                  >
+                    <option value="pcs">pcs</option>
+                    <option value="kg">kg</option>
+                    <option value="g">g</option>
+                    <option value="ml">ml</option>
+                    <option value="l">l</option>
+                    <option value="box">box</option>
+                    <option value="pkt">pkt</option>
+                  </select>
+                </div>
                 <div className="space-y-2 flex flex-col justify-end">
                   <label className="flex items-center gap-3 cursor-pointer group mb-2">
                     <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">Raw Ingredient Status</span>

@@ -33,6 +33,7 @@ const OrderForm = () => {
     const [productSearch, setProductSearch] = useState('');
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [expandedItems, setExpandedItems] = useState({});
     
     const [formData, setFormData] = useState({
         customerName: 'Walk-in Customer',
@@ -102,7 +103,7 @@ const OrderForm = () => {
     const addItem = () => {
         setFormData(prev => ({
             ...prev,
-            items: [...prev.items, { pName: '', category: '', quantity: 1, price: 0, isCustom: false, customization: { message: '', flavor: '', specialInstructions: '' } }]
+            items: [...prev.items, { pName: '', category: '', quantity: 1, unit: 'pcs', price: 0, isCustom: false, customization: { message: '', flavor: '', specialInstructions: '' } }]
         }));
     };
 
@@ -113,6 +114,7 @@ const OrderForm = () => {
                 pName: product.pName, 
                 category: product.pCategory, 
                 quantity: 1, 
+                unit: product.unit || 'pcs',
                 price: product.price, 
                 isCustom: false,
                 customization: { message: '', flavor: '', specialInstructions: '' } 
@@ -130,6 +132,7 @@ const OrderForm = () => {
                 pName: '', 
                 category: 'Cake', 
                 quantity: 1, 
+                unit: 'pcs',
                 price: 0, 
                 isCustom: true,
                 customization: { message: '', flavor: '', specialInstructions: '' } 
@@ -141,8 +144,8 @@ const OrderForm = () => {
     useEffect(() => {
         if (productSearch.trim()) {
             const filtered = products.filter(p => 
-                p.pName.toLowerCase().includes(productSearch.toLowerCase()) || 
-                p.productId.toLowerCase().includes(productSearch.toLowerCase())
+                (p.pName || "").toLowerCase().includes(productSearch.toLowerCase()) || 
+                (p.productId || "").toLowerCase().includes(productSearch.toLowerCase())
             );
             setFilteredProducts(filtered);
             setShowSuggestions(true);
@@ -160,6 +163,18 @@ const OrderForm = () => {
         setFormData(prev => ({
             ...prev,
             items: prev.items.filter((_, i) => i !== index)
+        }));
+        setExpandedItems(prev => {
+            const next = { ...prev };
+            delete next[index];
+            return next;
+        });
+    };
+
+    const toggleDescription = (index) => {
+        setExpandedItems(prev => ({
+            ...prev,
+            [index]: !prev[index]
         }));
     };
 
@@ -182,6 +197,7 @@ const OrderForm = () => {
                         ...newItems[index],
                         pName: selectedProd.pName,
                         category: selectedProd.pCategory,
+                        unit: selectedProd.unit || 'pcs',
                         price: selectedProd.price,
                         isCustom: false
                     };
@@ -315,7 +331,7 @@ const OrderForm = () => {
                                             value={productSearch}
                                             onChange={(e) => setProductSearch(e.target.value)}
                                             placeholder="Quick Search: Type product name or ID..."
-                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-200 text-xs shadow-inner"
+                                            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-400 text-xs shadow-inner"
                                         />
                                         
                                         {/* Search Suggestions */}
@@ -360,7 +376,7 @@ const OrderForm = () => {
                                     <div key={index} className="p-5 md:p-8 rounded-[24px] md:rounded-[32px] bg-slate-50/50 border border-slate-100 relative group/item hover:bg-white hover:shadow-2xl transition-all duration-500 overflow-hidden">
                                         <div className="absolute top-0 left-0 w-1 h-full bg-slate-200 group-hover/item:bg-primary transition-colors"></div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-5 md:gap-6 items-center">
-                                            <div className={`sm:col-span-2 ${item.isCustom ? 'lg:col-span-8' : 'lg:col-span-4'} space-y-1.5`}>
+                                            <div className={`sm:col-span-2 ${item.isCustom ? 'lg:col-span-7' : 'lg:col-span-3'} space-y-1.5`}>
                                                 <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Entity selection</label>
                                                 {item.isCustom ? (
                                                     <div className="flex gap-2">
@@ -391,34 +407,38 @@ const OrderForm = () => {
 
                                             {!item.isCustom && (
                                                 <>
-                                                    <div className="lg:col-span-3 space-y-1.5">
+                                                    <div className="lg:col-span-2 space-y-1.5">
                                                         <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Taxonomy Class</label>
-                                                        <div className="px-4 md:px-5 py-3 md:py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed shadow-sm">
+                                                        <div className="px-4 md:px-5 py-3 md:py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed shadow-sm h-[42px] md:h-[46px] flex items-center">
                                                             {item.category || "---"}
                                                         </div>
                                                     </div>
                                                     <div className="lg:col-span-2 space-y-1.5">
                                                         <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Valuation</label>
-                                                        <div className="px-4 md:px-5 py-3 md:py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black text-slate-900 shadow-sm">
+                                                        <div className="px-4 md:px-5 py-3 md:py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black text-slate-900 shadow-sm h-[42px] md:h-[46px] flex items-center">
                                                             Rs.{item.price.toLocaleString()}
                                                         </div>
                                                     </div>
                                                 </>
                                             )}
 
-                                            <div className="lg:col-span-2 space-y-1.5">
+                                            <div className="lg:col-span-3 space-y-1.5">
                                                 <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Order Quantity</label>
-                                                <div className="flex items-center gap-1 bg-white border border-slate-100 rounded-xl p-1 shadow-sm">
+                                                <div className="flex items-center gap-2 bg-white border border-slate-100 rounded-xl p-1 shadow-sm min-w-[150px]">
                                                     <button 
                                                         type="button"
-                                                        onClick={() => handleItemChange(index, 'quantity', Math.max(1, (item.quantity || 1) - 1))}
+                                                        onClick={() => handleItemChange(index, 'quantity', Math.max(0, (item.quantity || 1) - 1))}
                                                         className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors"
                                                     >
                                                         <Minus size={12} />
                                                     </button>
-                                                    <div className="flex-1 text-center font-black text-slate-900 text-xs">
-                                                        {item.quantity || 1}
-                                                    </div>
+                                                    <input 
+                                                        type="number"
+                                                        step="0.01"
+                                                        value={item.quantity || ''}
+                                                        onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
+                                                        className="w-12 text-center font-black text-slate-900 text-[10px] outline-none bg-transparent"
+                                                    />
                                                     <button 
                                                         type="button"
                                                         onClick={() => handleItemChange(index, 'quantity', (item.quantity || 1) + 1)}
@@ -426,9 +446,31 @@ const OrderForm = () => {
                                                     >
                                                         <Plus size={12} />
                                                     </button>
+                                                    <div className="h-6 w-px bg-slate-100 mx-1"></div>
+                                                    <select 
+                                                        value={item.unit || 'pcs'} 
+                                                        onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
+                                                        className="text-[9px] font-black text-primary bg-slate-50 rounded-lg px-2 py-1 outline-none cursor-pointer uppercase hover:bg-primary/5 transition-colors"
+                                                    >
+                                                        <option value="pcs">pcs</option>
+                                                        <option value="kg">kg</option>
+                                                        <option value="g">g</option>
+                                                        <option value="ml">ml</option>
+                                                        <option value="l">l</option>
+                                                        <option value="box">box</option>
+                                                        <option value="pkt">pkt</option>
+                                                    </select>
                                                 </div>
                                             </div>
-                                            <div className="lg:col-span-1 flex justify-end pt-4">
+                                            <div className="lg:col-span-2 flex justify-end gap-2 pt-4">
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => toggleDescription(index)}
+                                                    className={`p-3 md:p-3.5 rounded-lg md:rounded-xl transition-all shadow-sm ${expandedItems[index] ? 'bg-primary text-white shadow-primary/20' : 'bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5'}`}
+                                                    title={expandedItems[index] ? "Hide Description" : "Add Description/Notes"}
+                                                >
+                                                    <FileText size={16} md:size={18} />
+                                                </button>
                                                 <button 
                                                     type="button" onClick={() => removeItem(index)}
                                                     className="p-3 md:p-3.5 bg-rose-50 text-rose-400 hover:text-white hover:bg-rose-500 rounded-lg md:rounded-xl transition-all shadow-sm"
@@ -439,7 +481,7 @@ const OrderForm = () => {
                                         </div>
 
                                         {/* Customization Layer */}
-                                        {(item.category?.toLowerCase()?.includes('cake') || item.isCustom) && (
+                                        {expandedItems[index] && (
                                             <div className="mt-8 pt-8 border-t border-slate-200/50 grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-top-4">
                                                 {/* Description Field - Always shown for Custom, or as Notes for others */}
                                                 <div className={`${item.isCustom ? 'md:col-span-2' : 'md:col-span-3'} space-y-2 mb-2`}>
@@ -564,39 +606,6 @@ const OrderForm = () => {
 
                     {/* Right Column: Totals & Settings */}
                     <div className="space-y-10">
-                        {/* Summary Card */}
-                        <div className="glass-card p-6 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.4)] relative overflow-hidden group">
-                           <div className="absolute bottom-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-primary rounded-full blur-[80px] md:blur-[100px] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
-                            
-                           <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 mb-8 md:mb-10 relative z-10">Economic Settlement</p>
-                           <div className="space-y-5 md:space-y-6 mb-8 md:mb-10 relative z-10">
-                               <div className="flex justify-between items-center">
-                                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Asset Gross Value</span>
-                                   <span className="font-bold text-white text-xs md:text-sm">Rs.{calculateTotal().toLocaleString()}</span>
-                               </div>
-                               <div className="flex justify-between items-center">
-                                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Commission Protocol</span>
-                                   <span className="px-2.5 py-1 bg-white/10 rounded-lg font-black text-gold text-[8px] uppercase tracking-widest border border-white/5">Waived</span>
-                               </div>
-                               <div className="h-px bg-white/10" />
-                               <div className="flex flex-col gap-1.5">
-                                   <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">Final Net Settlement</span>
-                                   <span className="text-2xl md:text-4xl font-black text-white tracking-tighter">Rs.{calculateTotal().toLocaleString()}</span>
-                               </div>
-                           </div>
-
-                           <button 
-                               type="submit" disabled={loading}
-                               className="w-full py-4.5 md:py-5 bg-primary text-white rounded-xl md:rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl shadow-primary/20 hover:bg-white hover:text-slate-900 transition-all duration-500 disabled:opacity-50 relative z-10"
-                           >
-                               {loading ? (
-                                   <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-                               ) : (
-                                   id ? `Authorize Update (Rs.${calculateTotal().toLocaleString()})` : `Commit Transmission (Rs.${calculateTotal().toLocaleString()})`
-                               )}
-                           </button>
-                        </div>
-
                         {/* Scheduling Settings */}
                         <div className="glass-card p-6 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border-none shadow-xl relative overflow-hidden">
                             <div className="flex items-center gap-3.5 mb-8 md:mb-10">
@@ -639,6 +648,39 @@ const OrderForm = () => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Summary Card */}
+                        <div className="glass-card p-6 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-[0_32px_64px_-12px_rgba(0,0,0,0.4)] relative overflow-hidden group">
+                           <div className="absolute bottom-0 right-0 w-48 md:w-64 h-48 md:h-64 bg-primary rounded-full blur-[80px] md:blur-[100px] opacity-20 group-hover:scale-125 transition-transform duration-1000" />
+                            
+                           <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 mb-8 md:mb-10 relative z-10">Economic Settlement</p>
+                           <div className="space-y-5 md:space-y-6 mb-8 md:mb-10 relative z-10">
+                               <div className="flex justify-between items-center">
+                                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Asset Gross Value</span>
+                                   <span className="font-bold text-white text-xs md:text-sm">Rs.{calculateTotal().toLocaleString()}</span>
+                               </div>
+                               <div className="flex justify-between items-center">
+                                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Commission Protocol</span>
+                                   <span className="px-2.5 py-1 bg-white/10 rounded-lg font-black text-gold text-[8px] uppercase tracking-widest border border-white/5">Waived</span>
+                               </div>
+                               <div className="h-px bg-white/10" />
+                               <div className="flex flex-col gap-1.5">
+                                   <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">Final Net Settlement</span>
+                                   <span className="text-2xl md:text-4xl font-black text-white tracking-tighter">Rs.{calculateTotal().toLocaleString()}</span>
+                               </div>
+                           </div>
+
+                           <button 
+                               type="submit" disabled={loading}
+                               className="w-full py-4.5 md:py-5 bg-primary text-white rounded-xl md:rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-2xl shadow-primary/20 hover:bg-white hover:text-slate-900 transition-all duration-500 disabled:opacity-50 relative z-10"
+                           >
+                               {loading ? (
+                                   <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                               ) : (
+                                   id ? `Authorize Update (Rs.${calculateTotal().toLocaleString()})` : `Commit Transmission (Rs.${calculateTotal().toLocaleString()})`
+                               )}
+                           </button>
                         </div>
 
                         {/* Security Verification */}
