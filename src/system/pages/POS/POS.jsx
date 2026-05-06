@@ -13,7 +13,11 @@ import {
   CakeSlice,
   ChevronRight,
   Package,
-  X
+  X,
+  History,
+  Eye,
+  XCircle,
+  ArrowLeft
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -31,6 +35,9 @@ export default function POSTerminal() {
   const [customerName, setCustomerName] = useState("Walk-in Customer");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [completedOrder, setCompletedOrder] = useState(null);
+  const [view, setView] = useState("catalog"); // "catalog" or "history"
+  const [history, setHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -50,6 +57,39 @@ export default function POSTerminal() {
       setLoading(false);
     }
   };
+
+  const fetchHistory = async () => {
+    try {
+      setHistoryLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { type: 'DirectSale' }
+      });
+      const sortedData = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setHistory(sortedData);
+    } catch {
+      toast.error("Failed to load history");
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleCancelSale = async (orderId) => {
+    if (!window.confirm("Are you sure you want to cancel this sale? This will restore inventory.")) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${orderId}/status`, { orderStatus: 'Cancelled' }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Sale cancelled");
+      fetchHistory();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to cancel sale");
+    }
+  };
+
+
 
   const addToCart = (product) => {
     setCart(prev => {
@@ -137,7 +177,8 @@ export default function POSTerminal() {
                           ? p.pCategory.some(pCat => pCat.trim().toLowerCase() === selectedCategory.toLowerCase())
                           : p.pCategory.trim().toLowerCase() === selectedCategory.toLowerCase()
                       ));
-    const matchesSearch = (p.pName || "").toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = (p.pName || "").toLowerCase().includes(search.toLowerCase()) || 
+                          (p.productId || "").toLowerCase().includes(search.toLowerCase());
     return matchesCat && matchesSearch;
   });
 
@@ -153,79 +194,186 @@ export default function POSTerminal() {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               <div className="w-2 h-8 bg-primary rounded-full"></div>
               POS <span className="text-slate-400 italic">Terminal</span>
-            </h1>
-            
-            {/* Search Bar */}
-            <div className="relative group w-full md:w-96">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <Search className="text-slate-300 group-focus-within:text-primary transition-all duration-500" size={18} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search products by name..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
+              <button 
+                onClick={() => {
+                  if (view === 'catalog') {
+                    setView('history');
+                    fetchHistory();
+                  } else {
+                    setView('catalog');
+                  }
                 }}
-                className="w-full pl-14 pr-6 py-3.5 bg-white border border-slate-100 outline-none focus:ring-8 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-300 font-bold shadow-sm rounded-xl text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar border-b border-slate-50">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => toggleCategory(cat)}
-                className={`px-6 py-2 rounded-lg whitespace-nowrap font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
-                  selectedCategory === cat
-                  ? "bg-slate-900 text-gold shadow-lg" 
-                  : "bg-white text-slate-400 hover:text-slate-600"
+                className={`ml-4 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
+                  view === 'history' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                {cat}
+                {view === 'catalog' ? <><History size={14} /> Sale History</> : <><ArrowLeft size={14} /> Back to Catalog</>}
               </button>
-            ))}
+            </h1>
+            
+            {view === 'catalog' && (
+              <div className="relative group w-full md:w-96">
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                  <Search className="text-slate-300 group-focus-within:text-primary transition-all duration-500" size={18} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search by name or product ID..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-14 pr-6 py-3.5 bg-white border border-slate-100 outline-none focus:ring-8 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 font-bold shadow-sm rounded-xl text-sm"
+                />
+              </div>
+            )}
           </div>
+
+          {view === 'catalog' && (
+            <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar border-b border-slate-50">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => toggleCategory(cat)}
+                  className={`px-6 py-2 rounded-lg whitespace-nowrap font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
+                    selectedCategory === cat
+                    ? "bg-slate-900 text-gold shadow-lg" 
+                    : "bg-white text-slate-400 hover:text-slate-600"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
         </header>
 
-        {/* Product Grid */}
-        <div className="flex-1 overflow-y-auto pr-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 no-scrollbar pb-10">
-          {loading ? (
-            Array(8).fill(0).map((_, i) => (
-              <div key={i} className="glass-card p-3.5 rounded-[24px] bg-white/50 animate-pulse h-[220px]">
-                <div className="w-full aspect-square bg-slate-100 rounded-[18px] mb-3"></div>
-                <div className="h-3 w-3/4 bg-slate-100 rounded-full mb-2"></div>
-                <div className="h-2 w-1/2 bg-slate-100 rounded-full"></div>
-              </div>
-            ))
-          ) : filteredProducts.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-40">
-              <Package size={48} className="text-slate-300 mb-4" />
-              <p className="font-black uppercase tracking-widest text-[10px]">No matches in catalog</p>
+        {view === 'catalog' ? (
+          <>
+            {/* Product Grid */}
+            <div className="flex-1 overflow-y-auto pr-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 no-scrollbar pb-10">
+              {loading ? (
+                Array(8).fill(0).map((_, i) => (
+                  <div key={i} className="glass-card p-3.5 rounded-[24px] bg-white/50 animate-pulse h-[220px]">
+                    <div className="w-full aspect-square bg-slate-100 rounded-[18px] mb-3"></div>
+                    <div className="h-3 w-3/4 bg-slate-100 rounded-full mb-2"></div>
+                    <div className="h-2 w-1/2 bg-slate-100 rounded-full"></div>
+                  </div>
+                ))
+              ) : filteredProducts.length === 0 ? (
+                <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-40">
+                  <Package size={48} className="text-slate-300 mb-4" />
+                  <p className="font-black uppercase tracking-widest text-[10px]">No matches in catalog</p>
+                </div>
+              ) : (
+                filteredProducts.map(product => (
+                  <button
+                    key={product._id}
+                    onClick={() => addToCart(product)}
+                    className="bg-white p-4 rounded-[24px] text-center group border border-slate-50 hover:border-primary/20 hover:shadow-2xl transition-all duration-500 flex flex-col gap-4"
+                  >
+                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-slate-50 p-1 border border-slate-100">
+                      <img 
+                        src={product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"} 
+                        alt={product.pName}
+                        className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-tight line-clamp-2 h-8">{product.pName}</h3>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-400 font-bold uppercase">/ {product.unit || 'pcs'}</span></p>
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${
+                          product.stock > 10 ? 'bg-emerald-50 text-emerald-600' : 
+                          product.stock > 0 ? 'bg-amber-50 text-amber-600' : 
+                          'bg-rose-50 text-rose-600'
+                        }`}>
+                          {product.stock > 0 ? `${product.stock} IN STOCK` : 'OUT OF STOCK'}
+                        </span>
+                      </div>
+                      <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em]">{product.productId}</p>
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
-          ) : (
-            filteredProducts.map(product => (
-              <button
-                key={product._id}
-                onClick={() => addToCart(product)}
-                className="bg-white p-4 rounded-[24px] text-center group border border-slate-50 hover:border-primary/20 hover:shadow-2xl transition-all duration-500 flex flex-col gap-4"
-              >
-                <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-slate-50 p-1 border border-slate-100">
-                  <img 
-                    src={product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"} 
-                    alt={product.pName}
-                    className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700"
-                  />
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col overflow-hidden">
+             <div className="flex items-center justify-between mb-6 pr-4">
+                <div>
+                   <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Recent Sale History</h2>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Management of in-store transmissions</p>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-tight line-clamp-2 h-8">{product.pName}</h3>
-                  <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-400 font-bold uppercase">/ {product.unit || 'pcs'}</span></p>
+                <button 
+                  onClick={() => setView('catalog')}
+                  className="px-6 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg flex items-center gap-2 hover:bg-primary hover:text-white transition-all"
+                >
+                  <Plus size={16} /> New Sale
+                </button>
+             </div>
+
+             <div className="flex-1 overflow-y-auto pr-4 no-scrollbar">
+                <div className="glass-card rounded-[24px] overflow-hidden bg-white/70 border border-slate-100">
+                  <table className="w-full text-left">
+                    <thead className="bg-slate-50/50">
+                      <tr>
+                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Order ID</th>
+                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Customer</th>
+                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {historyLoading ? (
+                        <tr><td colSpan="5" className="py-20 text-center font-black text-[10px] text-slate-400 uppercase tracking-widest animate-pulse">Retrieving master records...</td></tr>
+                      ) : history.length === 0 ? (
+                        <tr><td colSpan="5" className="py-20 text-center font-black text-[10px] text-slate-400 uppercase tracking-widest">No history found</td></tr>
+                      ) : (
+                        history.map(order => (
+                          <tr key={order._id} className="hover:bg-white transition-all group">
+                            <td className="px-6 py-4">
+                              <p className="font-mono text-[10px] font-black text-slate-400 uppercase leading-none mb-1">SEQ: {order._id.slice(-6).toUpperCase()}</p>
+                              <p className="text-[9px] font-bold text-slate-300">{new Date(order.createdAt).toLocaleString()}</p>
+                            </td>
+                            <td className="px-6 py-4">
+                              <p className="font-black text-slate-900 text-xs uppercase">{order.customerName}</p>
+                            </td>
+                            <td className="px-6 py-4 font-black text-slate-900 text-sm">Rs.{order.totalAmount.toLocaleString()}</td>
+                            <td className="px-6 py-4">
+                              <span className={`px-3 py-1 rounded-full text-[8px] font-black tracking-widest ${
+                                order.orderStatus === 'Cancelled' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                              }`}>
+                                {order.orderStatus.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                               <button 
+                                 onClick={() => setCompletedOrder(order)}
+                                 className="p-2 bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                                 title="Review Bill"
+                               >
+                                 <Eye size={16} />
+                               </button>
+
+                               {order.orderStatus !== 'Cancelled' && (
+                                 <button 
+                                   onClick={() => handleCancelSale(order._id)}
+                                   className="p-2 bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                   title="Cancel Sale"
+                                 >
+                                   <XCircle size={16} />
+                                 </button>
+                               )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
-              </button>
-            ))
-          )}
-        </div>
+             </div>
+          </div>
+        )}
       </div>
 
       {/* Right Side: Cart & Checkout */}
@@ -301,7 +449,22 @@ export default function POSTerminal() {
                             }}
                             className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] w-12 text-center focus:ring-0 p-0"
                           />
-                          <span className="text-[7px] font-black text-primary uppercase leading-none">{item.unit || 'pcs'}</span>
+                          <select 
+                            value={item.unit || 'pcs'} 
+                            onChange={(e) => {
+                              const newUnit = e.target.value;
+                              setCart(prev => prev.map(c => c._id === item._id ? { ...c, unit: newUnit } : c));
+                            }}
+                            className="text-[7px] font-black text-primary uppercase bg-transparent outline-none cursor-pointer appearance-none text-center hover:text-slate-900 transition-colors"
+                          >
+                            <option value="pcs">pcs</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="ml">ml</option>
+                            <option value="l">l</option>
+                            <option value="box">box</option>
+                            <option value="pkt">pkt</option>
+                          </select>
                         </div>
                         <button 
                           onClick={() => updateQuantity(item._id, 1)}
