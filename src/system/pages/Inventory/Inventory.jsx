@@ -11,7 +11,11 @@ import {
   ShieldCheck,
   Loader2,
   History,
-  ArrowDownLeft
+  ArrowDownLeft,
+  PlusCircle,
+  MinusCircle,
+  X,
+  CheckCircle2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -28,6 +32,13 @@ const InventoryDashboard = () => {
     const [search, setSearch] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [stockStatus, setStockStatus] = useState("All");
+    
+    // Update Modal State
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [updateModalOpen, setUpdateModalOpen] = useState(false);
+    const [updateQty, setUpdateQty] = useState(0);
+    const [updateReason, setUpdateReason] = useState("Restock");
+    const [updating, setUpdating] = useState(false);
 
     useEffect(() => {
         fetchInventory();
@@ -91,17 +102,46 @@ const InventoryDashboard = () => {
         }
     };
 
-    const updateThreshold = async (id, newLevel) => {
+    const handleStockUpdate = async () => {
+        if (!selectedItem || updateQty === 0) return;
+        
         try {
+            setUpdating(true);
             const token = localStorage.getItem("token");
-            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/inventory/${id}/threshold`, 
-                { lowStockLevel: parseInt(newLevel) },
+            const newStock = selectedItem.quantity + Number(updateQty);
+            
+            if (newStock < 0) {
+                toast.error("Stock cannot be negative");
+                return;
+            }
+
+            // Reason Consistency Validation
+            if (updateQty > 0 && (updateReason === 'Expired Cake' || updateReason === 'Damaged')) {
+                toast.error("Alert: You cannot select 'Expired' or 'Damaged' when ADDING stock!");
+                return;
+            }
+            if (updateQty < 0 && updateReason === 'Restock') {
+                toast.error("Alert: 'Restock from Supplier' is only for ADDING stock!");
+                return;
+            }
+
+            await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/products/update/${selectedItem.productId._id}`, 
+                { 
+                    stock: newStock,
+                    updateReason: updateReason 
+                },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            toast.success("Alert level updated");
+
+            toast.success("Inventory updated successfully");
+            setUpdateModalOpen(false);
+            setUpdateQty(0);
             fetchInventory();
+            fetchHistory();
         } catch (error) {
             toast.error("Update failed");
+        } finally {
+            setUpdating(false);
         }
     };
 
@@ -259,6 +299,7 @@ const InventoryDashboard = () => {
                                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Stock Level</th>
                                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Alert At</th>
                                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
+                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Quick Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -343,6 +384,17 @@ const InventoryDashboard = () => {
                                                     </p>
                                                 </div>
                                             </td>
+                                            <td className="px-8 md:px-10 py-5 md:py-6 text-right">
+                                                <button 
+                                                    onClick={() => {
+                                                        setSelectedItem(item);
+                                                        setUpdateModalOpen(true);
+                                                    }}
+                                                    className="px-4 py-2.5 bg-slate-900 text-gold rounded-xl font-black text-[8px] md:text-[9px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg shadow-slate-100 flex items-center gap-2 ml-auto"
+                                                >
+                                                    <PlusCircle size={14} /> Update Stock
+                                                </button>
+                                            </td>
                                         </tr>
                                     );
                                 })
@@ -411,6 +463,91 @@ const InventoryDashboard = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Stock Update Modal */}
+            {updateModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-lg rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                        <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-slate-900 text-gold rounded-2xl"><Package size={24} /></div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Update Stock</h2>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Inventory Inbound/Outbound</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setUpdateModalOpen(false)} className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-400">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-8 md:p-10 space-y-8">
+                            <div className="flex items-center gap-6 p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                <div className="w-16 h-16 bg-white rounded-2xl border border-slate-200 flex items-center justify-center overflow-hidden">
+                                    {selectedItem.productId?.images?.[0] ? (
+                                        <img src={selectedItem.productId.images[0]} className="w-full h-full object-cover" alt="" />
+                                    ) : (
+                                        <Package size={24} className="text-slate-200" />
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="font-black text-slate-900 uppercase tracking-tight">{selectedItem.productId?.pName}</p>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Current: {selectedItem.quantity} Units</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Quantity Adjustment</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="number"
+                                            value={updateQty}
+                                            onChange={(e) => setUpdateQty(e.target.value)}
+                                            placeholder="Use + for stock in, - for stock out"
+                                            className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all"
+                                        />
+                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300">
+                                            {updateQty > 0 ? <PlusCircle size={20} className="text-emerald-500" /> : updateQty < 0 ? <MinusCircle size={20} className="text-rose-500" /> : <RefreshCw size={20} />}
+                                        </div>
+                                    </div>
+                                    <p className="text-[9px] font-bold text-slate-300 italic ml-1">Example: +50 (Add stock), -10 (Damaged/Return)</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reason / Context</label>
+                                    <select 
+                                        value={updateReason}
+                                        onChange={(e) => setUpdateReason(e.target.value)}
+                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary appearance-none transition-all"
+                                    >
+                                        <option value="Restock">Restock from Supplier</option>
+                                        <option value="Expired Cake">Expired Cake</option>
+                                        <option value="Damaged">Damaged / Waste</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-8 md:p-10 bg-slate-50 border-t border-slate-100 flex gap-4">
+                            <button 
+                                onClick={() => setUpdateModalOpen(false)}
+                                className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
+                            >
+                                Discard
+                            </button>
+                            <button 
+                                onClick={handleStockUpdate}
+                                disabled={updating || updateQty === 0}
+                                className="flex-[2] py-4 bg-slate-900 text-gold rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-primary hover:text-white transition-all shadow-xl shadow-slate-200 disabled:opacity-50 disabled:grayscale"
+                            >
+                                {updating ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                                Confirm Update
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

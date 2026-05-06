@@ -29,7 +29,7 @@ export default function AdminExpenses() {
     category: ""
   });
 
-  const categories = ['Ingredients', 'Salaries', 'Utilities', 'Other'];
+  const categories = ['Ingredients', 'Salaries', 'Shop Bills', 'Other'];
 
   useEffect(() => {
     fetchExpenses();
@@ -180,7 +180,7 @@ export default function AdminExpenses() {
                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
                         expense.category === 'Ingredients' ? 'bg-emerald-50 text-emerald-600' :
                         expense.category === 'Salaries' ? 'bg-indigo-50 text-indigo-600' :
-                        expense.category === 'Utilities' ? 'bg-amber-50 text-amber-600' :
+                        expense.category === 'Shop Bills' ? 'bg-amber-50 text-amber-600' :
                         'bg-slate-100 text-slate-600'
                       }`}>
                         {expense.category}

@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Plus, 
-  Search, 
-  Edit3, 
-  Trash2, 
-  Package, 
+import {
+  Plus,
+  Search,
+  Edit3,
+  Trash2,
+  Package,
   ExternalLink,
   Loader2,
   X,
   Save,
-  Settings
+  Settings,
+  Image,
+  Upload
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -50,7 +52,7 @@ export default function ProductDashboardAdmin() {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_BASE}/`, {
-        headers: { 
+        headers: {
           "Authorization": `Bearer ${token}`
         }
       });
@@ -67,7 +69,13 @@ export default function ProductDashboardAdmin() {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`${API_BASE}/delete/${id}`, { method: "DELETE" });
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE}/delete/${id}`, { 
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       setProducts((prev) => prev.filter((p) => p._id !== id));
       setDeleteId(null);
       toast.success("Product removed");
@@ -85,21 +93,45 @@ export default function ProductDashboardAdmin() {
     try {
       const res = await fetch(`${API_BASE}/update/${editProduct._id}`, {
         method: "PUT",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify(editForm),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Update failed");
+      }
+
       const updated = await res.json();
+      
       setProducts((prev) =>
         prev.map((p) => (p._id === updated._id ? updated : p))
       );
+      
       setEditProduct(null);
-      toast.success("Product updated");
-      fetchProducts(); // Refresh to ensure all data is synced
-    } catch {
-      toast.error("Update failed");
+      toast.success("Product updated successfully");
+      fetchProducts(); 
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error(error.message || "Failed to update product");
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be less than 5MB");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditForm(prev => ({ ...prev, images: [reader.result] }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -110,17 +142,17 @@ export default function ProductDashboardAdmin() {
 
   const filtered = products.filter(
     (p) => {
-      const matchesCat = selectedCategory === "All" || 
-                        (p.pCategory && (
-                          Array.isArray(p.pCategory) 
-                            ? p.pCategory.some(pCat => pCat.trim().toLowerCase() === selectedCategory.toLowerCase())
-                            : p.pCategory.trim().toLowerCase() === selectedCategory.toLowerCase()
-                        ));
-      
+      const matchesCat = selectedCategory === "All" ||
+        (p.pCategory && (
+          Array.isArray(p.pCategory)
+            ? p.pCategory.some(pCat => pCat.trim().toLowerCase() === selectedCategory.toLowerCase())
+            : p.pCategory.trim().toLowerCase() === selectedCategory.toLowerCase()
+        ));
+
       const matchesSearch = p.pName?.toLowerCase().includes(search.toLowerCase()) ||
-                           p.productId?.toLowerCase().includes(search.toLowerCase()) ||
-                           p.pCategory?.toLowerCase().includes(search.toLowerCase());
-      
+        p.productId?.toLowerCase().includes(search.toLowerCase()) ||
+        p.pCategory?.toLowerCase().includes(search.toLowerCase());
+
       return matchesCat && matchesSearch;
     }
   );
@@ -176,23 +208,21 @@ export default function ProductDashboardAdmin() {
       <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar border-b border-slate-100">
         <button
           onClick={() => toggleCategory("All")}
-          className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${
-            selectedCategory === "All"
-            ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5" 
+          className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === "All"
+            ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
             : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
-          }`}
+            }`}
         >
-          All Assets
+          All
         </button>
         {categories.map(cat => (
           <button
             key={cat._id}
             onClick={() => toggleCategory(cat.name)}
-            className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${
-              selectedCategory === cat.name
-              ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5" 
+            className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
+              ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
               : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
-            }`}
+              }`}
           >
             {cat.name}
           </button>
@@ -235,7 +265,7 @@ export default function ProductDashboardAdmin() {
                         <div className="flex items-center gap-4 md:gap-5">
                           <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-[24px] overflow-hidden shadow-sm group-hover:shadow-2xl transition-all duration-700 bg-slate-100 border border-slate-50 shrink-0">
                             <img
-                              src={p.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
+                              src={p.images?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
                               className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-1000"
                               alt=""
                             />
@@ -249,8 +279,8 @@ export default function ProductDashboardAdmin() {
                         </div>
                       </td>
 
-                      <td className="px-6 md:px-10 py-4 md:py-6 text-right">
-                        <div className="flex flex-wrap justify-end gap-1.5">
+                      <td className="px-6 md:px-10 py-4 md:py-6 text-left">
+                        <div className="flex flex-wrap justify-start gap-1.5">
                           {Array.isArray(p.pCategory) ? (
                             p.pCategory.map((cat, idx) => (
                               <span key={idx} className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 text-[8px] font-black uppercase tracking-widest border border-slate-100 whitespace-nowrap">
@@ -273,13 +303,13 @@ export default function ProductDashboardAdmin() {
                       <td className="px-6 md:px-10 py-4 md:py-6">
                         <div className="space-y-2 md:space-y-2.5 min-w-[120px] md:min-w-[140px]">
                           <div className="flex items-center justify-between">
-                             <div className={`px-2.5 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border ${status.class}`}>
-                               {status.label}
-                             </div>
-                             <span className="text-[11px] md:text-xs font-black text-slate-900">{p.stock}</span>
+                            <div className={`px-2.5 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border ${status.class}`}>
+                              {status.label}
+                            </div>
+                            <span className="text-[11px] md:text-xs font-black text-slate-900">{p.stock}</span>
                           </div>
                           <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                            <div 
+                            <div
                               className={`h-full transition-all duration-1000 shadow-[0_0_8px_rgba(0,0,0,0.1)] ${p.stock <= 3 ? 'bg-primary' : 'bg-emerald-500'}`}
                               style={{ width: `${Math.min(100, (p.stock / 20) * 100)}%` }}
                             ></div>
@@ -288,16 +318,16 @@ export default function ProductDashboardAdmin() {
                       </td>
 
                       <td className="px-6 md:px-12 py-6 md:py-8 text-right">
-                        <div className="flex justify-end gap-2 md:gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                          <button 
+                        <div className="flex justify-end gap-2 md:gap-3 transition-all duration-300">
+                          <button
                             onClick={() => handleEditOpen(p)}
-                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-400 hover:text-primary hover:shadow-xl transition-all"
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-600 hover:text-primary hover:shadow-xl transition-all"
                           >
                             <Edit3 size={18} md:size={20} />
                           </button>
-                          <button 
+                          <button
                             onClick={() => setDeleteId(p._id)}
-                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-rose-100 text-rose-300 hover:text-rose-500 hover:shadow-xl transition-all"
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl transition-all border bg-white border-rose-100 text-rose-500 hover:text-rose-600 hover:shadow-xl"
                           >
                             <Trash2 size={18} md:size={20} />
                           </button>
@@ -317,44 +347,93 @@ export default function ProductDashboardAdmin() {
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
             <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between shrink-0">
-               <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-900 text-gold rounded-2xl"><Edit3 size={24} /></div>
-                  <div>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Product</h2>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Update Master Registry</p>
-                  </div>
-               </div>
-               <button onClick={() => setEditProduct(null)} className="p-4 hover:bg-slate-50 rounded-2xl transition-colors text-slate-400">
-                 <X size={24} />
-               </button>
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-slate-900 text-gold rounded-2xl"><Edit3 size={24} /></div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Product</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Update Master Registry</p>
+                </div>
+              </div>
+              <button onClick={() => setEditProduct(null)} className="p-4 hover:bg-slate-50 rounded-2xl transition-colors text-slate-400">
+                <X size={24} />
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 md:p-10 space-y-10 no-scrollbar">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
-                  <input 
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Name</label>
+                  <input
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.pName}
-                    onChange={(e) => setEditForm({...editForm, pName: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, pName: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Price (Rs.)</label>
-                  <input 
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Selling Price Rs.</label>
+                  <input
                     type="number"
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.price}
-                    onChange={(e) => setEditForm({...editForm, price: Number(e.target.value)})}
+                    onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Stock Quantity</label>
-                  <input 
+                <div className="space-y-4">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
+                    <Image size={12} />
+                    Product Image
+                  </label>
+                  <div
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary'); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-primary'); }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove('border-primary');
+                      const file = e.dataTransfer.files[0];
+                      if (file) handleFileChange({ target: { files: [file] } });
+                    }}
+                    onClick={() => document.getElementById('editFileInput').click()}
+                    className="w-full aspect-video rounded-3xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center bg-white hover:bg-slate-50 transition-all cursor-pointer group relative overflow-hidden"
+                  >
+                    {editForm.images?.[0] ? (
+                      <div className="absolute inset-0 group">
+                        <img
+                          src={editForm.images[0]}
+                          alt="Preview"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="p-3 bg-white/20 rounded-full text-white"><Upload size={20} /></div>
+                            <p className="text-[10px] font-black text-white uppercase tracking-widest">Drop image to update</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-500">
+                          <Upload className="text-slate-400 w-6 h-6" />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Add Product Image</p>
+                      </>
+                    )}
+                    <input
+                      id="editFileInput"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock Quantity</label>
+                  <input
                     type="number"
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.stock}
-                    onChange={(e) => setEditForm({...editForm, stock: Number(e.target.value)})}
+                    onChange={(e) => setEditForm({ ...editForm, stock: Number(e.target.value) })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -374,38 +453,38 @@ export default function ProductDashboardAdmin() {
                   </select>
                 </div>
                 <div className="space-y-2 flex flex-col justify-end">
-                   <label className="flex items-center gap-3 cursor-pointer group mb-2">
-                      <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">Raw Ingredient Status</span>
-                      <div className="relative">
-                        <input 
-                          type="checkbox" 
-                          className="sr-only peer"
-                          checked={editForm.isIngredient}
-                          onChange={(e) => setEditForm({...editForm, isIngredient: e.target.checked})}
-                        />
-                        <div className="w-11 h-6 bg-slate-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                      </div>
-                   </label>
+                  <label className="flex items-center gap-3 cursor-pointer group mb-2">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">Raw Ingredient Status</span>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={editForm.isIngredient}
+                        onChange={(e) => setEditForm({ ...editForm, isIngredient: e.target.checked })}
+                      />
+                      <div className="w-11 h-6 bg-slate-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </div>
+                  </label>
                 </div>
               </div>
 
               {!editForm.isIngredient && (
                 <div className="p-8 bg-slate-900 rounded-[32px] text-white">
                   <div className="flex items-center justify-between mb-8">
-                     <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-white/10 text-gold rounded-lg border border-white/10"><Settings size={18} /></div>
-                        <h3 className="text-base font-black text-white tracking-tight uppercase">Recipe Configuration</h3>
-                     </div>
-                     <button 
-                        type="button"
-                        onClick={() => setEditForm(prev => ({
-                          ...prev,
-                          recipe: [...(prev.recipe || []), { ingredientId: "", quantity: 1 }]
-                        }))}
-                        className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                      >
-                        + Add Ingredient
-                      </button>
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-white/10 text-gold rounded-lg border border-white/10"><Settings size={18} /></div>
+                      <h3 className="text-base font-black text-white tracking-tight uppercase">Recipe Configuration</h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditForm(prev => ({
+                        ...prev,
+                        recipe: [...(prev.recipe || []), { ingredientId: "", quantity: 1 }]
+                      }))}
+                      className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                    >
+                      + Add Ingredient
+                    </button>
                   </div>
 
                   <div className="space-y-4">
@@ -413,13 +492,13 @@ export default function ProductDashboardAdmin() {
                       <div key={index} className="flex items-end gap-4">
                         <div className="flex-1 space-y-2">
                           <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Ingredient</label>
-                          <select 
+                          <select
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-gold transition-all font-bold text-white text-sm"
                             value={item.ingredientId?._id || item.ingredientId}
                             onChange={(e) => {
                               const newRecipe = [...editForm.recipe];
                               newRecipe[index].ingredientId = e.target.value;
-                              setEditForm({...editForm, recipe: newRecipe});
+                              setEditForm({ ...editForm, recipe: newRecipe });
                             }}
                           >
                             <option value="" className="bg-slate-900">Choose...</option>
@@ -430,21 +509,21 @@ export default function ProductDashboardAdmin() {
                         </div>
                         <div className="w-24 space-y-2">
                           <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Qty</label>
-                          <input 
+                          <input
                             type="number"
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-sm"
                             value={item.quantity}
                             onChange={(e) => {
                               const newRecipe = [...editForm.recipe];
                               newRecipe[index].quantity = Number(e.target.value);
-                              setEditForm({...editForm, recipe: newRecipe});
+                              setEditForm({ ...editForm, recipe: newRecipe });
                             }}
                           />
                         </div>
-                        <button 
+                        <button
                           onClick={() => {
                             const newRecipe = editForm.recipe.filter((_, i) => i !== index);
-                            setEditForm({...editForm, recipe: newRecipe});
+                            setEditForm({ ...editForm, recipe: newRecipe });
                           }}
                           className="p-3 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all"
                         >
@@ -463,20 +542,63 @@ export default function ProductDashboardAdmin() {
             </div>
 
             <div className="p-8 md:p-10 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-4 shrink-0">
-               <button 
+              <button
                 onClick={() => setEditProduct(null)}
-                className="px-8 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-colors"
-               >
-                 Discard
-               </button>
-               <button 
+                className="px-8 py-4 bg-primary text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all shadow-lg"
+              >
+                Discard
+              </button>
+              <button
                 onClick={handleEditSave}
                 className="px-10 py-4 bg-slate-900 text-gold rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-3 hover:bg-primary hover:text-white transition-all shadow-xl shadow-slate-200"
-               >
-                 Save Changes
-                 <Save size={16} />
-               </button>
+              >
+                Save Changes
+                <Save size={16} />
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 md:p-0">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setDeleteId(null)}
+          ></div>
+
+          <div className="relative w-full max-w-[440px] bg-white rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 fade-in duration-300">
+            <div className="h-2 w-full bg-primary"></div>
+
+            <div className="p-8 md:p-12 text-center">
+              <div className="w-20 h-20 bg-rose-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <Trash2 size={36} className="text-primary animate-pulse" />
+              </div>
+
+              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase leading-tight mb-4">
+                Confirm <span className="text-primary italic">Deletion</span>
+              </h2>
+
+              <p className="text-sm font-medium text-slate-400 mb-10 leading-relaxed px-4">
+                Permanently erase this product from the inventory? This action is irreversible.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => setDeleteId(null)}
+                  className="flex-1 py-4.5 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDelete(deleteId)}
+                  className="flex-1 py-4.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 hover:bg-primary transition-all duration-500"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-slate-50 rounded-full opacity-50 -z-10"></div>
           </div>
         </div>
       )}

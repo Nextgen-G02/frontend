@@ -12,6 +12,7 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "../../../shared/context/AuthContext";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -80,17 +81,46 @@ export default function AuthPage() {
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      const res = await axios.post(
+        import.meta.env.VITE_BACKEND_URL + "/api/auth/google-login",
+        { tokenId: credentialResponse.credential }
+      );
+
+      login(res.data.user, res.data.token);
+      toast.success(res.data.message);
+
+      switch (res.data.user.role) {
+        case "admin":
+          navigate("/admin");
+          break;
+        case "staff":
+          navigate("/staff");
+          break;
+        default:
+          navigate("/");
+      }
+    } catch (error) {
+      console.error("Google Login Error:", error);
+      toast.error(error.response?.data?.message || "Google authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <Navbar />
-      <div className="min-h-screen pt-32 pb-12 bg-slate-50 flex items-center justify-center px-4 sm:px-6 lg:px-8 animate-in fade-in duration-1000">
-        <div className="w-full max-w-[1300px] bg-white rounded-[32px] md:rounded-[48px] shadow-[0_64px_128px_-24px_rgba(0,0,0,0.1)] overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[auto] md:min-h-[750px] border border-white">
+      <div className="min-h-screen pt-24 md:pt-32 pb-12 bg-slate-50 flex items-center justify-center px-4 sm:px-6 lg:px-8 animate-in fade-in duration-1000">
+        <div className="w-full max-w-5xl bg-white rounded-[32px] md:rounded-[48px] shadow-[0_64px_128px_-24px_rgba(0,0,0,0.1)] overflow-hidden grid grid-cols-1 lg:grid-cols-2 min-h-[auto] md:min-h-[650px] border border-white">
 
           {/* LEFT HERO PANEL - DARK AUTHENTICITY */}
-          <div className="relative hidden lg:block lg:col-span-7 overflow-hidden">
+          <div className="relative hidden lg:block overflow-hidden">
             <img
-              src="/images/login_cake.png"
-              alt="Nirosha Heritage"
+              src="/images/leftimg.png"
+              alt="Nirosha Sweet House Storefront"
               className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-[3s]"
             />
 
@@ -101,44 +131,33 @@ export default function AuthPage() {
               </div>
 
               <div>
-                <h1 className="heading-premium text-6xl mb-6 leading-tight drop-shadow-2xl">
-                  {isLogin
-                    ? ""
-                    : ""}
+                <h1 className="heading-premium text-4xl lg:text-5xl mb-6 leading-tight text-gold drop-shadow-2xl">
+         
                 </h1>
 
                 <div className="h-px w-20 bg-primary mb-8"></div>
 
                 <p className="text-base xl:text-lg text-slate-300 leading-relaxed max-w-md font-medium italic">
-                  {isLogin
-                    ? ""
-                    : ""}
+                  
                 </p>
               </div>
 
               <div className="flex items-center gap-6">
-                <div className="flex -space-x-3">
-                    {[1,2,3].map(i => (
-                      <div key={i} className="w-10 h-10 rounded-full border-2 border-slate-900 bg-slate-800 flex items-center justify-center overflow-hidden">
-                        <User size={16} className="text-slate-400" />
-                      </div>
-                    ))}
-                </div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Trusted by over 100+ artisans</p>
+                
               </div>
             </div>
           </div>
 
           {/* RIGHT FORM PANEL - LIGHT REFINEMENT */}
-          <div className="lg:col-span-5 p-6 sm:p-10 md:p-12 lg:p-20 flex flex-col justify-center bg-white relative">
+          <div className="p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-white relative">
             <div className="absolute top-6 md:top-10 right-6 md:right-10 flex gap-2">
               <div className="w-2 h-2 rounded-full bg-slate-100"></div>
               <div className="w-2 h-2 rounded-full bg-slate-200"></div>
               <div className="w-2 h-2 rounded-full bg-primary"></div>
             </div>
 
-            <div className="mb-10 sm:mb-12 md:mb-16">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-3 md:mb-5 tracking-tighter">
+            <div className="mb-8 sm:mb-10">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mb-2 md:mb-4 tracking-tighter">
                 {isLogin ? "Sign In" : "Register"}
               </h1>
 
@@ -172,7 +191,7 @@ export default function AuthPage() {
                       value={formData.firstName}
                       onChange={handleChange}
                       placeholder="John"
-                      className="w-full px-6 md:px-8 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
+                      className="w-full px-5 md:px-6 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                       required={!isLogin}
                     />
                   </div>
@@ -187,7 +206,7 @@ export default function AuthPage() {
                       value={formData.lastName}
                       onChange={handleChange}
                       placeholder="Doe"
-                      className="w-full px-6 md:px-8 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
+                      className="w-full px-5 md:px-6 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                       required={!isLogin}
                     />
                   </div>
@@ -212,7 +231,7 @@ export default function AuthPage() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="name@nirosha.com"
-                    className="w-full pl-14 md:pl-16 pr-6 md:pr-8 py-3.5 md:py-4.5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[32px] outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
+                    className="w-full pl-12 md:pl-14 pr-5 md:pr-6 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[32px] outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                     required
                   />
                 </div>
@@ -236,7 +255,7 @@ export default function AuthPage() {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="••••••••••••"
-                    className="w-full pl-14 md:pl-16 pr-6 md:pr-8 py-3 md:py-4 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[32px] outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
+                    className="w-full pl-12 md:pl-14 pr-5 md:pr-6 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[32px] outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                     required
                   />
                 </div>
@@ -247,7 +266,7 @@ export default function AuthPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-slate-900 text-gold py-4.5 md:py-5 rounded-2xl md:rounded-[32px] font-black text-[10px] md:text-xs uppercase tracking-[0.4em] hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-4 shadow-2xl shadow-slate-200 active:scale-95 disabled:opacity-50 border border-white/10"
+                  className="w-full bg-slate-900 text-gold py-3.5 md:py-4 rounded-2xl md:rounded-[32px] font-black text-[10px] md:text-xs uppercase tracking-[0.4em] hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-4 shadow-2xl shadow-slate-200 active:scale-95 disabled:opacity-50 border border-white/10"
                 >
                   {loading
                     ? "Synchronizing..."
@@ -259,12 +278,34 @@ export default function AuthPage() {
                     (isLogin ? <LogIn size={16} md:size={18} /> : <UserPlus size={16} md:size={18} />)}
                 </button>
                 
-                {isLogin && (
-                  <p className="mt-8 text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
-                    Secure End-to-End Encryption Enabled
-                  </p>
-                )}
               </div>
+
+              {/* OR SEPARATOR */}
+              <div className="relative flex items-center gap-4 pt-4">
+                <div className="h-px bg-slate-100 flex-1"></div>
+                <span className="text-[9px] font-black uppercase text-slate-300 tracking-[0.3em]">OR</span>
+                <div className="h-px bg-slate-100 flex-1"></div>
+              </div>
+
+              {/* GOOGLE LOGIN */}
+              <div className="flex justify-center pt-2">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => {
+                    toast.error("Google Login Failed");
+                  }}
+                  useOneTap
+                  theme="filled_black"
+                  shape="pill"
+                  width="100%"
+                />
+              </div>
+
+              {isLogin && (
+                <p className="mt-8 text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+                  Secure End-to-End Encryption Enabled
+                </p>
+              )}
 
             </form>
           </div>
