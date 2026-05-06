@@ -273,8 +273,8 @@ const InventoryDashboard = () => {
                             className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 text-xs font-bold text-slate-900 appearance-none"
                         >
                             <option value="All">All Items</option>
-                            <option value="Low">Low Stock Only</option>
-                            <option value="Optimal">Optimal Only</option>
+                            <option value="Low">LOW STOCK</option>
+                            <option value="Optimal">IN STOCK</option>
                         </select>
                     </div>
                     <div className="flex items-end pb-1 px-2">
