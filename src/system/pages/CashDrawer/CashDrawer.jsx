@@ -232,14 +232,18 @@ export default function CashDrawer() {
 
               <div className="mt-10 pt-10 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
                 <div>
-                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-1">Expected Closing Balance</p>
+                  <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-1">Expected Balance</p>
                   <p className="text-5xl font-black tracking-tighter">Rs.{drawer.closingBalance.toLocaleString()}</p>
                 </div>
                 {drawer.status === 'Closed' && (
                   <div className="text-right">
                     <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] mb-1">Difference</p>
-                    <p className={`text-2xl font-black ${drawer.difference === 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {drawer.difference === 0 ? 'No Difference' : `Rs.${drawer.difference.toLocaleString()}`}
+                    <p className={`text-2xl font-black ${
+                      drawer.difference > 0 ? 'text-emerald-400' : 
+                      drawer.difference < 0 ? 'text-rose-400' : 
+                      'text-white/40'
+                    }`}>
+                      {drawer.difference === 0 ? 'No Difference' : (drawer.difference > 0 ? '+' : '') + `Rs.${drawer.difference.toLocaleString()}`}
                     </p>
                   </div>
                 )}
@@ -260,7 +264,7 @@ export default function CashDrawer() {
                   <thead>
                     <tr className="bg-slate-50/30">
                       <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Date</th>
-                      <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Expected</th>
+                      <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Expected Balance</th>
                       <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Actual</th>
                       <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest">Difference</th>
                       <th className="px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Status</th>
@@ -279,7 +283,11 @@ export default function CashDrawer() {
                           <span className="text-sm font-black text-slate-900">Rs.{log.actualBalance.toLocaleString()}</span>
                         </td>
                         <td className="px-10 py-6">
-                          <span className={`text-sm font-black ${log.difference === 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          <span className={`text-sm font-black ${
+                            log.difference > 0 ? 'text-emerald-500' : 
+                            log.difference < 0 ? 'text-rose-500' : 
+                            'text-slate-400'
+                          }`}>
                             {log.difference > 0 ? '+' : ''}{log.difference.toLocaleString()}
                           </span>
                         </td>
