@@ -70,7 +70,7 @@ export default function ProductDashboardAdmin() {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await fetch(`${API_BASE}/delete/${id}`, { 
+      await fetch(`${API_BASE}/delete/${id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -90,6 +90,14 @@ export default function ProductDashboardAdmin() {
   };
 
   const handleEditSave = async () => {
+    if (!editForm.pName || editForm.price <= 0) {
+      toast.error("Please provide a valid name and price (> 0)");
+      return;
+    }
+    if (editForm.stock < 0) {
+      toast.error("Stock cannot be negative");
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/update/${editProduct._id}`, {
         method: "PUT",
@@ -106,14 +114,14 @@ export default function ProductDashboardAdmin() {
       }
 
       const updated = await res.json();
-      
+
       setProducts((prev) =>
         prev.map((p) => (p._id === updated._id ? updated : p))
       );
-      
+
       setEditProduct(null);
       toast.success("Product updated successfully");
-      fetchProducts(); 
+      fetchProducts();
     } catch (error) {
       console.error("Update error:", error);
       toast.error(error.message || "Failed to update product");
@@ -373,9 +381,14 @@ export default function ProductDashboardAdmin() {
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Selling Price Rs.</label>
                   <input
                     type="number"
+                    min="0.01"
+                    step="0.01"
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.price}
-                    onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      if (val >= 0) setEditForm({ ...editForm, price: val });
+                    }}
                   />
                 </div>
                 <div className="space-y-4">
@@ -431,9 +444,13 @@ export default function ProductDashboardAdmin() {
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock Quantity</label>
                   <input
                     type="number"
+                    min="0"
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.stock}
-                    onChange={(e) => setEditForm({ ...editForm, stock: Number(e.target.value) })}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      if (val >= 0) setEditForm({ ...editForm, stock: val });
+                    }}
                   />
                 </div>
                 <div className="space-y-2">
@@ -580,7 +597,7 @@ export default function ProductDashboardAdmin() {
               </h2>
 
               <p className="text-sm font-medium text-slate-400 mb-10 leading-relaxed px-4">
-                Permanently erase this product from the inventory? This action is irreversible.
+                Permanently erase this product from the inventory?
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
