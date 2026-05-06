@@ -198,8 +198,10 @@ const InventoryDashboard = () => {
                 <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
-                        <div className="p-3.5 bg-white/10 text-gold rounded-xl border border-white/5 backdrop-blur-xl shadow-lg"><Activity size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-white/5 text-gold border border-white/10 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Products</span>
+                        <div className="p-4 bg-emerald-500 text-white rounded-2xl shadow-xl shadow-emerald-500/20">
+                            <Activity size={24} md:size={32} />
+                        </div>
+                        <span className="px-3.5 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Products</span>
                     </div>
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Total Products</p>
                     <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.length}</p>
@@ -208,40 +210,44 @@ const InventoryDashboard = () => {
                 <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
-                        <div className="p-3.5 bg-primary text-white rounded-xl shadow-xl shadow-primary/20"><AlertTriangle size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-rose-500/10 text-primary border border-rose-500/20 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Alerts</span>
+                        <div className="p-4 bg-amber-500 text-slate-900 rounded-2xl shadow-xl shadow-amber-500/20">
+                            <AlertTriangle size={24} md:size={32} />
+                        </div>
+                        <span className="px-3.5 py-1.5 bg-amber-500 text-slate-900 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Alerts</span>
                     </div>
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Low Stock Items</p>
                     <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.filter(i => i.quantity <= i.lowStockLevel).length}</p>
                 </div>
             </div>
 
-            {/* Tab Bar */}
-            <div className="flex items-center gap-6 border-b border-slate-100">
+            {/* Tab Bar - Redesigned as Pill Buttons */}
+            <div className="flex items-center p-1.5 bg-slate-100 rounded-2xl w-fit gap-2">
                 <button 
                     onClick={() => setActiveTab("Stock")}
-                    className={`pb-4 px-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative ${
-                        activeTab === "Stock" ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
+                    className={`px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-xl ${
+                        activeTab === "Stock" 
+                        ? "bg-slate-900 text-white shadow-lg" 
+                        : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
                     }`}
                 >
                     Current Stock
-                    {activeTab === "Stock" && <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-full animate-in slide-in-from-bottom-1 duration-300"></div>}
                 </button>
                 <button 
                     onClick={() => setActiveTab("Usage")}
-                    className={`pb-4 px-2 text-[10px] font-black uppercase tracking-[0.3em] transition-all relative ${
-                        activeTab === "Usage" ? "text-slate-900" : "text-slate-400 hover:text-slate-600"
+                    className={`px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-xl ${
+                        activeTab === "Usage" 
+                        ? "bg-slate-900 text-white shadow-lg" 
+                        : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
                     }`}
                 >
                     Usage History
-                    {activeTab === "Usage" && <div className="absolute bottom-0 left-0 w-full h-1 bg-primary rounded-full animate-in slide-in-from-bottom-1 duration-300"></div>}
                 </button>
             </div>
 
             {activeTab === "Stock" ? (
                 <>
                 {/* Filter Bar */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 bg-white p-8 md:p-10 rounded-[32px] md:rounded-[40px] border border-slate-100 shadow-xl mb-10">
                     <div className="space-y-1.5">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Search Products</label>
                         <input 
@@ -277,9 +283,6 @@ const InventoryDashboard = () => {
                             <option value="Optimal">IN STOCK</option>
                         </select>
                     </div>
-                    <div className="flex items-end pb-1 px-2">
-                        <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-tight">Showing {filteredInventory.length} of {inventory.length} items</p>
-                    </div>
                 </div>
 
             {/* Inventory Table */}
@@ -300,7 +303,7 @@ const InventoryDashboard = () => {
                                 <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-32 whitespace-nowrap text-center">Stock Level</th>
                                 <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-32 whitespace-nowrap text-right">Alert At</th>
                                 <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-40 whitespace-nowrap text-center">Status</th>
-                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-40 whitespace-nowrap text-right">Quick Action</th>
+                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-40 whitespace-nowrap text-right">Manage</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
