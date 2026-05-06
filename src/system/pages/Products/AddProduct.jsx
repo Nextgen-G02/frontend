@@ -32,7 +32,7 @@ export default function AddProduct() {
     costPrice: "",
     stock: "",
     expiryDate: "",
-    unit: "Unit (Pcs)",
+    unit: "pcs",
     status: "Active",
     description: "New product entry",
     weight: 0,
@@ -298,11 +298,13 @@ export default function AddProduct() {
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Measurement Unit</label>
               <select name="unit" value={form.unit} onChange={handleChange} className={inputClass("unit")}>
-                <option>Unit (Pcs)</option>
-                <option>kg</option>
-                <option>g</option>
-                <option>ml</option>
-                <option>l</option>
+                <option value="pcs">pcs</option>
+                <option value="kg">kg</option>
+                <option value="g">g</option>
+                <option value="ml">ml</option>
+                <option value="l">l</option>
+                <option value="box">box</option>
+                <option value="pkt">pkt</option>
               </select>
             </div>
 

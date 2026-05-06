@@ -162,7 +162,7 @@ export default function AdminLayout({ children }) {
         )}
 
         {/* Page Content */}
-        <div className={`${(location.pathname === '/pos' || location.pathname.startsWith('/orders')) ? 'p-0' : 'px-6 md:px-10 py-6 md:py-8 lg:px-10'}`}>
+        <div className={`${(location.pathname === '/pos' || location.pathname.startsWith('/orders') || location.pathname === '/inventory') ? 'p-0' : 'px-6 md:px-10 py-6 md:py-8 lg:px-10'}`}>
           {children}
         </div>
       </main>
