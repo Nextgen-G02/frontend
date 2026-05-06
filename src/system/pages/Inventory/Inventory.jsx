@@ -172,7 +172,7 @@ const InventoryDashboard = () => {
     });
 
     return (
-        <div className="space-y-10 max-w-[1500px] mx-auto">
+        <div className="space-y-10 max-w-full mx-auto p-6">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-slate-100">
                 <div>
                     <div className="flex items-center gap-2.5 mb-3">
@@ -194,38 +194,25 @@ const InventoryDashboard = () => {
             </div>
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
-                        <div className="p-3.5 bg-slate-900 text-gold rounded-xl shadow-lg"><Activity size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-slate-50 text-slate-400 border border-slate-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Products</span>
+                        <div className="p-3.5 bg-white/10 text-gold rounded-xl border border-white/5 backdrop-blur-xl shadow-lg"><Activity size={20} md:size={24} /></div>
+                        <span className="px-3.5 py-1 bg-white/5 text-gold border border-white/10 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Products</span>
                     </div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10 leading-none">Total Products</p>
-                    <p className="text-3xl md:text-5xl font-black text-slate-900 mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.length}</p>
-                </div>
-
-                <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
-                    <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
-                        <div className="p-3.5 bg-primary text-white rounded-xl shadow-xl shadow-primary/20"><AlertTriangle size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-rose-50 text-primary border border-rose-100 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Alerts</span>
-                    </div>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest relative z-10 leading-none">Low Stock Items</p>
-                    <p className="text-3xl md:text-5xl font-black text-slate-900 mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.filter(i => i.quantity <= i.lowStockLevel).length}</p>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Total Products</p>
+                    <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.length}</p>
                 </div>
 
                 <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-2xl relative overflow-hidden group">
-                    <div className="absolute bottom-0 right-0 w-48 h-48 bg-primary rounded-full blur-[80px] opacity-10"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
                     <div className="flex justify-between items-start mb-6 md:mb-8 relative z-10">
-                        <div className="p-3.5 bg-white/10 text-gold rounded-xl border border-white/5 backdrop-blur-xl"><ShieldCheck size={20} md:size={24} /></div>
-                        <span className="px-3.5 py-1 bg-white/5 text-gold border border-white/10 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Status</span>
+                        <div className="p-3.5 bg-primary text-white rounded-xl shadow-xl shadow-primary/20"><AlertTriangle size={20} md:size={24} /></div>
+                        <span className="px-3.5 py-1 bg-rose-500/10 text-primary border border-rose-500/20 rounded-full text-[8.5px] md:text-[9px] font-black uppercase tracking-widest leading-none">Alerts</span>
                     </div>
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Stock Health</p>
-                    <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">
-                        {inventory.length > 0 ? Math.round(((inventory.length - inventory.filter(i => i.quantity <= i.lowStockLevel).length) / inventory.length) * 100) : 100}
-                        <span className="text-xl md:text-2xl text-slate-600">%</span>
-                    </p>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest relative z-10 leading-none">Low Stock Items</p>
+                    <p className="text-3xl md:text-5xl font-black text-white mt-1.5 md:mt-2 tracking-tighter relative z-10 leading-none">{inventory.filter(i => i.quantity <= i.lowStockLevel).length}</p>
                 </div>
             </div>
 
@@ -308,12 +295,12 @@ const InventoryDashboard = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50">
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Info</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Category</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Stock Level</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Alert At</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
-                                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Quick Action</th>
+                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-full">Product Info</th>
+                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-32 whitespace-nowrap text-right">Category</th>
+                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-32 whitespace-nowrap text-center">Stock Level</th>
+                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-32 whitespace-nowrap text-right">Alert At</th>
+                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-40 whitespace-nowrap text-center">Status</th>
+                                <th className="px-4 md:px-5 py-4 text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] w-40 whitespace-nowrap text-right">Quick Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50">
@@ -340,7 +327,7 @@ const InventoryDashboard = () => {
                                     
                                     return (
                                         <tr key={item._id} className="hover:bg-white transition-all duration-300 group border-b border-slate-50/50">
-                                            <td className="px-8 md:px-10 py-5 md:py-6">
+                                            <td className="px-4 md:px-5 py-4 md:py-5">
                                                 <div className="flex items-center gap-5">
                                                     <div className="relative">
                                                         <div className={`w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner group-hover:shadow-md transition-all`}>
@@ -358,47 +345,47 @@ const InventoryDashboard = () => {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-8 md:px-10 py-5 md:py-6">
-                                                <span className="px-3.5 py-1.5 bg-slate-50 text-slate-400 border border-slate-100 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                                            <td className="px-4 md:px-5 py-4 md:py-5 text-right">
+                                                <span className="px-3.5 py-1.5 bg-slate-50 text-slate-400 border border-slate-100 rounded-lg text-[10px] font-black uppercase tracking-widest">
                                                     {item.productId?.pCategory || "No Category"}
                                                 </span>
                                             </td>
-                                            <td className="px-8 md:px-10 py-5 md:py-6">
-                                                <div className="flex flex-col">
+                                            <td className="px-4 md:px-5 py-4 md:py-5 text-center">
+                                                <div className="flex flex-col items-center">
                                                    <span className={`text-2xl md:text-3xl font-black tracking-tighter leading-none ${isLow ? "text-primary" : "text-slate-900"}`}>
                                                        {item.quantity}
                                                    </span>
-                                                   <span className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1.5 leading-none">Units in Stock</span>
+                                                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1.5 leading-none">Units in Stock</span>
                                                 </div>
                                             </td>
-                                            <td className="px-8 md:px-10 py-5 md:py-6">
-                                                <div className="relative w-28 md:w-32 group/input">
+                                            <td className="px-4 md:px-5 py-4 md:py-5 text-right">
+                                                <div className="relative w-28 md:w-32 group/input ml-auto">
                                                     <input 
                                                         type="number"
                                                         defaultValue={item.lowStockLevel}
                                                         onBlur={(e) => updateThreshold(item._id, e.target.value)}
-                                                        className="w-full pl-4 md:pl-5 pr-8 md:pr-10 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-xs md:text-sm font-black text-slate-900 transition-all shadow-sm"
+                                                        className="w-full pl-4 md:pl-5 pr-8 md:pr-10 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-xl md:rounded-2xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary text-xs md:text-sm font-black text-slate-900 transition-all shadow-sm text-right"
                                                     />
                                                     <Settings className="absolute right-3.5 top-3 md:top-3.5 text-slate-300 group-hover/input:text-primary transition-colors" size={14} md:size={16} />
                                                 </div>
                                             </td>
-                                            <td className="px-8 md:px-10 py-5 md:py-6">
-                                                <div className="flex flex-col gap-2">
+                                            <td className="px-4 md:px-5 py-4 md:py-5 text-center">
+                                                <div className="flex flex-col gap-2 items-center">
                                                     {isLow ? (
-                                                        <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-rose-50 text-primary border border-rose-100 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] leading-none w-fit">
-                                                            <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-primary rounded-full animate-ping"></div> LOW STOCK
+                                                        <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-rose-50 text-primary border border-rose-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] leading-none w-fit">
+                                                            <div className="w-1.5 h-1.5 bg-primary rounded-full animate-ping"></div> LOW STOCK
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] leading-none w-fit">
-                                                            <ShieldCheck size={12} md:size={14} /> HEALTHY
+                                                        <span className="inline-flex items-center gap-2.5 px-3.5 md:px-5 py-1.5 md:py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] leading-none w-fit">
+                                                            <ShieldCheck size={14} /> IN STOCK
                                                         </span>
                                                     )}
-                                                    <p className="text-[7px] font-black text-slate-300 uppercase tracking-widest ml-1">
+                                                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
                                                         Updated: {new Date(item.lastUpdated).toLocaleDateString()}
                                                     </p>
                                                 </div>
                                             </td>
-                                            <td className="px-8 md:px-10 py-5 md:py-6 text-right">
+                                            <td className="px-4 md:px-5 py-4 md:py-5 text-right">
                                                 <button 
                                                     onClick={() => {
                                                         setSelectedItem(item);
