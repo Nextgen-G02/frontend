@@ -17,7 +17,6 @@ import {
   History,
   Eye,
   XCircle,
-  Hash,
   ArrowLeft
 } from "lucide-react";
 import axios from "axios";
@@ -67,7 +66,8 @@ export default function POSTerminal() {
         headers: { Authorization: `Bearer ${token}` },
         params: { type: 'DirectSale' }
       });
-      setHistory(response.data);
+      const sortedData = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setHistory(sortedData);
     } catch {
       toast.error("Failed to load history");
     } finally {
@@ -89,20 +89,7 @@ export default function POSTerminal() {
     }
   };
 
-  const handleAddIMEI = async (orderId) => {
-    const imei = prompt("Enter IMEI/Serial Number:");
-    if (imei === null) return;
-    try {
-      const token = localStorage.getItem('token');
-      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${orderId}`, { imei }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success("IMEI updated");
-      fetchHistory();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update IMEI");
-    }
-  };
+
 
   const addToCart = (product) => {
     setCart(prev => {
@@ -292,7 +279,17 @@ export default function POSTerminal() {
                     </div>
                     <div className="space-y-1">
                       <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-tight line-clamp-2 h-8">{product.pName}</h3>
-                      <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-400 font-bold uppercase">/ {product.unit || 'pcs'}</span></p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-400 font-bold uppercase">/ {product.unit || 'pcs'}</span></p>
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${
+                          product.stock > 10 ? 'bg-emerald-50 text-emerald-600' : 
+                          product.stock > 0 ? 'bg-amber-50 text-amber-600' : 
+                          'bg-rose-50 text-rose-600'
+                        }`}>
+                          {product.stock > 0 ? `${product.stock} IN STOCK` : 'OUT OF STOCK'}
+                        </span>
+                      </div>
+                      <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em]">{product.productId}</p>
                     </div>
                   </button>
                 ))
@@ -340,7 +337,6 @@ export default function POSTerminal() {
                             </td>
                             <td className="px-6 py-4">
                               <p className="font-black text-slate-900 text-xs uppercase">{order.customerName}</p>
-                              {order.imei && <p className="text-[8px] font-black text-primary mt-0.5">IMEI: {order.imei}</p>}
                             </td>
                             <td className="px-6 py-4 font-black text-slate-900 text-sm">Rs.{order.totalAmount.toLocaleString()}</td>
                             <td className="px-6 py-4">
@@ -358,13 +354,7 @@ export default function POSTerminal() {
                                >
                                  <Eye size={16} />
                                </button>
-                               <button 
-                                 onClick={() => handleAddIMEI(order._id)}
-                                 className="p-2 bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                 title="Add IMEI"
-                               >
-                                 <Hash size={16} />
-                               </button>
+
                                {order.orderStatus !== 'Cancelled' && (
                                  <button 
                                    onClick={() => handleCancelSale(order._id)}

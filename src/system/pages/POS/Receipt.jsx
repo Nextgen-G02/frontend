@@ -44,57 +44,95 @@ export default function Receipt({ order, onClose }) {
             }
           `}} />
 
-          <div className="text-center space-y-1 mb-8">
-            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">NIROSHA <span className="text-primary italic font-medium">Sweets</span></h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Premium Confectionery & Patisserie</p>
-            <div className="flex flex-col gap-0.5 mt-2">
-              <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">123 Galle Road, Colombo 03</p>
-              <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">+94 11 234 5678</p>
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-2">
+              <img 
+                src="/images/nirosha bg removed.png" 
+                alt="Nirosha Sweets" 
+                className="h-16 w-auto object-contain"
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
             </div>
+            <p className="text-[10px] text-slate-900 font-black uppercase tracking-widest">Nirosha Sweets</p>
+            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-tight">
+              Kurundugahahetekma, Elpitiya <br/> 076 670 9860
+            </p>
             <div className="h-px w-12 bg-slate-100 mx-auto mt-4"></div>
           </div>
 
-          <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-4">
+          <div className="grid grid-cols-2 gap-4 text-[8px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-50 pb-4">
             <div className="space-y-1">
-               <p>Date: {order.scheduleDate || new Date().toLocaleDateString()}</p>
-               <p>Time: {order.scheduleTime || new Date().toLocaleTimeString()}</p>
+               <p><span className="text-slate-300">Date:</span> {order.scheduleDate || new Date().toLocaleDateString()}</p>
+               <p><span className="text-slate-300">Time:</span> {order.scheduleTime || new Date().toLocaleTimeString()}</p>
+               <p><span className="text-slate-300">Ref:</span> #{order._id?.slice(-8).toUpperCase()}</p>
             </div>
             <div className="text-right space-y-1">
-               <p>Customer: {order.customerName}</p>
-               <p>Type: {order.type}</p>
+               <p><span className="text-slate-300">Customer:</span> {order.customerName}</p>
+               <p><span className="text-slate-300">Payment:</span> {order.paymentMethod || 'Cash'}</p>
+               <p><span className="text-slate-300">Type:</span> {order.type || 'Direct'}</p>
             </div>
           </div>
 
-          <div className="space-y-4 mb-8">
-            {order.items?.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-start gap-4">
-                <div className="flex-1">
-                  <p className="text-[11px] font-black text-slate-900 uppercase leading-tight">{item.pName}</p>
-                  <p className="text-[9px] text-slate-400 font-bold mt-0.5">{item.quantity} {item.unit || 'pcs'} x Rs.{item.price}</p>
-                </div>
-                <p className="text-[11px] font-black text-slate-900 whitespace-nowrap">Rs.{item.price * item.quantity}</p>
-              </div>
-            ))}
+          {/* Tabular Items */}
+          <div className="mb-8">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-100 text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="py-2 text-left w-8">#</th>
+                  <th className="py-2 text-left">Description</th>
+                  <th className="py-2 text-center w-20">Price</th>
+                  <th className="py-2 text-center w-12">Qty</th>
+                  <th className="py-2 text-right w-20">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {order.items?.map((item, idx) => (
+                  <tr key={idx} className="text-[10px]">
+                    <td className="py-3 text-slate-300 font-bold">{idx + 1}</td>
+                    <td className="py-3 pr-4">
+                      <p className="font-black text-slate-900 uppercase leading-tight">{item.pName}</p>
+                    </td>
+                    <td className="py-3 text-center font-black text-slate-400">
+                       <span className="text-slate-900">Rs.{item.price}</span>
+                       <span className="text-[7px] block">/{item.unit || 'pcs'}</span>
+                    </td>
+                    <td className="py-3 text-center font-black text-slate-900">{item.quantity}</td>
+                    <td className="py-3 text-right font-black text-slate-900">Rs.{item.price * item.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
           <div className="border-t-2 border-dashed border-slate-100 pt-6 space-y-2">
-            <div className="flex justify-between items-center text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-              <p>Subtotal</p>
-              <p>Rs.{order.totalAmount}</p>
+            <div className="flex justify-between items-center text-slate-400 font-bold text-[9px] uppercase tracking-widest">
+              <p>Total Items: {order.items?.length || 0}</p>
+              <div className="text-right">
+                <p>Subtotal: Rs.{order.totalAmount}</p>
+              </div>
             </div>
-            <div className="flex justify-between items-center text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-              <p>Tax (0%)</p>
-              <p>Rs.0</p>
-            </div>
-            <div className="flex justify-between items-center pt-2">
-              <p className="text-[12px] font-black text-slate-900 uppercase tracking-widest">Grand Total</p>
-              <p className="text-xl font-black text-primary tracking-tighter">Rs.{order.totalAmount}</p>
+            <div className="flex justify-between items-center pt-4 bg-slate-50 -mx-8 px-8 py-4">
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Payable</p>
+                <p className="text-[8px] text-slate-300 font-bold uppercase mt-1 italic">Incl. all taxes</p>
+              </div>
+              <p className="text-2xl font-black text-primary tracking-tighter">Rs.{order.totalAmount.toLocaleString()}</p>
             </div>
           </div>
 
-          <div className="mt-10 text-center">
-            <div className="inline-block p-4 bg-slate-50 rounded-2xl border border-slate-100">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Thank you for your visit!</p>
+          <div className="mt-10 text-center space-y-4">
+            <div className="inline-block p-4 bg-slate-50/50 rounded-2xl border border-slate-100 w-full">
+               <p className="text-[9px] font-black text-slate-900 uppercase tracking-[0.2em]">Thank you for shopping with us!</p>
+               <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-2 leading-relaxed">
+                 Please keep this receipt for returns within 7 days. <br/>
+                 Items must be in original packaging.
+               </p>
+            </div>
+            
+            <div className="flex justify-center gap-4 opacity-20 grayscale">
+               <div className="w-8 h-8 bg-slate-900 rounded-full"></div>
+               <div className="w-8 h-8 bg-slate-900 rounded-full"></div>
+               <div className="w-8 h-8 bg-slate-900 rounded-full"></div>
             </div>
           </div>
         </div>
