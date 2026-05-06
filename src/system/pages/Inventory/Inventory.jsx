@@ -145,6 +145,20 @@ const InventoryDashboard = () => {
         }
     };
 
+    const updateThreshold = async (id, newLevel) => {
+        try {
+            const token = localStorage.getItem("token");
+            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/inventory/${id}/threshold`, 
+                { lowStockLevel: Number(newLevel) },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success("Alert threshold updated");
+            fetchInventory();
+        } catch (error) {
+            toast.error("Failed to update threshold");
+        }
+    };
+
     const filteredInventory = inventory.filter(item => {
         const matchesSearch = item.productId?.pName?.toLowerCase().includes(search.toLowerCase()) || 
                              item.productId?.productId?.toLowerCase().includes(search.toLowerCase());
