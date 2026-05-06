@@ -150,7 +150,9 @@ const OrderDetails = () => {
                                                         <p className="text-xs font-bold text-slate-600 leading-none">Rs.{item.price.toLocaleString()}</p>
                                                     </td>
                                                     <td className="px-5 md:px-7 py-4 text-center">
-                                                        <p className="text-xs font-black text-slate-900 leading-none bg-slate-100 w-fit mx-auto px-2 py-1 rounded-md">{item.quantity}</p>
+                                                        <p className="text-xs font-black text-slate-900 leading-none bg-slate-100 w-fit mx-auto px-2 py-1 rounded-md">
+                                                            {item.quantity} <span className="text-[10px] text-slate-400 lowercase">{item.unit || 'pcs'}</span>
+                                                        </p>
                                                     </td>
                                                     <td className="px-5 md:px-7 py-4 text-right">
                                                         <p className="text-sm font-black text-slate-900 leading-none">

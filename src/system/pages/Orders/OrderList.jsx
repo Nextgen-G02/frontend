@@ -36,7 +36,8 @@ const OrderList = () => {
                 headers: { Authorization: `Bearer ${token}` },
                 params: {
                     customerName: search,
-                    status: statusFilter
+                    status: statusFilter,
+                    type: 'Order' // This represents scheduled orders
                 }
             });
             setOrders(response.data);

@@ -70,7 +70,7 @@ export default function Receipt({ order, onClose }) {
               <div key={idx} className="flex justify-between items-start gap-4">
                 <div className="flex-1">
                   <p className="text-[11px] font-black text-slate-900 uppercase leading-tight">{item.pName}</p>
-                  <p className="text-[9px] text-slate-400 font-bold mt-0.5">{item.quantity}{item.unit || 'pcs'} x Rs.{item.price}</p>
+                  <p className="text-[9px] text-slate-400 font-bold mt-0.5">{item.quantity} {item.unit || 'pcs'} x Rs.{item.price}</p>
                 </div>
                 <p className="text-[11px] font-black text-slate-900 whitespace-nowrap">Rs.{item.price * item.quantity}</p>
               </div>
