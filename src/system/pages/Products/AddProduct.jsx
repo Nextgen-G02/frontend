@@ -70,9 +70,9 @@ export default function AddProduct() {
     const newErrors = {};
     if (!form.productId) newErrors.productId = "Product ID is required";
     if (!form.pName) newErrors.pName = "Product name is required";
-    if (form.price === "") newErrors.price = "Price is required";
-    if (form.costPrice === "") newErrors.costPrice = "Cost price is required";
-    if (!form.stock || form.stock < 0) newErrors.stock = "Stock quantity is required";
+    if (form.price === "" || Number(form.price) <= 0) newErrors.price = "Price must be greater than 0";
+    if (form.costPrice === "" || Number(form.costPrice) <= 0) newErrors.costPrice = "Cost price must be greater than 0";
+    if (form.stock === "" || Number(form.stock) < 0) newErrors.stock = "Stock quantity cannot be negative";
     if (!form.pCategory) newErrors.pCategory = "Category is required";
     if (!form.unit) newErrors.unit = "Unit is required";
 
@@ -83,6 +83,11 @@ export default function AddProduct() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Prevent negative values for specific numeric fields
+    if (["price", "costPrice", "stock"].includes(name) && value < 0) {
+      return;
+    }
+
     setForm(prev => {
       let updatedForm = { ...prev, [name]: value };
 
@@ -91,12 +96,12 @@ export default function AddProduct() {
         const selectedCat = categories.find(cat => cat.name === value);
         if (selectedCat) {
           const prefix = selectedCat.prefix;
-          
+
           // Find all existing products with this prefix
           const relatedIds = allProducts
             .map(p => p.productId)
             .filter(id => id && id.startsWith(`${prefix}-`));
-          
+
           let nextNum = 1;
           if (relatedIds.length > 0) {
             // Extract numeric parts and find the maximum
@@ -107,7 +112,7 @@ export default function AddProduct() {
             });
             nextNum = Math.max(...nums) + 1;
           }
-          
+
           // Format as PREFIX-00X
           updatedForm.productId = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
         }
@@ -262,21 +267,21 @@ export default function AddProduct() {
           <div className="flex flex-col gap-6">
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Price Rs.</label>
-              <input type="number" name="price" value={form.price} onChange={handleChange}
+              <input type="number" name="price" value={form.price} onChange={handleChange} min="0.01" step="0.01"
                 placeholder="0.00" className={inputClass("price")} />
               {errors.price && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.price}</p>}
             </div>
 
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Cost Price Rs.</label>
-              <input type="number" name="costPrice" value={form.costPrice} onChange={handleChange}
+              <input type="number" name="costPrice" value={form.costPrice} onChange={handleChange} min="0.01" step="0.01"
                 placeholder="0.00" className={inputClass("costPrice")} />
               {errors.costPrice && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.costPrice}</p>}
             </div>
 
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock</label>
-              <input type="number" name="stock" value={form.stock} onChange={handleChange}
+              <input type="number" name="stock" value={form.stock} onChange={handleChange} min="0"
                 placeholder="0" className={inputClass("stock")} />
               {errors.stock && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.stock}</p>}
             </div>
@@ -316,7 +321,7 @@ export default function AddProduct() {
               <div className="p-2.5 bg-slate-900 text-gold rounded-lg shadow-lg">
                 <Image className="w-4.5 h-4.5" />
               </div>
-              <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Product Media</h2>
+              <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight uppercase">Product Image </h2>
             </div>
 
             <div className="space-y-6">
