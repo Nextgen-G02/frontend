@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, Info, X } from "lucide-react";
+import { useCart } from "../../../shared/context/CartContext";
+import { toast } from "react-hot-toast";
 
 const ItemProduct = ({ searchParams }) => {
+  const { addToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,8 +32,8 @@ const ItemProduct = ({ searchParams }) => {
   }, [searchParams]);
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.pName.toLowerCase().includes(searchParams.search.toLowerCase()) || 
-                         product.description?.toLowerCase().includes(searchParams.search.toLowerCase());
+    const matchesSearch = product.pName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
+      product.description?.toLowerCase().includes(searchParams.search.toLowerCase());
     const matchesCategory = searchParams.category === "all" || product.pCategory === searchParams.category;
     return matchesSearch && matchesCategory;
   });
@@ -98,10 +101,9 @@ const ItemProduct = ({ searchParams }) => {
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className={`text-[9px] font-black uppercase tracking-widest block mb-1 ${
-                      product.stockStatus === "In Stock"
-                        ? "text-emerald-500"
-                        : product.stockStatus === "Low Stock"
+                  <span className={`text-[9px] font-black uppercase tracking-widest block mb-1 ${product.stockStatus === "In Stock"
+                      ? "text-emerald-500"
+                      : product.stockStatus === "Low Stock"
                         ? "text-amber-500"
                         : "text-rose-500"
                     }`}>
@@ -112,14 +114,20 @@ const ItemProduct = ({ searchParams }) => {
               </div>
 
               <div className="flex gap-2 border-t border-slate-50 pt-3.5">
-                <button 
+                <button
                   onClick={() => setSelectedProduct(product)}
                   className="flex-1 border border-slate-100 rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5"
                 >
                   <Info size={12} />
                   Details
                 </button>
-                <button className="flex-1 bg-slate-900 text-gold rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg shadow-slate-100 flex items-center justify-center gap-1.5">
+                <button
+                  onClick={() => {
+                    addToCart(product);
+                    toast.success(`${product.pName} added to cart!`);
+                  }}
+                  className="flex-1 bg-slate-900 text-gold rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg shadow-slate-100 flex items-center justify-center gap-1.5"
+                >
                   <ShoppingCart size={12} />
                   Add to Cart
                 </button>
@@ -133,7 +141,7 @@ const ItemProduct = ({ searchParams }) => {
       {selectedProduct && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-2xl rounded-[32px] md:rounded-[48px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative">
-            <button 
+            <button
               onClick={() => setSelectedProduct(null)}
               className="absolute top-6 right-6 z-10 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-400 transition-all"
             >
@@ -143,8 +151,8 @@ const ItemProduct = ({ searchParams }) => {
             <div className="flex flex-col md:flex-row h-full">
               {/* Modal Image */}
               <div className="md:w-1/2 aspect-square md:aspect-auto overflow-hidden">
-                <img 
-                  src={selectedProduct.images?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"} 
+                <img
+                  src={selectedProduct.images?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
                   alt={selectedProduct.pName}
                   className="w-full h-full object-cover"
                 />
@@ -172,8 +180,7 @@ const ItemProduct = ({ searchParams }) => {
                       <span className="text-2xl font-black text-slate-900">Rs.{selectedProduct.price?.toLocaleString()}</span>
                     </div>
                     <div className="text-right">
-                       <span className={`text-[10px] font-black uppercase tracking-widest block mb-1 ${
-                          selectedProduct.stockStatus === "In Stock" ? "text-emerald-500" : "text-amber-500"
+                      <span className={`text-[10px] font-black uppercase tracking-widest block mb-1 ${selectedProduct.stockStatus === "In Stock" ? "text-emerald-500" : "text-amber-500"
                         }`}>
                         {selectedProduct.stockStatus}
                       </span>
@@ -181,15 +188,16 @@ const ItemProduct = ({ searchParams }) => {
                     </div>
                   </div>
 
-                  <button 
+                  <button
                     onClick={() => {
-                      toast.success("Added to collection!");
+                      addToCart(selectedProduct);
+                      toast.success(`${selectedProduct.pName} added to cart!`);
                       setSelectedProduct(null);
                     }}
                     className="w-full bg-slate-900 text-gold py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 mt-4 flex items-center justify-center gap-3"
                   >
                     <ShoppingCart size={16} />
-                    Reserve This Item
+                    Add to Cart
                   </button>
                 </div>
               </div>
