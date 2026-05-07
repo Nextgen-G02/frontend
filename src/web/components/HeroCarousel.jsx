@@ -17,7 +17,7 @@ const slides = [
     lightText: true,
   },
   {
-    image: "https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg",
+    image: "/images/img3.png",
     titlePart1: "Signature",
     titlePart2: "Sweet Treats",
     description: "Freshly baked daily using only the finest premium ingredients.",

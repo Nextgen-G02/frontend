@@ -207,11 +207,11 @@ export default function AdminSupplierManagement() {
                 />
               </div>
               <div className="space-y-1.5 md:space-y-2">
-                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number 1 (Optional)</label>
+                <label className="block text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number 1 (Required)</label>
                 <input 
-                  name="phone1" value={formData.phone1} onChange={handleChange}
+                  name="phone1" value={formData.phone1} onChange={handleChange} required
                   className="w-full px-5 md:px-6 py-3.5 md:py-4 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs md:text-sm placeholder:text-slate-300"
-                  placeholder="Primary Phone"
+                  placeholder="Primary Phone (Required)"
                 />
               </div>
               <div className="space-y-1.5 md:space-y-2">
@@ -347,7 +347,7 @@ export default function AdminSupplierManagement() {
                         ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                         : 'bg-rose-50 text-rose-600 border-rose-100'
                       }`}>
-                        {s.status === 'Active' ? <ShieldCheck size={12} /> : <ShieldAlert size={12} />}
+                        {s.status === 'Active' ? <ShieldCheck size={12} /> : <AlertTriangle size={12} />}
                         <span className="text-[10px] font-black uppercase tracking-widest">{s.status}</span>
                       </div>
                     </td>
@@ -359,12 +359,6 @@ export default function AdminSupplierManagement() {
                           title="View Accounts & Payments"
                         >
                           <Truck size={18} className="group-hover:scale-110 transition-transform" />
-                        </button>
-                        <button 
-                          onClick={() => handleEdit(s)}
-                          className="p-3 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-primary hover:shadow-xl transition-all"
-                        >
-                          <Edit3 size={18} />
                         </button>
                         <button 
                           onClick={() => handleDelete(s._id)}

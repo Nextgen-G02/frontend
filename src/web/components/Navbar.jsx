@@ -122,13 +122,15 @@ export default function Navbar() {
                   className="flex items-center gap-2 bg-slate-900 text-gold px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg lg:rounded-xl text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all duration-500 shadow-xl shadow-slate-100"
                 >
                   <LayoutDashboard size={12} lg:size={16} />
-                  Registry
+                  System
                 </Link>
               )}
 
               <div className="flex items-center gap-2 px-2 py-1 lg:px-3 lg:py-1.5 bg-slate-50 rounded-lg lg:rounded-xl border border-slate-100 group">
                 <User size={12} lg:size={16} className="text-primary" />
-                <span className="text-[8px] lg:text-[10px] font-black uppercase text-slate-900 tracking-widest">{user.firstName}</span>
+                <span className="text-[8px] lg:text-[10px] font-black uppercase text-slate-900 tracking-widest">
+                  {(user.role === "admin" || user.role === "staff") ? "Admin" : user.firstName}
+                </span>
               </div>
 
               <button
