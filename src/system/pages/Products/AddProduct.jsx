@@ -34,7 +34,7 @@ export default function AddProduct() {
     expiryDate: "",
     unit: "pcs",
     status: "Active",
-    description: "New product entry",
+    description: "",
     weight: 0,
     pImg: "",
     isIngredient: false,
@@ -75,6 +75,7 @@ export default function AddProduct() {
     if (form.stock === "" || Number(form.stock) < 0) newErrors.stock = "Stock quantity cannot be negative";
     if (!form.pCategory) newErrors.pCategory = "Category is required";
     if (!form.unit) newErrors.unit = "Unit is required";
+    if (!form.description) newErrors.description = "Description is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -259,6 +260,18 @@ export default function AddProduct() {
                 <input name="pName" value={form.pName} onChange={handleChange}
                   placeholder="e.g. Highland Chocolate Truffle" className={inputClass("pName")} />
                 {errors.pName && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.pName}</p>}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Description</label>
+                <textarea 
+                  name="description" 
+                  value={form.description} 
+                  onChange={handleChange}
+                  placeholder="Describe this product..." 
+                  className={`${inputClass("description")} min-h-[120px] py-4 resize-none`} 
+                />
+                {errors.description && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.description}</p>}
               </div>
             </div>
           </div>

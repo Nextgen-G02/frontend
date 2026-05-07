@@ -109,7 +109,7 @@ const ItemProduct = ({ searchParams }) => {
                     }`}>
                     {product.stockStatus}
                   </span>
-                  <span className="text-[10px] font-bold text-slate-400">Qty: {product.stock}</span>
+
                 </div>
               </div>
 
@@ -184,7 +184,7 @@ const ItemProduct = ({ searchParams }) => {
                         }`}>
                         {selectedProduct.stockStatus}
                       </span>
-                      <span className="text-xs font-bold text-slate-400 italic">Available: {selectedProduct.stock}</span>
+
                     </div>
                   </div>
 

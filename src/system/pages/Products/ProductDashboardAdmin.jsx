@@ -90,8 +90,8 @@ export default function ProductDashboardAdmin() {
   };
 
   const handleEditSave = async () => {
-    if (!editForm.pName || editForm.price <= 0) {
-      toast.error("Please provide a valid name and price (> 0)");
+    if (!editForm.pName || !editForm.description || editForm.price <= 0) {
+      toast.error("Please provide a valid name, description and price (> 0)");
       return;
     }
     if (editForm.stock < 0) {
@@ -375,6 +375,15 @@ export default function ProductDashboardAdmin() {
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.pName}
                     onChange={(e) => setEditForm({ ...editForm, pName: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Description</label>
+                  <textarea
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 min-h-[100px] resize-none"
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    placeholder="Describe this product..."
                   />
                 </div>
                 <div className="space-y-2">
