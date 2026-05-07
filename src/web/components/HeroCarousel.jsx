@@ -3,14 +3,14 @@ import { ArrowRight, Play } from "lucide-react";
 
 const slides = [
   {
-    image: "/images/img1.png",
+    image: "/images/img1.jpg",
     titlePart1: "Delight in Every",
     titlePart2: "Bite of Happiness",
     description: "Indulge in our handcrafted cakes, made with the finest ingredients and a sprinkle of love.",
     lightText: false, // Use dark text for this slide as it has a light background area
   },
   {
-    image: "/images/hero_2.png",
+    image: "/images/img2.png",
     titlePart1: "Heavenly",
     titlePart2: "Gourmet Cakes",
     description: "Exquisite flavors crafted with precision and passion for your special moments.",
@@ -34,7 +34,7 @@ export default function HeroCarousel() {
       setCurrent((prev) =>
         prev === slides.length - 1 ? 0 : prev + 1
       );
-    }, 10000); // Slower interval for better readability
+    }, 20000); // Slower interval for better readability
 
     return () => clearInterval(interval);
   }, []);
@@ -48,7 +48,7 @@ export default function HeroCarousel() {
   };
 
   return (
-    <div className="relative w-full h-[500px] md:h-[650px] lg:h-[750px] overflow-hidden bg-white group/hero">
+    <div className="relative w-full h-[450px] md:h-[550px] lg:h-[650px] overflow-hidden bg-white group/hero">
       
       {/* SLIDES */}
       <div
@@ -69,35 +69,28 @@ export default function HeroCarousel() {
               />
               
               {/* Gradient Overlay for Readability - Modern Look */}
-              <div className={`absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent ${!slide.lightText ? 'from-white/60 via-white/30' : ''}`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-r from-black/40 via-black/10 to-transparent ${!slide.lightText ? 'from-white/60 via-white/20' : ''}`}></div>
             </div>
 
             {/* Text Content */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start px-6 md:px-20 lg:px-32">
-              <div className="max-w-2xl animate-in fade-in slide-in-from-left duration-1000">
-                <h1 className={`text-4xl md:text-6xl lg:text-8xl font-serif font-bold leading-[1.1] mb-6 drop-shadow-sm ${slide.lightText ? 'text-white' : 'text-slate-900'}`}>
+            <div className="absolute inset-0 flex flex-col justify-center items-start px-6 md:px-16 lg:px-24">
+              <div className="max-w-xl animate-in fade-in slide-in-from-left duration-1000">
+                <h1 className={`text-3xl md:text-5xl lg:text-7xl font-serif font-bold leading-[1.1] mb-4 md:mb-6 drop-shadow-sm ${slide.lightText ? 'text-white' : 'text-slate-900'}`}>
                   {slide.titlePart1} <br />
                   <span className="text-[#B38B59] drop-shadow-none">{slide.titlePart2}</span>
                 </h1>
                 
-                <p className={`text-base md:text-lg lg:text-xl mb-10 max-w-lg leading-relaxed font-medium ${slide.lightText ? 'text-white/90' : 'text-slate-700'}`}>
+                <p className={`text-sm md:text-base lg:text-lg mb-8 md:mb-10 max-w-md leading-relaxed font-medium ${slide.lightText ? 'text-white/90' : 'text-slate-700'}`}>
                   {slide.description}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-6">
+                <div className="flex flex-wrap items-center gap-4 md:gap-6">
                   {/* ORDER NOW Button */}
-                  <button className="group flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-[#B38B59] transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5">
+                  <button className="group flex items-center gap-3 bg-slate-900 text-white px-6 py-3 md:px-8 md:py-4 rounded-full text-[10px] md:text-xs lg:text-sm font-bold uppercase tracking-wider hover:bg-[#B38B59] transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-0.5">
                     Order Now
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-3 h-3 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
 
-                  {/* WATCH OUR STORY Button */}
-                  <button className={`group flex items-center gap-3 px-2 py-2 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 ${slide.lightText ? 'text-white' : 'text-slate-900'}`}>
-                    <div className="w-12 h-12 rounded-full border-2 border-[#B38B59]/30 flex items-center justify-center group-hover:border-[#B38B59] transition-all duration-500 bg-white/10 backdrop-blur-sm">
-                      <Play className="w-4 h-4 fill-[#B38B59] text-[#B38B59] group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="group-hover:text-[#B38B59] transition-colors">Watch Our Story</span>
-                  </button>
                 </div>
               </div>
             </div>

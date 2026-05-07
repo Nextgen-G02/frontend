@@ -8,18 +8,32 @@ const Footer = () => {
     <footer className="bg-slate-900 text-slate-400 pt-12 md:pt-16 pb-8 px-6 md:px-10 border-t border-white/5">
       <div className="max-w-[1600px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
         <div className="col-span-1 md:col-span-1">
-          <div className="flex items-center gap-2.5 mb-6 group cursor-pointer">
-            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center rotate-3 group-hover:rotate-0 transition-all duration-500">
-               <ShoppingBag className="text-gold" size={16} />
+          <div className="flex items-center gap-3 mb-6 group cursor-pointer">
+            <div className="relative">
+              <img 
+                src="/images/nirosha bg removed.png" 
+                alt="Nirosha Sweet House" 
+                className="h-10 md:h-12 w-auto object-contain scale-150 translate-y-1 transition-transform duration-500 group-hover:scale-[1.6]"
+              />
             </div>
-            <h3 className="text-lg font-black text-white uppercase tracking-tight">Nirosha <span className="italic font-medium text-slate-400">Sweet House</span></h3>
+            <div className="flex flex-col ml-4">
+              <h3 className="text-lg font-black text-white leading-none tracking-tight">Nirosha <span className="italic font-medium text-slate-400">Sweet House</span></h3>
+              <p className="text-[7px] font-black text-amber-500 uppercase tracking-[0.3em] mt-1">Confectionary Excellence</p>
+            </div>
           </div>
           <p className="mb-8 leading-relaxed text-xs md:text-sm italic font-medium">
             "Crafting excellence with every transmission since inception. Local, fresh, and handmade with integrity in Kurundugahahetekma."
           </p>
-          <div className="flex gap-3">
-            <a href="#" className="w-10 h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-500 shadow-xl">FB</a>
-            <a href="#" className="w-10 h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center hover:bg-primary hover:text-white transition-all duration-500 shadow-xl">IG</a>
+          <div className="flex gap-4">
+            <a href="#" className="w-10 h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#1877F2] hover:text-white transition-all duration-500 shadow-xl group/social">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover/social:scale-110 transition-transform"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+            </a>
+            <a href="#" className="w-10 h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center text-slate-400 hover:bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] hover:text-white transition-all duration-500 shadow-xl group/social">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover/social:scale-110 transition-transform"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            </a>
+            <a href="#" className="w-10 h-10 bg-white/5 border border-white/5 rounded-xl flex items-center justify-center text-slate-400 hover:bg-[#FF0000] hover:text-white transition-all duration-500 shadow-xl group/social">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover/social:scale-110 transition-transform"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.42a2.78 2.78 0 0 0-1.94 2C1 8.14 1 12 1 12s0 3.86.42 5.58a2.78 2.78 0 0 0 1.94 2c1.72.42 8.6.42 8.6.42s6.88 0 8.6-.42a2.78 2.78 0 0 0 1.94-2C23 15.86 23 12 23 12s0-3.86-.42-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+            </a>
           </div>
         </div>
 

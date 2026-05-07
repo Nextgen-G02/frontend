@@ -3,40 +3,46 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ProductScroller from '../components/ProductScroller'
 import HeroCarousel from '../components/HeroCarousel'
+import CustomizeCake from '../components/CustomizeCake'
+import BrandStory from '../components/BrandStory'
+
 export default function Home() {
-
-
   return (
-    <div >
-        <Navbar />
-        
+    <div className="bg-white">
+      <Navbar />
+      
+      {/* HERO SECTION */}
       <div className="pt-20">
-
         <HeroCarousel />
+      </div>
 
-        <ProductScroller
-        title="Popular Items"
-        category="cake"
+      {/* CUSTOMIZE CAKE SECTION */}
+      <CustomizeCake />
+
+      {/* FEATURED PRODUCTS */}
+      <ProductScroller
+        title="Chef's Special Selection"
+        category="cakes"
         bgColor="#ff149305"
       />
 
+      {/* BRAND STORY */}
+      <BrandStory />
+
+      {/* POPULAR ITEMS */}
       <ProductScroller
-        title="Pastries"
-        category="cake"
-        bgColor="#f5f5f5"
+        title="Popular Pastries"
+        category="sweet"
+        bgColor="white"
       />
 
       <ProductScroller
-        title="Cupcakes"
-        category="cupcake"
+        title="Our Cupcake Box"
+        category="beverages"
         bgColor="#ff149305"
-        // bgColor="#d6cfc7"
       />
-    </div>  
 
-
-        <Footer />
+      <Footer />
     </div>
-    
   )
 }
