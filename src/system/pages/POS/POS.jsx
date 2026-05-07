@@ -32,7 +32,7 @@ export default function POSTerminal() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedItem, setExpandedItem] = useState(null);
-  const [customerName, setCustomerName] = useState("Walk-in Customer");
+  const [customerName, setCustomerName] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [completedOrder, setCompletedOrder] = useState(null);
   const [view, setView] = useState("catalog"); // "catalog" or "history"
@@ -41,18 +41,68 @@ export default function POSTerminal() {
 
   useEffect(() => {
     fetchProducts();
+
+    // Live Pulse Sync: Refresh registry every 60 seconds
+    const pulseInterval = setInterval(() => {
+      fetchProducts(true); // Silent update
+    }, 60000);
+
+    // Focus Protocol: Refresh when user returns to tab
+    const handleFocus = () => fetchProducts(true);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      clearInterval(pulseInterval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
-      setLoading(true);
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`);
-      const data = response.data.data;
-      setProducts(data);
-      const uniqueCats = ["All", ...new Set(data.flatMap(p => Array.isArray(p.pCategory) ? p.pCategory.map(c => c.trim()) : [p.pCategory?.trim()]).filter(Boolean))];
-      setCategories(uniqueCats);
-    } catch {
-      toast.error("Failed to load products");
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`, {
+        timeout: 30000 // High-performance 30s window
+      });
+      
+      // Deep Registry Validation
+      const rawBody = response.data;
+      const validProducts = Array.isArray(rawBody.data) ? rawBody.data : (Array.isArray(rawBody) ? rawBody : []);
+      
+      if (!validProducts || validProducts.length === 0) {
+        console.warn("Registry Sync: Remote directory is empty.");
+        setProducts([]);
+        setCategories(["All"]);
+        return;
+      }
+
+      setProducts(validProducts);
+      
+      // No-Crash Category Mapping
+      try {
+        const catSet = new Set(["All"]);
+        validProducts.forEach(p => {
+          if (!p.pCategory) return;
+          if (Array.isArray(p.pCategory)) {
+            p.pCategory.forEach(c => c && catSet.add(c.trim()));
+          } else {
+            catSet.add(p.pCategory.trim());
+          }
+        });
+        setCategories(Array.from(catSet));
+      } catch (catErr) {
+        console.error("Category Indexing Violation:", catErr);
+        setCategories(["All"]); // Fallback
+      }
+
+      if (!silent && validProducts.length > 0) toast.success("Registry Synced Successfully");
+    } catch (error) {
+      console.error("Deep Connection Analysis:", error);
+      const isTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
+      
+      // Operational Logic: Only notify user if they manually triggered the sync
+      if (!silent) {
+        toast.error(isTimeout ? "Connection Latency Detected: Optimizing Registry Link..." : "Registry Integrity Error: Protocol Connection Refused");
+      }
     } finally {
       setLoading(false);
     }
@@ -132,7 +182,7 @@ export default function POSTerminal() {
     setLoading(true);
     try {
       const orderData = {
-        customerName,
+        customerName: customerName.trim() || "Walk-in Customer",
         type: "DirectSale",
         items: cart.map(item => ({
           pName: item.pName,
@@ -157,7 +207,7 @@ export default function POSTerminal() {
       toast.success("Sale completed successfully!");
       setCompletedOrder(response.data); // Use the real data from backend (with ID)
       setCart([]);
-      setCustomerName("Walk-in Customer");
+      setCustomerName("");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to complete sale");
     } finally {
@@ -171,16 +221,32 @@ export default function POSTerminal() {
   };
 
   const filteredProducts = products.filter(p => {
-    const matchesCat = selectedCategory === "All" || 
-                      (p.pCategory && (
-                        Array.isArray(p.pCategory)
-                          ? p.pCategory.some(pCat => pCat.trim().toLowerCase() === selectedCategory.toLowerCase())
-                          : p.pCategory.trim().toLowerCase() === selectedCategory.toLowerCase()
-                      ));
-    const matchesSearch = (p.pName || "").toLowerCase().includes(search.toLowerCase()) || 
-                          (p.productId || "").toLowerCase().includes(search.toLowerCase());
+    // Resilient Category Normalization
+    const normalize = (val) => String(val || "").trim().toLowerCase();
+    const activeCat = normalize(selectedCategory);
+    
+    const matchesCat = activeCat === "all" || (p.pCategory && (
+      Array.isArray(p.pCategory) 
+        ? p.pCategory.some(c => normalize(c) === activeCat)
+        : normalize(p.pCategory) === activeCat
+    ));
+
+    const matchesSearch = normalize(p.pName).includes(normalize(search)) || 
+                          normalize(p.productId).includes(normalize(search));
+                          
     return matchesCat && matchesSearch;
   });
+
+  const getCategoryCount = (catName) => {
+    const normalize = (val) => String(val || "").trim().toLowerCase();
+    const target = normalize(catName);
+    if (target === "all") return products.length;
+    return products.filter(p => 
+      Array.isArray(p.pCategory) 
+        ? p.pCategory.some(c => normalize(c) === target)
+        : normalize(p.pCategory) === target
+    ).length;
+  };
 
   return (
     <div 
@@ -192,54 +258,71 @@ export default function POSTerminal() {
         <header className="flex flex-col gap-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-              <div className="w-2 h-8 bg-primary rounded-full"></div>
-              POS <span className="text-slate-500 font-bold italic">Terminal</span>
-              <button 
-                onClick={() => {
-                  if (view === 'catalog') {
-                    setView('history');
-                    fetchHistory();
-                  } else {
-                    setView('catalog');
-                  }
-                }}
-                className={`ml-4 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${
-                  view === 'history' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {view === 'catalog' ? <><History size={14} /> Sale History</> : <><ArrowLeft size={14} /> Back to Catalog</>}
-              </button>
+              <div className="w-2 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]"></div>
+              POS <span className="text-slate-400 font-bold italic lowercase">terminal</span>
+              <div className="flex items-center gap-3 ml-6">
+                <button 
+                  onClick={() => {
+                    if (view === 'catalog') {
+                      setView('history');
+                      fetchHistory();
+                    } else {
+                      setView('catalog');
+                    }
+                  }}
+                  className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 shadow-lg active:scale-95 ${
+                    view === 'history' ? 'bg-primary text-white shadow-primary/20' : 'bg-slate-900 text-gold hover:bg-primary hover:text-white shadow-slate-900/10'
+                  }`}
+                >
+                  {view === 'catalog' ? <><History size={16} /> Sale History</> : <><ArrowLeft size={16} /> Back to Catalog</>}
+                </button>
+                {view === 'catalog' && (
+                  <button 
+                    onClick={fetchProducts}
+                    disabled={loading}
+                    className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-primary rounded-xl transition-all shadow-sm active:rotate-180 duration-500 disabled:opacity-50"
+                    title="Force Registry Sync"
+                  >
+                    <Package size={18} />
+                  </button>
+                )}
+              </div>
             </h1>
             
             {view === 'catalog' && (
               <div className="relative group w-full md:w-96">
                 <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                  <Search className="text-slate-300 group-focus-within:text-primary transition-all duration-500" size={18} />
+                  <Search className="text-slate-400 group-focus-within:text-primary transition-all duration-300" size={18} />
                 </div>
                 <input
                   type="text"
-                  placeholder="Search by name or product ID..."
+                  placeholder="Search assets or registry ID..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-14 pr-6 py-3.5 bg-white border border-slate-100 outline-none focus:ring-8 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 font-bold shadow-sm rounded-xl text-sm"
+                  className="w-full pl-14 pr-6 py-3.5 bg-white border border-slate-200 outline-none focus:ring-8 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 font-black shadow-sm rounded-xl text-[11px] uppercase tracking-wider"
                 />
               </div>
             )}
           </div>
 
           {view === 'catalog' && (
-            <div className="flex gap-2.5 overflow-x-auto pb-2 no-scrollbar border-b border-slate-50">
+            <div className="flex gap-2.5 overflow-x-auto pb-4 no-scrollbar border-b border-slate-100">
               {categories.map(cat => (
                 <button
                   key={cat}
                   onClick={() => toggleCategory(cat)}
-                  className={`px-6 py-2 rounded-lg whitespace-nowrap font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
+                  className={`px-6 py-2.5 rounded-xl whitespace-nowrap font-black text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 flex items-center gap-2 ${
                     selectedCategory === cat
-                    ? "bg-slate-900 text-gold shadow-lg" 
-                    : "bg-white text-slate-600 hover:text-slate-900"
+                    ? "bg-slate-900 text-gold shadow-xl shadow-slate-900/20" 
+                    : "bg-white text-slate-500 hover:text-slate-900 border border-slate-100 hover:border-slate-300"
                   }`}
                 >
                   {cat}
+                  <span className={`px-2 py-0.5 rounded-md text-[8px] font-black ${
+                    selectedCategory === cat ? "bg-white/10 text-gold" : "bg-slate-100 text-slate-400"
+                  }`}>
+                    {getCategoryCount(cat)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -252,44 +335,58 @@ export default function POSTerminal() {
             <div className="flex-1 overflow-y-auto pr-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 no-scrollbar pb-10">
               {loading ? (
                 Array(8).fill(0).map((_, i) => (
-                  <div key={i} className="glass-card p-3.5 rounded-[24px] bg-white/50 animate-pulse h-[220px]">
-                    <div className="w-full aspect-square bg-slate-100 rounded-[18px] mb-3"></div>
-                    <div className="h-3 w-3/4 bg-slate-100 rounded-full mb-2"></div>
-                    <div className="h-2 w-1/2 bg-slate-100 rounded-full"></div>
+                  <div key={i} className="p-4 rounded-[32px] bg-white border border-slate-100 animate-pulse h-[240px]">
+                    <div className="w-24 h-24 mx-auto bg-slate-50 rounded-full mb-6"></div>
+                    <div className="h-4 w-3/4 mx-auto bg-slate-50 rounded-full mb-3"></div>
+                    <div className="h-3 w-1/2 mx-auto bg-slate-50 rounded-full"></div>
                   </div>
                 ))
               ) : filteredProducts.length === 0 ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-20 opacity-40">
-                  <Package size={48} className="text-slate-300 mb-4" />
-                  <p className="font-black uppercase tracking-widest text-[10px]">No matches in catalog</p>
+                <div className="col-span-full flex flex-col items-center justify-center py-40 bg-white rounded-[40px] border border-dashed border-slate-200 opacity-60">
+                  <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-6">
+                    <XCircle size={32} className="text-slate-200" />
+                  </div>
+                  <p className="font-black uppercase tracking-[0.3em] text-[10px] text-slate-900">Registry sequence is empty</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-widest">No assets found for the current filter/connection</p>
+                  <button 
+                    onClick={fetchProducts}
+                    className="mt-8 px-8 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-xl"
+                  >
+                    Attempt Protocol Sync
+                  </button>
                 </div>
               ) : (
                 filteredProducts.map(product => (
                   <button
                     key={product._id}
                     onClick={() => addToCart(product)}
-                    className="bg-white p-4 rounded-[24px] text-center group border border-slate-50 hover:border-primary/20 hover:shadow-2xl transition-all duration-500 flex flex-col gap-4"
+                    className="bg-white p-5 rounded-[32px] text-center group border border-slate-100 hover:border-primary hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col gap-4 relative overflow-hidden"
                   >
-                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-slate-50 p-1 border border-slate-100">
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center shadow-lg"><Plus size={16} /></div>
+                    </div>
+                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-slate-50 p-1.5 border border-slate-100 group-hover:border-primary/30 transition-colors">
                       <img 
                         src={product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"} 
                         alt={product.pName}
                         className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-tight line-clamp-2 h-8">{product.pName}</h3>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-600 font-black uppercase">/ {product.unit || 'pcs'}</span></p>
-                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${
-                          product.stock > 10 ? 'bg-emerald-50 text-emerald-600' : 
-                          product.stock > 0 ? 'bg-amber-50 text-amber-600' : 
-                          'bg-rose-50 text-rose-600'
-                        }`}>
-                          {product.stock > 0 ? `${product.stock} IN STOCK` : 'OUT OF STOCK'}
-                        </span>
+                    <div className="space-y-2">
+                      <h3 className="font-black text-slate-900 text-xs uppercase tracking-tight line-clamp-2 h-9 group-hover:text-primary transition-colors">{product.pName}</h3>
+                      <div className="flex flex-col gap-2">
+                        <p className="text-base font-black text-slate-900 tracking-tighter">Rs.{product.price} <span className="text-[10px] text-slate-400 font-black uppercase">/ {product.unit || 'pcs'}</span></p>
+                        <div className="flex items-center justify-center gap-2">
+                          <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border ${
+                            product.stock > 10 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                            product.stock > 0 ? 'bg-amber-50 text-amber-600 border-amber-100' : 
+                            'bg-rose-50 text-rose-600 border-rose-100'
+                          }`}>
+                            {product.stock > 0 ? `${product.stock} IN STOCK` : 'OUT OF STOCK'}
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">{product.productId}</p>
+                      <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">{product.productId}</p>
                     </div>
                   </button>
                 ))
@@ -298,70 +395,70 @@ export default function POSTerminal() {
           </>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
-             <div className="flex items-center justify-between mb-6 pr-4">
+             <div className="flex items-center justify-between mb-8 pr-4">
                 <div>
-                   <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Recent Sale History</h2>
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Management of in-store transmissions</p>
+                   <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Recent Sale History</h2>
+                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Management of in-store transmissions</p>
                 </div>
                 <button 
                   onClick={() => setView('catalog')}
-                  className="px-6 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg flex items-center gap-2 hover:bg-primary hover:text-white transition-all"
+                  className="px-6 py-3.5 bg-slate-900 text-gold rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 hover:bg-primary hover:text-white transition-all active:scale-95"
                 >
-                  <Plus size={16} /> New Sale
+                  <Plus size={18} /> New Transmission
                 </button>
              </div>
 
              <div className="flex-1 overflow-y-auto pr-4 no-scrollbar">
-                <div className="glass-card rounded-[24px] overflow-hidden bg-white/70 border border-slate-100">
+                <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm">
                   <table className="w-full text-left">
-                    <thead className="bg-slate-50/50">
+                    <thead className="bg-slate-50/50 border-b border-slate-100">
                       <tr>
-                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Order ID</th>
-                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Customer</th>
-                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
-                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                        <th className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Registry Entry</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Customer Entity</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Net Val</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Protocol</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Operations</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {historyLoading ? (
-                        <tr><td colSpan="5" className="py-20 text-center font-black text-[10px] text-slate-400 uppercase tracking-widest animate-pulse">Retrieving master records...</td></tr>
+                        <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em] animate-pulse">Retrieving master records...</td></tr>
                       ) : history.length === 0 ? (
-                        <tr><td colSpan="5" className="py-20 text-center font-black text-[10px] text-slate-400 uppercase tracking-widest">No history found</td></tr>
+                        <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em]">No transmissions found</td></tr>
                       ) : (
                         history.map(order => (
-                          <tr key={order._id} className="hover:bg-white transition-all group">
-                            <td className="px-6 py-4">
-                              <p className="font-mono text-[10px] font-black text-slate-400 uppercase leading-none mb-1">SEQ: {order._id.slice(-6).toUpperCase()}</p>
-                              <p className="text-[9px] font-bold text-slate-300">{new Date(order.createdAt).toLocaleString()}</p>
+                          <tr key={order._id} className="hover:bg-slate-50/50 transition-all group">
+                            <td className="px-8 py-5">
+                              <p className="font-mono text-[11px] font-black text-slate-900 uppercase leading-none mb-1.5">SEQ: {order._id.slice(-6).toUpperCase()}</p>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{new Date(order.createdAt).toLocaleString()}</p>
                             </td>
-                            <td className="px-6 py-4">
-                              <p className="font-black text-slate-900 text-xs uppercase">{order.customerName}</p>
+                            <td className="px-8 py-5">
+                              <p className="font-black text-slate-900 text-sm uppercase tracking-tight">{order.customerName}</p>
                             </td>
-                            <td className="px-6 py-4 font-black text-slate-900 text-sm">Rs.{order.totalAmount.toLocaleString()}</td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1 rounded-full text-[8px] font-black tracking-widest ${
-                                order.orderStatus === 'Cancelled' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                            <td className="px-8 py-5 font-black text-slate-900 text-base tracking-tighter">Rs.{order.totalAmount.toLocaleString()}</td>
+                            <td className="px-8 py-5">
+                              <span className={`px-4 py-1.5 rounded-lg text-[9px] font-black tracking-widest uppercase border ${
+                                order.orderStatus === 'Cancelled' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'
                               }`}>
-                                {order.orderStatus.toUpperCase()}
+                                {order.orderStatus}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                            <td className="px-8 py-5 text-right flex items-center justify-end gap-3">
                                <button 
                                  onClick={() => setCompletedOrder(order)}
-                                 className="p-2 bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                                 className="p-2.5 bg-white text-slate-400 hover:text-primary hover:border-primary border border-slate-100 rounded-xl transition-all shadow-sm"
                                  title="Review Bill"
                                >
-                                 <Eye size={16} />
+                                 <Eye size={18} />
                                </button>
 
                                {order.orderStatus !== 'Cancelled' && (
                                  <button 
                                    onClick={() => handleCancelSale(order._id)}
-                                   className="p-2 bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                   className="p-2.5 bg-white text-slate-400 hover:text-rose-600 hover:border-rose-100 border border-slate-100 rounded-xl transition-all shadow-sm"
                                    title="Cancel Sale"
                                  >
-                                   <XCircle size={16} />
+                                   <XCircle size={18} />
                                  </button>
                                )}
                             </td>
@@ -378,76 +475,79 @@ export default function POSTerminal() {
 
       {/* Right Side: Cart & Checkout */}
       <div className="h-full min-w-0 flex flex-col overflow-hidden">
-        <div className="flex-1 bg-white rounded-[24px] md:rounded-[40px] border-none shadow-[0_24px_48px_-12px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden relative border border-slate-100">
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-primary"></div>
+        <div className="flex-1 bg-white rounded-[40px] border border-slate-100 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden relative">
+          <div className="absolute top-0 left-0 w-full h-2 bg-primary"></div>
           
           {/* Cart Header */}
-          <div className="p-6 md:p-8 border-b border-slate-50 flex flex-col gap-4 shrink-0">
+          <div className="p-8 border-b border-slate-50 flex flex-col gap-4 shrink-0 bg-slate-50/30">
             <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-slate-900 text-gold rounded-xl shadow-lg">
-                  <ShoppingCart size={20} />
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 bg-slate-900 text-gold rounded-2xl shadow-xl flex items-center justify-center">
+                  <ShoppingCart size={24} />
                 </div>
-                <div className="space-y-0.5">
+                <div className="space-y-1">
                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">Boutique Cart</h2>
-                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Transmission Mode</p>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Transmission Mode</p>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className="px-3 py-1 bg-slate-900 text-white rounded-full text-[9px] font-black border border-slate-900 shadow-sm">{cart.length} ASSETS</span>
+                <span className="px-4 py-1.5 bg-slate-900 text-white rounded-xl text-[10px] font-black border border-slate-900 shadow-lg uppercase tracking-widest">{cart.length} Assets</span>
               </div>
             </div>
           </div>
 
           {/* Cart Items - Scrollable Area */}
-          <div className="flex-1 overflow-y-auto p-5 md:p-8 space-y-4 min-h-0">
+          <div className="flex-1 overflow-y-auto p-8 space-y-2 min-h-0 no-scrollbar">
             {cart.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-6">
                 <div className="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center shadow-inner group transition-transform hover:scale-110">
                   <ShoppingCart size={48} className="text-slate-200" />
                 </div>
                 <div>
-                  <p className="font-black text-slate-900 uppercase tracking-widest text-xs">Empty Cart</p>
-                  <p className="text-[10px] text-slate-500 mt-2 font-bold italic px-8">Select items from the catalog to begin a transaction.</p>
+                  <p className="font-black text-slate-900 uppercase tracking-[0.2em] text-[11px]">Empty Cart Registry</p>
+                  <p className="text-[10px] text-slate-400 mt-2 font-bold italic px-8">Select assets from the active catalog to begin a transaction.</p>
                 </div>
               </div>
             ) : (
               <div className="space-y-1">
                 {cart.map((item, idx) => (
-                  <div key={item._id} className="bg-white border-b border-slate-50 py-3 group">
+                  <div key={item._id} className="bg-white border-b border-slate-50 py-4 group transition-all hover:bg-slate-50/30">
                     <div className="flex items-center justify-between gap-4">
                       {/* Name - Left Aligned */}
-                      <div className="flex-1 min-w-0 flex items-center gap-3">
-                        <span className="text-[10px] font-black text-slate-300 w-4 shrink-0">{idx + 1}</span>
-                        <input 
-                          type="text" 
-                          value={item.pName}
-                          onChange={(e) => {
-                            const newName = e.target.value;
-                            setCart(prev => prev.map(c => c._id === item._id ? { ...c, pName: newName } : c));
-                          }}
-                          className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] uppercase tracking-wider w-full focus:ring-0 p-0 h-4"
-                        />
+                      <div className="flex-1 min-w-0 flex items-center gap-4">
+                        <span className="text-[10px] font-black text-slate-300 w-5 shrink-0 italic">{String(idx + 1).padStart(2, '0')}</span>
+                        <div className="w-full">
+                          <input 
+                            type="text" 
+                            value={item.pName}
+                            onChange={(e) => {
+                              const newName = e.target.value;
+                              setCart(prev => prev.map(c => c._id === item._id ? { ...c, pName: newName } : c));
+                            }}
+                            className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] uppercase tracking-wider w-full focus:ring-0 p-0 h-4 truncate hover:text-primary transition-colors cursor-text"
+                          />
+                          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Asset Node</p>
+                        </div>
                       </div>
 
                       {/* Quantity Controls - Center */}
-                      <div className="flex items-center gap-2 bg-slate-50 p-1 rounded-lg border border-slate-100 shrink-0">
+                      <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-100 shrink-0">
                         <button 
                           onClick={() => updateQuantity(item._id, -1)}
-                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded transition-all"
+                          className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-lg transition-all shadow-sm active:scale-90"
                         >
-                          <Minus size={12} />
+                          <Minus size={14} />
                         </button>
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center px-1">
                           <input 
                             type="number"
-                            step={item.unit?.toLowerCase() === 'kg' ? "0.01" : "1"}
+                            step={item.unit?.toLowerCase() === 'kg' ? "0.1" : "1"}
                             value={item.quantity}
                             onChange={(e) => {
                               const val = parseFloat(e.target.value) || 0;
                               setCart(prev => prev.map(c => c._id === item._id ? { ...c, quantity: val } : c));
                             }}
-                            className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] w-12 text-center focus:ring-0 p-0"
+                            className="bg-transparent border-none outline-none font-black text-slate-900 text-[12px] w-14 text-center focus:ring-0 p-0"
                           />
                           <select 
                             value={item.unit || 'pcs'} 
@@ -455,7 +555,7 @@ export default function POSTerminal() {
                               const newUnit = e.target.value;
                               setCart(prev => prev.map(c => c._id === item._id ? { ...c, unit: newUnit } : c));
                             }}
-                            className="text-[7px] font-black text-primary uppercase bg-transparent outline-none cursor-pointer appearance-none text-center hover:text-slate-900 transition-colors"
+                            className="text-[8px] font-black text-primary uppercase bg-transparent outline-none cursor-pointer appearance-none text-center hover:text-slate-900 transition-colors"
                           >
                             <option value="pcs">pcs</option>
                             <option value="kg">kg</option>
@@ -468,20 +568,23 @@ export default function POSTerminal() {
                         </div>
                         <button 
                           onClick={() => updateQuantity(item._id, 1)}
-                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded transition-all"
+                          className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white rounded-lg transition-all shadow-sm active:scale-90"
                         >
-                          <Plus size={12} />
+                          <Plus size={14} />
                         </button>
                       </div>
                       
                       {/* Price - Right Aligned */}
                       <div className="flex items-center gap-4 shrink-0">
-                        <span className="font-black text-slate-900 text-xs w-20 text-right">Rs.{item.price * item.quantity}</span>
+                        <div className="text-right">
+                          <span className="font-black text-slate-900 text-[13px] tracking-tighter block leading-none">Rs.{(item.price * item.quantity).toLocaleString()}</span>
+                          <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Locked val</span>
+                        </div>
                         <button 
                           onClick={() => removeFromCart(item._id)}
-                          className="p-1.5 text-slate-200 hover:text-primary transition-all"
+                          className="p-2 text-slate-200 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                         >
-                          <X size={14} />
+                          <X size={16} />
                         </button>
                       </div>
                     </div>
@@ -492,40 +595,47 @@ export default function POSTerminal() {
           </div>
 
           {/* Sticky Cart Footer */}
-          <div className="p-6 bg-slate-50/95 backdrop-blur-xl border-t border-slate-100 space-y-4 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] relative z-20 shrink-0">
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-xl border border-slate-100 shadow-sm">
-                <User size={16} className="text-primary" />
+          <div className="p-8 bg-slate-900 backdrop-blur-xl border-t border-white/5 space-y-6 shadow-[0_-20px_40px_rgba(0,0,0,0.15)] relative z-20 shrink-0 text-white">
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 bg-white/5 px-5 py-3.5 rounded-2xl border border-white/10 group focus-within:border-primary transition-all">
+                <User size={20} className="text-primary" />
                 <div className="flex flex-col flex-1">
-                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-0.5">Personnel Identity</span>
+                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none mb-1.5">Personnel Identification</span>
                    <input 
                      type="text" 
                      value={customerName} 
                      onChange={(e) => setCustomerName(e.target.value)}
-                     className="bg-transparent border-none outline-none text-[11px] text-slate-900 font-black w-full uppercase tracking-tight h-4"
-                     placeholder="Customer Name"
+                     className="bg-transparent border-none outline-none text-sm text-white font-black w-full uppercase tracking-tight placeholder:text-slate-600 focus:ring-0 p-0"
+                     placeholder="Walk-in Customer"
                    />
                 </div>
               </div>
 
-              <div className="flex items-center justify-center gap-3 py-3 bg-slate-900 text-gold rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg">
-                <Banknote size={16} /> Cash Mode
+              <div className="flex items-center justify-between px-2">
+                <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-primary border border-white/10">
+                     <Banknote size={20} />
+                   </div>
+                   <div>
+                     <p className="text-[10px] font-black text-white uppercase tracking-widest">Settlement Mode</p>
+                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">Physical Cash Protocol</p>
+                   </div>
+                </div>
+                <div className="text-right">
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Payable Net</p>
+                   <span className="text-3xl font-black text-gold tracking-tighter drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">Rs.{calculateTotal().toLocaleString()}</span>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-between items-center py-2">
-                <p className="text-slate-900 font-black uppercase tracking-widest text-[11px]">Payable Amount</p>
-                <span className="text-2xl font-black text-primary tracking-tighter">Rs.{calculateTotal().toLocaleString()}</span>
-            </div>
-
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button 
                 onClick={handleCheckout}
                 disabled={loading || cart.length === 0}
-                className="flex-1 py-4 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-3"
+                className="flex-1 py-5 bg-primary text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 hover:bg-white hover:text-slate-900 transition-all duration-500 flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50 disabled:grayscale"
               >
-                {loading ? "Synchronizing..." : "Proceed to Checkout"}
-                {!loading && <CheckCircle2 size={18} />}
+                {loading ? "Synchronizing Data..." : "Finalize Transmission"}
+                {!loading && <CheckCircle2 size={20} />}
               </button>
             </div>
           </div>
