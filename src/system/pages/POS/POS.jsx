@@ -193,7 +193,7 @@ export default function POSTerminal() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
               <div className="w-2 h-8 bg-primary rounded-full"></div>
-              POS <span className="text-slate-400 italic">Terminal</span>
+              POS <span className="text-slate-500 font-bold italic">Terminal</span>
               <button 
                 onClick={() => {
                   if (view === 'catalog') {
@@ -236,7 +236,7 @@ export default function POSTerminal() {
                   className={`px-6 py-2 rounded-lg whitespace-nowrap font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
                     selectedCategory === cat
                     ? "bg-slate-900 text-gold shadow-lg" 
-                    : "bg-white text-slate-400 hover:text-slate-600"
+                    : "bg-white text-slate-600 hover:text-slate-900"
                   }`}
                 >
                   {cat}
@@ -280,7 +280,7 @@ export default function POSTerminal() {
                     <div className="space-y-1">
                       <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-tight line-clamp-2 h-8">{product.pName}</h3>
                       <div className="flex items-center justify-between">
-                        <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-400 font-bold uppercase">/ {product.unit || 'pcs'}</span></p>
+                        <p className="text-[12px] font-black text-primary">Rs.{product.price} <span className="text-[10px] text-slate-600 font-black uppercase">/ {product.unit || 'pcs'}</span></p>
                         <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter ${
                           product.stock > 10 ? 'bg-emerald-50 text-emerald-600' : 
                           product.stock > 0 ? 'bg-amber-50 text-amber-600' : 
@@ -289,7 +289,7 @@ export default function POSTerminal() {
                           {product.stock > 0 ? `${product.stock} IN STOCK` : 'OUT OF STOCK'}
                         </span>
                       </div>
-                      <p className="text-[8px] font-black text-slate-300 uppercase tracking-[0.2em]">{product.productId}</p>
+                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em]">{product.productId}</p>
                     </div>
                   </button>
                 ))
@@ -390,7 +390,7 @@ export default function POSTerminal() {
                 </div>
                 <div className="space-y-0.5">
                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">Boutique Cart</h2>
-                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Transmission Mode</p>
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Transmission Mode</p>
                 </div>
               </div>
               <div className="flex flex-col items-end">
@@ -408,7 +408,7 @@ export default function POSTerminal() {
                 </div>
                 <div>
                   <p className="font-black text-slate-900 uppercase tracking-widest text-xs">Empty Cart</p>
-                  <p className="text-[10px] text-slate-400 mt-2 font-medium italic px-8">Select items from the catalog to begin a transaction.</p>
+                  <p className="text-[10px] text-slate-500 mt-2 font-bold italic px-8">Select items from the catalog to begin a transaction.</p>
                 </div>
               </div>
             ) : (
@@ -497,12 +497,12 @@ export default function POSTerminal() {
               <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-xl border border-slate-100 shadow-sm">
                 <User size={16} className="text-primary" />
                 <div className="flex flex-col flex-1">
-                   <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Personnel Identity</span>
+                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none mb-0.5">Personnel Identity</span>
                    <input 
                      type="text" 
                      value={customerName} 
                      onChange={(e) => setCustomerName(e.target.value)}
-                     className="bg-transparent border-none outline-none text-[11px] text-slate-900 font-bold w-full uppercase tracking-tight h-4"
+                     className="bg-transparent border-none outline-none text-[11px] text-slate-900 font-black w-full uppercase tracking-tight h-4"
                      placeholder="Customer Name"
                    />
                 </div>
