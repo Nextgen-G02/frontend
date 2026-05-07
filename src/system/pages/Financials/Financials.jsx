@@ -23,9 +23,16 @@ export default function AdminFinancials() {
   const [dailyData, setDailyData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const getToday = () => new Date().toLocaleDateString('en-CA');
+  const getThirtyDaysAgo = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toLocaleDateString('en-CA');
+  };
+
   const [dates, setDates] = useState({
-    startDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0]
+    startDate: getThirtyDaysAgo(),
+    endDate: getToday()
   });
 
   useEffect(() => {

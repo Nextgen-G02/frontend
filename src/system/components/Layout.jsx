@@ -132,15 +132,6 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex items-center gap-6">
-              <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-xl border border-slate-100">
-                <Search size={16} className="text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="bg-transparent border-none outline-none text-xs text-slate-900 placeholder:text-slate-300 w-32 md:w-40 font-medium"
-                />
-              </div>
-              
               <div className="flex items-center gap-4">
                 <button className="relative p-1.5 text-slate-400 hover:text-slate-900 transition-colors">
                   <Bell size={18} md:size={20} />
