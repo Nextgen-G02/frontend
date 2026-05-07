@@ -57,7 +57,10 @@ export default function ProductDashboardAdmin() {
         }
       });
       const data = await res.json();
-      setProducts(data.data || data);
+      const fetchedProducts = data.data || data;
+      // Sort by newest first (assuming MongoDB _id or createdAt)
+      const sortedProducts = [...fetchedProducts].sort((a, b) => b._id.localeCompare(a._id));
+      setProducts(sortedProducts);
     } catch {
       setError("Failed to fetch products");
       toast.error("Catalog loading failed");
@@ -86,12 +89,25 @@ export default function ProductDashboardAdmin() {
 
   const handleEditOpen = (product) => {
     setEditProduct(product);
-    setEditForm({ ...product });
+    // Support multiple possible field names for description for legacy data compatibility
+    const desc = product.description || product.pDescription || product.pDesc || "";
+    setEditForm({
+      ...product,
+      description: desc
+    });
   };
 
   const handleEditSave = async () => {
-    if (!editForm.pName || !editForm.description || editForm.price <= 0) {
-      toast.error("Please provide a valid name, description and price (> 0)");
+    if (!editForm.pName) {
+      toast.error("Product name is required");
+      return;
+    }
+    if (!editForm.description) {
+      toast.error("Description is required");
+      return;
+    }
+    if (Number(editForm.price) <= 0) {
+      toast.error("Price must be greater than 0");
       return;
     }
     if (editForm.stock < 0) {
@@ -108,12 +124,13 @@ export default function ProductDashboardAdmin() {
         body: JSON.stringify(editForm),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Update failed");
+        throw new Error(data.message || "Update failed");
       }
 
-      const updated = await res.json();
+      const updated = data;
 
       setProducts((prev) =>
         prev.map((p) => (p._id === updated._id ? updated : p))
@@ -159,7 +176,8 @@ export default function ProductDashboardAdmin() {
 
       const matchesSearch = p.pName?.toLowerCase().includes(search.toLowerCase()) ||
         p.productId?.toLowerCase().includes(search.toLowerCase()) ||
-        p.pCategory?.toLowerCase().includes(search.toLowerCase());
+        p.pCategory?.toLowerCase().includes(search.toLowerCase()) ||
+        (p.description || p.pDescription || p.pDesc)?.toLowerCase().includes(search.toLowerCase());
 
       return matchesCat && matchesSearch;
     }
@@ -381,7 +399,7 @@ export default function ProductDashboardAdmin() {
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Description</label>
                   <textarea
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 min-h-[100px] resize-none"
-                    value={editForm.description}
+                    value={editForm.description || ""}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     placeholder="Describe this product..."
                   />
