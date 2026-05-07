@@ -26,7 +26,7 @@ import Receipt from "./Receipt";
 export default function POSTerminal() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [cart, setCart] = useState([]);
@@ -38,75 +38,132 @@ export default function POSTerminal() {
   const [view, setView] = useState("catalog"); // "catalog" or "history"
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  
+  // StrictMode & Double-Execution Guard
+  const isMounted = React.useRef(true);
+  const initialFetchRef = React.useRef(false);
 
-  useEffect(() => {
-    fetchProducts();
+  // Optimized Product Fetching
+  const fetchProducts = React.useCallback(async (silent = false) => {
+    console.log(`[POS Registry] Initiation: silent=${silent}, current_products=${products.length}`);
+    
+    // Only show loading if we don't have products yet, or if it's a forced manual sync
+    if (!silent) {
+      setLoading(true);
+    }
 
-    // Live Pulse Sync: Refresh registry every 60 seconds
-    const pulseInterval = setInterval(() => {
-      fetchProducts(true); // Silent update
-    }, 60000);
-
-    // Focus Protocol: Refresh when user returns to tab
-    const handleFocus = () => fetchProducts(true);
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      clearInterval(pulseInterval);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, []);
-
-  const fetchProducts = async (silent = false) => {
-    if (!silent) setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/products`, {
-        timeout: 30000 // High-performance 30s window
+      const backendUrl = import.meta.env.VITE_BACKEND_URL;
+      if (!backendUrl) {
+        throw new Error("Missing VITE_BACKEND_URL configuration");
+      }
+
+      console.log(`[POS Registry] Fetching from: ${backendUrl}/api/products`);
+      const response = await axios.get(`${backendUrl}/api/products`, {
+        timeout: 15000 // Optimized 15s window for retail responsiveness
       });
       
-      // Deep Registry Validation
+      console.log("[POS Registry] Data received:", response.status);
+      
       const rawBody = response.data;
       const validProducts = Array.isArray(rawBody.data) ? rawBody.data : (Array.isArray(rawBody) ? rawBody : []);
       
-      if (!validProducts || validProducts.length === 0) {
-        console.warn("Registry Sync: Remote directory is empty.");
+      if (!isMounted.current) return;
+
+      if (validProducts.length === 0) {
+        console.warn("[POS Registry] remote directory is empty.");
         setProducts([]);
         setCategories(["All"]);
-        return;
-      }
-
-      setProducts(validProducts);
-      
-      // No-Crash Category Mapping
-      try {
+      } else {
+        console.log(`[POS Registry] Syncing ${validProducts.length} assets`);
+        setProducts(validProducts);
+        
+        // Dynamic Category Mapping
         const catSet = new Set(["All"]);
         validProducts.forEach(p => {
-          if (!p.pCategory) return;
-          if (Array.isArray(p.pCategory)) {
-            p.pCategory.forEach(c => c && catSet.add(c.trim()));
-          } else {
-            catSet.add(p.pCategory.trim());
+          if (p.pCategory) {
+            if (Array.isArray(p.pCategory)) {
+              p.pCategory.forEach(c => c && catSet.add(c.trim()));
+            } else {
+              catSet.add(String(p.pCategory).trim());
+            }
           }
         });
         setCategories(Array.from(catSet));
-      } catch (catErr) {
-        console.error("Category Indexing Violation:", catErr);
-        setCategories(["All"]); // Fallback
       }
 
-      if (!silent && validProducts.length > 0) toast.success("Registry Synced Successfully");
+      if (!silent && !initialFetchRef.current) {
+        toast.success("Registry Synced Successfully");
+        initialFetchRef.current = true;
+      }
     } catch (error) {
-      console.error("Deep Connection Analysis:", error);
-      const isTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
+      console.error("[POS Registry] Connection Failure:", {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data
+      });
       
-      // Operational Logic: Only notify user if they manually triggered the sync
+      if (!isMounted.current) return;
+
+      const isTimeout = error.code === 'ECONNABORTED' || error.message.includes('timeout');
       if (!silent) {
-        toast.error(isTimeout ? "Connection Latency Detected: Optimizing Registry Link..." : "Registry Integrity Error: Protocol Connection Refused");
+        toast.error(isTimeout 
+          ? "Connection Latency Detected: Optimizing Registry Link..." 
+          : `Registry Integrity Error: ${error.response?.data?.message || "Protocol Refused"}`
+        );
       }
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        console.log("[POS Registry] Cycle complete, releasing loading lock.");
+        setLoading(false);
+      }
     }
-  };
+  }, [products.length]); // Dependency on length to know if we need to show skeletons
+
+  useEffect(() => {
+    isMounted.current = true;
+    
+    // Initial Bootstrap
+    fetchProducts();
+
+    // Live Pulse Sync: Refresh registry every 60 seconds (silent)
+    const pulseInterval = setInterval(() => {
+      fetchProducts(true);
+    }, 60000);
+
+    // Focus Protocol: Refresh when user returns to tab
+    const handleFocus = () => {
+      console.log("[POS Protocol] Window focus detected, silent sync triggered");
+      fetchProducts(true);
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      isMounted.current = false;
+      clearInterval(pulseInterval);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [fetchProducts]);
+
+  // Performance-Optimized Product Filtering
+  const filteredProducts = React.useMemo(() => {
+    console.log("[POS Engine] Re-calculating filtered assets...");
+    return products.filter(p => {
+      const normalize = (val) => String(val || "").trim().toLowerCase();
+      const activeCat = normalize(selectedCategory);
+      
+      const matchesCat = activeCat === "all" || (p.pCategory && (
+        Array.isArray(p.pCategory) 
+          ? p.pCategory.some(c => normalize(c) === activeCat)
+          : normalize(p.pCategory) === activeCat
+      ));
+
+      const matchesSearch = normalize(p.pName).includes(normalize(search)) || 
+                            normalize(p.productId).includes(normalize(search));
+                            
+      return matchesCat && matchesSearch;
+    });
+  }, [products, selectedCategory, search]);
 
   const fetchHistory = async () => {
     try {
@@ -220,22 +277,7 @@ export default function POSTerminal() {
     if (cat !== "All") setSearch("");
   };
 
-  const filteredProducts = products.filter(p => {
-    // Resilient Category Normalization
-    const normalize = (val) => String(val || "").trim().toLowerCase();
-    const activeCat = normalize(selectedCategory);
-    
-    const matchesCat = activeCat === "all" || (p.pCategory && (
-      Array.isArray(p.pCategory) 
-        ? p.pCategory.some(c => normalize(c) === activeCat)
-        : normalize(p.pCategory) === activeCat
-    ));
 
-    const matchesSearch = normalize(p.pName).includes(normalize(search)) || 
-                          normalize(p.productId).includes(normalize(search));
-                          
-    return matchesCat && matchesSearch;
-  });
 
   const getCategoryCount = (catName) => {
     const normalize = (val) => String(val || "").trim().toLowerCase();
@@ -330,69 +372,126 @@ export default function POSTerminal() {
         </header>
 
         {view === 'catalog' ? (
-          <>
-            {/* Product Grid */}
-            <div className="flex-1 overflow-y-auto pr-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 no-scrollbar pb-10">
-              {loading ? (
-                Array(8).fill(0).map((_, i) => (
-                  <div key={i} className="p-4 rounded-[32px] bg-white border border-slate-100 animate-pulse h-[240px]">
-                    <div className="w-24 h-24 mx-auto bg-slate-50 rounded-full mb-6"></div>
-                    <div className="h-4 w-3/4 mx-auto bg-slate-50 rounded-full mb-3"></div>
-                    <div className="h-3 w-1/2 mx-auto bg-slate-50 rounded-full"></div>
-                  </div>
-                ))
-              ) : filteredProducts.length === 0 ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-40 bg-white rounded-[40px] border border-dashed border-slate-200 opacity-60">
-                  <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-6">
-                    <XCircle size={32} className="text-slate-200" />
-                  </div>
-                  <p className="font-black uppercase tracking-[0.3em] text-[10px] text-slate-900">Registry sequence is empty</p>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase mt-2 tracking-widest">No assets found for the current filter/connection</p>
-                  <button 
-                    onClick={fetchProducts}
-                    className="mt-8 px-8 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-xl"
-                  >
-                    Attempt Protocol Sync
-                  </button>
-                </div>
-              ) : (
-                filteredProducts.map(product => (
-                  <button
-                    key={product._id}
-                    onClick={() => addToCart(product)}
-                    className="bg-white p-5 rounded-[32px] text-center group border border-slate-100 hover:border-primary hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col gap-4 relative overflow-hidden"
-                  >
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                      <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center shadow-lg"><Plus size={16} /></div>
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Master Product Registry Grid */}
+            <div className="flex-1 overflow-y-auto pr-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 no-scrollbar pb-20">
+              {(() => {
+                const totalAssets = products.length;
+                const filteredCount = filteredProducts.length;
+                
+                console.log("[POS UI] Heartbeat:", { 
+                  state: loading ? 'SYNCING' : 'IDLE', 
+                  registry_total: totalAssets, 
+                  filtered_view: filteredCount,
+                  active_category: selectedCategory,
+                  search_buffer: search || 'EMPTY'
+                });
+                
+                // Case A: Initial Sync / Cold Start
+                if (loading && totalAssets === 0) {
+                  return Array(12).fill(0).map((_, i) => (
+                    <div key={`skeleton-${i}`} className="p-5 rounded-[32px] bg-white border border-slate-100 animate-pulse h-[280px] flex flex-col gap-4">
+                      <div className="w-28 h-28 mx-auto bg-slate-50 rounded-full shadow-inner"></div>
+                      <div className="h-4 w-3/4 mx-auto bg-slate-50 rounded-full"></div>
+                      <div className="h-3 w-1/2 mx-auto bg-slate-50 rounded-full"></div>
+                      <div className="mt-auto h-10 w-full bg-slate-50 rounded-2xl"></div>
                     </div>
-                    <div className="w-28 h-28 mx-auto rounded-full overflow-hidden bg-slate-50 p-1.5 border border-slate-100 group-hover:border-primary/30 transition-colors">
-                      <img 
-                        src={product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"} 
-                        alt={product.pName}
-                        className="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700"
-                      />
+                  ));
+                }
+
+                // Case B: Registry Connection Succeeded but Filter resulted in null set
+                if (filteredCount === 0) {
+                  return (
+                    <div className="col-span-full flex flex-col items-center justify-center py-32 bg-white rounded-[40px] border border-dashed border-slate-200 shadow-inner">
+                      <div className="w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 shadow-sm">
+                        <XCircle size={40} className="text-slate-300" />
+                      </div>
+                      <h3 className="font-black uppercase tracking-[0.2em] text-[12px] text-slate-900 mb-2">No Assets in current view</h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center px-10">
+                        The registry query for <span className="text-primary">"{selectedCategory}"</span> returned zero entries.
+                      </p>
+                      <div className="flex gap-4 mt-8">
+                        <button 
+                          onClick={() => { setSelectedCategory("All"); setSearch(""); }}
+                          className="px-8 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl"
+                        >
+                          Reset Filters
+                        </button>
+                        <button 
+                          onClick={() => fetchProducts()}
+                          className="px-8 py-3 bg-white text-slate-900 border border-slate-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+                        >
+                          Force Re-Sync
+                        </button>
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="font-black text-slate-900 text-xs uppercase tracking-tight line-clamp-2 h-9 group-hover:text-primary transition-colors">{product.pName}</h3>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-base font-black text-slate-900 tracking-tighter">Rs.{product.price} <span className="text-[10px] text-slate-400 font-black uppercase">/ {product.unit || 'pcs'}</span></p>
-                        <div className="flex items-center justify-center gap-2">
-                          <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest border ${
-                            product.stock > 10 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                            product.stock > 0 ? 'bg-amber-50 text-amber-600 border-amber-100' : 
-                            'bg-rose-50 text-rose-600 border-rose-100'
-                          }`}>
-                            {product.stock > 0 ? `${product.stock} IN STOCK` : 'OUT OF STOCK'}
-                          </span>
+                  );
+                }
+
+                // Case C: Nominal Operation - Rendering Transmission Nodes
+                return filteredProducts.map((product, idx) => {
+                  // Resilient Data Mapping
+                  const pId = product.productId || product._id?.slice(-8) || `UNK-${idx}`;
+                  const pName = product.pName || "Unnamed Asset";
+                  const pPrice = typeof product.price === 'number' ? product.price : 0;
+                  const pUnit = product.unit || "pcs";
+                  const pStock = typeof product.stock === 'number' ? product.stock : 0;
+                  const pImage = product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729";
+
+                  return (
+                    <button
+                      key={product._id || `product-${idx}`}
+                      onClick={() => addToCart(product)}
+                      className="bg-white p-5 rounded-[32px] text-center group border border-slate-100 hover:border-primary hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 flex flex-col gap-4 relative overflow-hidden h-full min-h-[300px]"
+                    >
+                      {/* Interaction Layer */}
+                      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0 z-10">
+                        <div className="w-10 h-10 bg-primary text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/40"><Plus size={20} /></div>
+                      </div>
+                      
+                      {/* Visual Identity */}
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-slate-50 p-1.5 border border-slate-100 group-hover:border-primary/30 transition-all duration-700 shadow-inner">
+                        <img 
+                          src={pImage} 
+                          alt={pName}
+                          className="w-full h-full object-cover rounded-full group-hover:scale-125 transition-transform duration-1000"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Attribute Cluster */}
+                      <div className="flex-1 flex flex-col gap-3">
+                        <div className="space-y-1">
+                          <h3 className="font-black text-slate-900 text-xs uppercase tracking-tight line-clamp-2 h-9 group-hover:text-primary transition-colors leading-relaxed">
+                            {pName}
+                          </h3>
+                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">{pId}</p>
+                        </div>
+
+                        <div className="mt-auto space-y-3">
+                          <div className="flex items-center justify-between px-2">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rate</p>
+                             <p className="text-lg font-black text-slate-900 tracking-tighter">Rs.{pPrice.toLocaleString()}</p>
+                          </div>
+                          
+                          <div className="flex items-center justify-between px-2 py-2 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-primary/5 group-hover:border-primary/10 transition-colors">
+                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{pUnit}</span>
+                             <span className={`text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-widest ${
+                                pStock > 10 ? 'text-emerald-600' : 
+                                pStock > 0 ? 'text-amber-600' : 
+                                'text-rose-600'
+                             }`}>
+                               {pStock > 0 ? `${pStock} Avail` : 'Out of Sync'}
+                             </span>
+                          </div>
                         </div>
                       </div>
-                      <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">{product.productId}</p>
-                    </div>
-                  </button>
-                ))
-              )}
+                    </button>
+                  );
+                });
+              })()}
             </div>
-          </>
+          </div>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
              <div className="flex items-center justify-between mb-8 pr-4">
