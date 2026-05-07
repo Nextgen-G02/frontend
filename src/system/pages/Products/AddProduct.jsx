@@ -96,7 +96,7 @@ export default function AddProduct() {
       if (name === "pCategory") {
         const selectedCat = categories.find(cat => cat.name === value);
         if (selectedCat) {
-          const prefix = selectedCat.prefix;
+          const prefix = (selectedCat.prefix || value.substring(0, 3)).toUpperCase();
 
           // Find all existing products with this prefix
           const relatedIds = allProducts
@@ -108,7 +108,8 @@ export default function AddProduct() {
             // Extract numeric parts and find the maximum
             const nums = relatedIds.map(id => {
               const parts = id.split('-');
-              const num = parseInt(parts[parts.length - 1]);
+              const numStr = parts[parts.length - 1];
+              const num = parseInt(numStr);
               return isNaN(num) ? 0 : num;
             });
             nextNum = Math.max(...nums) + 1;
@@ -250,8 +251,14 @@ export default function AddProduct() {
 
               <div className="space-y-1.5">
                 <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product ID</label>
-                <input name="productId" value={form.productId} onChange={handleChange}
-                  placeholder="Select category first..." className={inputClass("productId")} />
+                <input 
+                  name="productId" 
+                  value={form.productId} 
+                  readOnly 
+                  placeholder="Select category first..." 
+                  className={`${inputClass("productId")} bg-slate-100 cursor-not-allowed border-slate-200 text-slate-500`} 
+                />
+                <p className="text-[10px] text-slate-400 mt-1 ml-1 italic font-medium">Auto-generated based on selected category</p>
                 {errors.productId && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.productId}</p>}
               </div>
 
