@@ -12,7 +12,8 @@ import {
   Loader2,
   Lock,
   BadgeCheck,
-  Settings
+  Settings,
+  AlertTriangle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -91,17 +92,27 @@ export default function AdminStaffManagement() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Remove this staff member from the system?")) return;
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
+
+  const handleDelete = (id) => {
+    setDeleteId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const executeDelete = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/auth/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/auth/${deleteId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success("Staff member removed");
       fetchStaff();
     } catch (error) {
       toast.error("Failed to remove staff");
+    } finally {
+      setIsDeleteModalOpen(false);
+      setDeleteId(null);
     }
   };
 
@@ -119,15 +130,6 @@ export default function AdminStaffManagement() {
           <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Manage your shop staff and their login access.</p>
         </div>
 
-        <div className="flex items-center gap-3.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
-          <div className="p-2.5 bg-white rounded-lg shadow-sm">
-            <Shield className="text-primary" size={20} md:size={22} />
-          </div>
-          <div className="pr-4">
-            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">System Status</p>
-            <p className="text-xs font-bold text-slate-900 mt-1">All Staff Online</p>
-          </div>
-        </div>
       </header>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-10 items-start">
@@ -197,14 +199,10 @@ export default function AdminStaffManagement() {
 
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Access Role</label>
-                <select 
-                  value={formData.role}
-                  onChange={(e) => setFormData({...formData, role: e.target.value})}
-                  className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs shadow-sm appearance-none"
-                >
-                  <option value="staff">Shop Staff</option>
-                  <option value="admin">Owner / Admin</option>
-                </select>
+                <div className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-400 text-xs shadow-sm flex items-center gap-2">
+                  <BadgeCheck size={14} className="text-emerald-500" />
+                  Shop Staff (Standard Access)
+                </div>
               </div>
             </div>
 
@@ -257,12 +255,12 @@ export default function AdminStaffManagement() {
                     <tr key={user._id} className="hover:bg-white transition-all duration-300 group border-b border-slate-50/50">
                       <td className="px-8 md:px-10 py-5 md:py-6">
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center font-black text-lg shadow-inner ${user.role === 'admin' ? 'bg-primary text-white' : 'bg-slate-900 text-gold'}`}>
-                            {user.firstName[0]}
+                          <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center font-black text-lg shadow-inner ${user.role === 'admin' ? 'bg-amber-500 text-white' : 'bg-slate-900 text-gold'}`}>
+                            {user.role === 'admin' ? <BadgeCheck size={24} /> : user.firstName[0]}
                           </div>
                           <div>
                             <p className="font-black text-slate-900 uppercase tracking-tight text-base leading-tight">{user.firstName} {user.lastName}</p>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit">
+                            <p className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit lowercase">
                               <Mail size={10} className="text-primary"/> {user.email}
                             </p>
                           </div>
@@ -311,7 +309,42 @@ export default function AdminStaffManagement() {
             </table>
           </div>
         </div>
-      </div>
+    </div>
+
+      {/* Custom Deletion Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsDeleteModalOpen(false)}></div>
+          
+          <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                <AlertTriangle size={40} />
+              </div>
+              
+              <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Are you sure?</h2>
+              <p className="text-sm font-medium text-slate-400 leading-relaxed mb-8">
+                Remove this staff member from the system? This action cannot be undone.
+              </p>
+
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 hover:text-slate-900 transition-all"
+                >
+                  No, Keep them
+                </button>
+                <button 
+                  onClick={executeDelete}
+                  className="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-rose-100 hover:bg-rose-600 transition-all"
+                >
+                  Yes, Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

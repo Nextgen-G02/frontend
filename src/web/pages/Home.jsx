@@ -21,7 +21,7 @@ export default function Home() {
 
       {/* FEATURED PRODUCTS */}
       <ProductScroller
-        title="Chef's Special Selection"
+        title="Popular Cakes"
         category="cakes"
         bgColor="#ff149305"
       />
@@ -31,13 +31,13 @@ export default function Home() {
 
       {/* POPULAR ITEMS */}
       <ProductScroller
-        title="Popular Pastries"
+        title="Popular Sweets"
         category="sweet"
         bgColor="white"
       />
 
       <ProductScroller
-        title="Our Cupcake Box"
+        title="Beverages"
         category="beverages"
         bgColor="#ff149305"
       />

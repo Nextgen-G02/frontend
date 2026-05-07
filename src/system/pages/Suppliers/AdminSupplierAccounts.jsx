@@ -21,6 +21,14 @@ import {
 export default function AdminSupplierAccounts() {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  const formatCurrency = (num) => {
+    return new Number(num).toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
+
   const [supplier, setSupplier] = useState(null);
   const [supplyLogs, setSupplyLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -168,7 +176,7 @@ export default function AdminSupplierAccounts() {
                 {isCompleted && <CheckCircle2 size={14} className="text-emerald-500" />}
               </p>
               <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
-                {log.quantity} units @ Rs. {log.unitPrice}
+                {log.quantity} units @ Rs. {formatCurrency(log.unitPrice)}
               </p>
             </div>
           </div>
@@ -178,11 +186,11 @@ export default function AdminSupplierAccounts() {
             <div className="space-y-1.5 pb-3 border-b border-dashed border-slate-100">
               <div className="flex justify-between w-48">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total:</span>
-                <span className="text-xs font-black text-slate-900">Rs. {log.cost.toLocaleString()}</span>
+                <span className="text-xs font-black text-slate-900">Rs. {formatCurrency(log.cost)}</span>
               </div>
               <div className="flex justify-between w-48">
                 <span className="text-xs font-bold text-emerald-400 uppercase">{isCompleted ? 'Total Paid:' : 'Total Paid:'}</span>
-                <span className="text-sm font-black text-emerald-600">Rs. {log.paidAmount.toLocaleString()}</span>
+                <span className="text-sm font-black text-emerald-600">Rs. {formatCurrency(log.paidAmount)}</span>
               </div>
               {log.paymentHistory?.length > 0 && (log.paymentHistory.length > 1 || log.balance > 0) && (
                 <div className="pt-3 mt-3 border-t border-slate-100 space-y-2">
@@ -197,7 +205,7 @@ export default function AdminSupplierAccounts() {
                           {new Date(pmt.date).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })} • {new Date(pmt.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <span className="text-xs font-black text-emerald-600">Rs. {pmt.amount.toLocaleString()}</span>
+                      <span className="text-xs font-black text-emerald-600">Rs. {formatCurrency(pmt.amount)}</span>
                     </div>
                   ))}
                 </div>
@@ -214,7 +222,7 @@ export default function AdminSupplierAccounts() {
           ) : (
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-600 rounded-full border border-amber-100">
               <Clock size={14} />
-              <span className="text-xs font-black uppercase tracking-widest">Pending: Rs. {log.balance.toLocaleString()}</span>
+              <span className="text-xs font-black uppercase tracking-widest">Pending: Rs. {formatCurrency(log.balance)}</span>
             </div>
           )}
         </td>
@@ -231,13 +239,6 @@ export default function AdminSupplierAccounts() {
                 Pay Balance
               </button>
             )}
-            <button 
-              onClick={() => handleEditOpen(log)}
-              className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
-              title="Edit Payment"
-            >
-              <Edit2 size={16} />
-            </button>
             <button 
               onClick={() => confirmDeleteLog(log._id)}
               className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
@@ -271,9 +272,10 @@ export default function AdminSupplierAccounts() {
         <div>
           <button 
             onClick={() => navigate("/admin/suppliers")}
-            className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors font-black uppercase tracking-widest text-[9px] mb-4"
+            className="flex items-center gap-2.5 bg-slate-900 text-gold px-5 py-2.5 rounded-xl font-black uppercase tracking-widest text-[9px] hover:bg-primary hover:text-white transition-all duration-300 shadow-lg shadow-slate-100 mb-6 group"
           >
-            <ArrowLeft size={14} /> Back to Suppliers
+            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> 
+            Back to Suppliers
           </button>
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-[24px] bg-slate-900 text-gold flex items-center justify-center font-black text-2xl shadow-xl">
@@ -382,7 +384,7 @@ export default function AdminSupplierAccounts() {
                 />
                 {newSupply.cost > 0 && (
                   <p className="text-[9px] font-bold text-slate-400 mt-1 italic">
-                    Net Payable: Rs. {Math.max(0, parseFloat(newSupply.cost) - (supplier?.creditBalance || 0)).toLocaleString()}
+                    Net Payable: Rs. {formatCurrency(Math.max(0, parseFloat(newSupply.cost) - (supplier?.creditBalance || 0)))}
                   </p>
                 )}
               </div>
@@ -504,7 +506,7 @@ export default function AdminSupplierAccounts() {
                 {editingLog?.appliedCredit > 0 && (
                   <div className="flex justify-between text-[10px] font-bold text-indigo-500 uppercase tracking-widest">
                     <span>Credit Used:</span>
-                    <span>Rs. {editingLog?.appliedCredit.toLocaleString()}</span>
+                    <span>Rs. {formatCurrency(editingLog?.appliedCredit)}</span>
                   </div>
                 )}
               </div>
@@ -524,11 +526,11 @@ export default function AdminSupplierAccounts() {
                     <div className="mt-2 ml-1">
                       {parseFloat(editPaidAmount) > editingLog?.balance ? (
                         <p className="text-[10px] font-bold text-indigo-500 italic">
-                          Overpayment: Rs. {(parseFloat(editPaidAmount) - editingLog?.balance).toLocaleString()} will be added to credit.
+                          Overpayment: Rs. {formatCurrency(parseFloat(editPaidAmount) - editingLog?.balance)} will be added to credit.
                         </p>
                       ) : (
                         <p className="text-[10px] font-bold text-slate-500 italic">
-                          Remaining after payment: Rs. {(Math.max(0, editingLog?.balance - parseFloat(editPaidAmount))).toLocaleString()}
+                          Remaining after payment: Rs. {formatCurrency(Math.max(0, editingLog?.balance - parseFloat(editPaidAmount)))}
                         </p>
                       )}
                     </div>
