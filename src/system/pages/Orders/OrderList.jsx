@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  ClipboardList, 
-  Search, 
-  Filter, 
-  Plus, 
-  ArrowRight,
-  MoreVertical,
-  Calendar,
-  Phone,
-  Store,
-  Clock,
-  Loader2,
-  ChefHat
+import {
+    ClipboardList,
+    Search,
+    Filter,
+    Plus,
+    ArrowRight,
+    Calendar,
+    Phone,
+    Store,
+    Clock,
+    Activity,
+    ChefHat,
+    ShoppingBag,
+    ChevronRight,
+    TrendingUp,
+    Package
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
 const OrderList = () => {
     const navigate = useNavigate();
+
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -30,26 +34,34 @@ const OrderList = () => {
 
     const fetchOrders = async () => {
         setLoading(true);
+
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, {
-                headers: { Authorization: `Bearer ${token}` },
-                params: {
-                    customerName: search,
-                    status: statusFilter,
-                    type: 'Order' // This represents scheduled orders
+
+            const response = await axios.get(
+                `${import.meta.env.VITE_BACKEND_URL}/api/orders`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    params: {
+                        customerName: search,
+                        status: statusFilter,
+                        type: 'Order'
+                    }
                 }
-            });
+            );
+
             setOrders(response.data);
         } catch (error) {
             console.error("Order Fetch Error:", error);
-            if (error.response && error.response.status === 401) {
+
+            if (error.response?.status === 401) {
                 toast.error("Session expired. Please log in again.");
                 localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = '/login';
+                navigate('/login');
             } else {
-                toast.error("Failed to fetch orders: " + error.message + (error.response ? " (" + error.response.status + ")" : ""));
+                toast.error("Failed to synchronize with registry");
             }
         } finally {
             setLoading(false);
@@ -59,188 +71,364 @@ const OrderList = () => {
     const handleStatusUpdate = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}/status`, { orderStatus: newStatus }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            toast.success("Order status updated");
-            fetchOrders(); // Refresh list
+
+            await axios.patch(
+                `${import.meta.env.VITE_BACKEND_URL}/api/orders/${id}/status`,
+                { orderStatus: newStatus },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            toast.success("State transition committed");
+            fetchOrders();
         } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to update status");
+            toast.error(error.response?.data?.message || "Protocol violation");
         }
     };
 
     const handleSearch = (e) => {
         e.preventDefault();
         fetchOrders();
-    }
+    };
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case 'Pending': return "bg-amber-50 text-amber-600 border-amber-100";
-            case 'Confirmed': return "bg-blue-50 text-blue-600 border-blue-100";
-            case 'Preparing': return "bg-purple-50 text-purple-600 border-purple-100";
-            case 'Delivered': return "bg-emerald-50 text-emerald-600 border-emerald-100";
-            case 'Cancelled': return "bg-rose-50 text-primary border-rose-100 uppercase";
-            default: return "bg-slate-50 text-slate-600 border-slate-100";
+            case 'Pending':
+                return "bg-amber-500 text-white shadow-lg shadow-amber-500/20 border-transparent";
+
+            case 'Confirmed':
+                return "bg-blue-500 text-white shadow-lg shadow-blue-500/20 border-transparent";
+
+            case 'Preparing':
+                return "bg-purple-500 text-white shadow-lg shadow-purple-500/20 border-transparent";
+
+            case 'Ready':
+                return "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 border-transparent";
+
+            case 'Delivered':
+                return "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 border-transparent";
+
+            case 'Cancelled':
+                return "bg-slate-300 text-white border-transparent grayscale";
+
+            default:
+                return "bg-slate-500 text-white border-transparent";
         }
     };
 
+    const metrics = {
+        total: orders.length,
+        pending: orders.filter((o) => o.orderStatus === 'Pending').length,
+        ready: orders.filter((o) => o.orderStatus === 'Ready').length,
+        revenue: orders.reduce((sum, o) => sum + o.totalAmount, 0)
+    };
+
     return (
-        <div className="space-y-12 max-w-[1600px] mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
-            <div>
-                <div className="flex items-center gap-2.5 mb-3">
-                    <span className="w-10 h-1 bg-primary rounded-full"></span>
-                    <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]">Commercial Operations Ledger</p>
-                </div>
-                <h1 className="heading-premium text-2xl md:text-5xl leading-tight">Sales & <span className="italic font-medium text-slate-400">Orders</span></h1>
-                <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">Track requests, transmissions, and settlement states.</p>
-            </div>
-            <div className="flex flex-wrap gap-4">
-                <Link 
-                    to="/orders/summary" 
-                    className="py-3.5 md:py-4 px-6 md:px-8 bg-white border border-slate-200 text-slate-600 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.3em] hover:bg-slate-50 transition-all flex items-center justify-center gap-3 shadow-sm"
-                >
-                    <ChefHat size={18} />
-                    Production Sheet
-                </Link>
-                <Link 
-                    to="/orders/new" 
-                    className="py-3.5 md:py-4 px-6 md:px-10 bg-slate-900 text-gold rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-3 border border-white/10"
-                >
-                    <Plus size={18} />
-                    Initiate New Order
-                </Link>
-            </div>
-        </div>
+        <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 space-y-8">
+            <div className="max-w-[1500px] mx-auto space-y-8">
 
-        <div className="glass-card rounded-[24px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border-none shadow-xl">
-            <form onSubmit={handleSearch} className="p-5 md:p-8 border-b border-slate-50 bg-white/50 flex flex-col md:flex-row md:items-end gap-4 md:gap-6">
-                <div className="flex-1 relative group">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5 md:mb-3 ml-1">Identity Query (Customer)</p>
-                    <Search className="absolute left-5 bottom-3.5 text-slate-300 group-focus-within:text-primary transition-colors" size={16} md:size={18} />
-                    <input 
-                        type="text" 
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Identify customer..."
-                        className="w-full pl-12 md:pl-14 pr-5 md:pr-6 py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-200 text-xs md:text-sm"
-                    />
+                {/* Header */}
+                <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                    <div>
+                        <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+                            Master <span className="text-slate-400 italic font-medium">Orders</span>
+                        </h1>
+
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mt-3 flex items-center gap-2">
+                            <Activity size={12} className="text-primary" />
+                            Operational Transmission Registry
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-4 w-full lg:w-auto">
+                        <Link
+                            to="/orders/summary"
+                            className="flex-1 lg:flex-none px-6 py-3.5 bg-white border border-slate-200 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-3 shadow-sm"
+                        >
+                            <ChefHat size={16} />
+                            Production Summary
+                        </Link>
+
+                        <Link
+                            to="/orders/new"
+                            className="flex-1 lg:flex-none px-8 py-3.5 bg-slate-900 text-gold rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-xl shadow-slate-900/10 flex items-center justify-center gap-3"
+                        >
+                            <Plus size={16} />
+                            Initiate New Order
+                        </Link>
+                    </div>
+                </header>
+
+                {/* Metrics */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    {[
+                        {
+                            label: 'Registry Load',
+                            val: metrics.total,
+                            sub: 'Active Transmissions',
+                            icon: ShoppingBag
+                        },
+                        {
+                            label: 'Awaiting Action',
+                            val: metrics.pending,
+                            sub: 'Pending Review',
+                            icon: Clock
+                        },
+                        {
+                            label: 'Ready for Fulfillment',
+                            val: metrics.ready,
+                            sub: 'Awaiting Delivery',
+                            icon: Package
+                        },
+                        {
+                            label: 'Gross Liquidity',
+                            val: `Rs.${metrics.revenue.toLocaleString()}`,
+                            sub: 'Transmission Val',
+                            icon: TrendingUp
+                        }
+                    ].map((m, i) => (
+                        <div
+                            key={i}
+                            className="bg-white p-5 rounded-[24px] border border-slate-200/60 shadow-sm relative overflow-hidden group hover:shadow-xl hover:border-primary/20 transition-all duration-500"
+                        >
+                            <div className="absolute top-0 right-0 p-4 opacity-[0.05] group-hover:scale-125 transition-transform duration-700">
+                                <m.icon size={64} />
+                            </div>
+
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                                {m.label}
+                            </p>
+
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                                {m.val}
+                            </h3>
+
+                            <p className="text-[7px] font-bold text-slate-400 uppercase mt-1">
+                                {m.sub}
+                            </p>
+                        </div>
+                    ))}
                 </div>
 
-                <div className="w-full md:w-64 relative group">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2.5 md:mb-3 ml-1">Operational Filter (Status)</p>
-                    <select 
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full px-5 md:px-6 py-3.5 bg-white border border-slate-100 rounded-lg md:rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-primary appearance-none cursor-pointer uppercase text-[9px] md:text-[10px] tracking-widest shadow-sm"
+                {/* Table Section */}
+                <div className="bg-white rounded-[32px] border border-slate-200/60 shadow-2xl shadow-slate-200/50 overflow-hidden">
+
+                    {/* Search */}
+                    <form
+                        onSubmit={handleSearch}
+                        className="p-6 md:p-8 bg-slate-50/50 border-b border-slate-100 flex flex-col md:flex-row items-end gap-6"
                     >
-                        <option value="">Global States</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Preparing">Preparing</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                    <Filter className="absolute right-5 bottom-3.5 text-slate-300 pointer-events-none group-focus-within:text-primary transition-colors" size={14} md:size={16} />
-                </div>
+                        <div className="flex-1 relative group w-full">
+                            <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">
+                                Identity Query (Customer)
+                            </label>
 
-                <button 
-                    type="submit"
-                    className="w-full md:w-auto px-8 py-3.5 bg-slate-900 text-gold rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all shadow-xl active:scale-95 border border-white/5"
-                >
-                    Apply Filters
-                </button>
-            </form>
+                            <div className="relative">
+                                <Search
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                                    size={16}
+                                />
 
-                <div className="overflow-x-auto no-scrollbar">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-            <tr className="bg-slate-50/50">
-                <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Transmission Type</th>
-                <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Client Profile</th>
-                <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Lifecycle state</th>
-                <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Settlement Value</th>
-                <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Registry Link</th>
-            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="5" className="px-12 py-40 text-center">
-                                        <Loader2 className="animate-spin text-primary mx-auto mb-6" size={56} />
-                                        <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400">Accessing Master Ledger Transmissions...</p>
-                                    </td>
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Identify customer profile..."
+                                    className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-xs"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="w-full md:w-64 relative">
+                            <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">
+                                Operational Filter
+                            </label>
+
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="w-full px-5 py-3 bg-white border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-[9px] uppercase tracking-widest appearance-none"
+                            >
+                                <option value="">Global Registry Status</option>
+
+                                {[
+                                    'Pending',
+                                    'Confirmed',
+                                    'Preparing',
+                                    'Ready',
+                                    'Delivered',
+                                    'Cancelled'
+                                ].map((s) => (
+                                    <option key={s} value={s}>
+                                        {s.toUpperCase()}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <Filter
+                                className="absolute right-5 bottom-3 text-slate-400 pointer-events-none"
+                                size={14}
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="w-full md:w-auto px-10 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all"
+                        >
+                            Sync Filters
+                        </button>
+                    </form>
+
+                    {/* Table */}
+                    <div className="overflow-x-auto no-scrollbar">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50/80">
+                                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                        Asset Origin
+                                    </th>
+
+                                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                        Personnel Handle
+                                    </th>
+
+                                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                        Lifecycle State
+                                    </th>
+
+                                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                                        Economic Val
+                                    </th>
+
+                                    <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">
+                                        Actions
+                                    </th>
                                 </tr>
-                            ) : orders.length === 0 ? (
-                                <tr>
-                                    <td colSpan="5" className="px-12 py-40 text-center">
-                                        <div className="w-24 h-24 bg-slate-50 rounded-[32px] flex items-center justify-center mx-auto mb-6 shadow-inner">
-                                            <ClipboardList size={48} className="text-slate-200" />
-                                        </div>
-                                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No order transmissions found in registry.</p>
-                                    </td>
-                                </tr>
-                            ) : (
-                                orders.map((order) => (
-                                    <tr key={order._id} className="hover:bg-white transition-all duration-300 group">
-                                        <td className="px-6 md:px-10 py-4 md:py-6">
-                                            <div className="flex items-center gap-3 md:gap-5">
-                                                <div className={`p-2.5 md:p-3 rounded-lg md:rounded-xl shadow-sm ${order.type === 'DirectSale' ? 'bg-slate-900 text-gold' : 'bg-primary text-white shadow-primary/20'}`}>
-                                                    {order.type === 'DirectSale' ? <Store size={16} md:size={18} /> : <Calendar size={16} md:size={18} />}
-                                                </div>
-                                                <div>
-                                                    <p className="font-mono text-[8px] font-black text-slate-300 uppercase leading-none mb-1 tracking-widest">SEQ: {order._id.slice(-6).toUpperCase()}</p>
-                                                    <p className="font-black text-slate-900 group-hover:text-primary transition-colors uppercase tracking-tight text-sm md:text-base">{order.type === 'DirectSale' ? 'In-Store' : 'Scheduled'}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 md:px-10 py-4 md:py-6">
-                                            <div className="space-y-0.5 md:space-y-1">
-                                                <p className="font-black text-slate-900 text-sm md:text-base uppercase tracking-tight">
-                                                    {order.customerName}
-                                                </p>
-                                                <div className="flex items-center gap-2 text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                                    <div className="w-1 h-1 rounded-full bg-emerald-500"></div>
-                                                    {order.phone || 'GUEST'}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 md:px-10 py-4 md:py-6">
-                                            <select 
-                                                value={order.orderStatus}
-                                                onChange={(e) => handleStatusUpdate(order._id, e.target.value)}
-                                                className={`px-3.5 md:px-4 py-1.5 rounded-full text-[8px] md:text-[9px] font-black tracking-[0.2em] border cursor-pointer outline-none transition-all appearance-none text-center ${getStatusStyle(order.orderStatus)}`}
-                                            >
-                                                <option value="Pending">PENDING</option>
-                                                <option value="Confirmed">CONFIRMED</option>
-                                                <option value="Preparing">PREPARING</option>
-                                                <option value="Delivered">DELIVERED</option>
-                                                <option value="Cancelled">CANCELLED</option>
-                                            </select>
-                                        </td>
-                                        <td className="px-6 md:px-10 py-4 md:py-6">
-                                            <div className="flex flex-col">
-                                                <span className="font-black text-slate-900 text-lg md:text-xl tracking-tighter">Rs.{order.totalAmount.toLocaleString()}</span>
-                                                <span className={`text-[8px] font-black uppercase tracking-widest mt-0.5 ${order.paymentStatus === 'Paid' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                    {order.paymentStatus}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 md:px-10 py-4 md:py-6 text-right">
-                                            <button 
-                                                onClick={() => navigate(`/orders/${order._id}`)}
-                                                className="inline-flex items-center gap-2 md:gap-2.5 px-3.5 md:px-5 py-2.5 rounded-lg md:rounded-xl bg-white border border-slate-100 text-[8px] md:text-[9px] font-black text-slate-400 hover:bg-slate-900 hover:text-gold hover:border-slate-900 hover:shadow-2xl transition-all uppercase tracking-widest group/btn"
-                                            >
-                                                Query
-                                                <ArrowRight size={12} md:size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-                                            </button>
+                            </thead>
+
+                            <tbody className="divide-y divide-slate-50">
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="5" className="py-32 text-center">
+                                            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+
+                                            <p className="font-black uppercase tracking-[0.3em] text-[9px] text-slate-400">
+                                                Synchronizing Master Ledger...
+                                            </p>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : orders.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="5" className="py-32 text-center">
+                                            <ClipboardList
+                                                size={40}
+                                                className="text-slate-100 mx-auto mb-4"
+                                            />
+
+                                            <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">
+                                                Registry sequence is empty.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    orders.map((order) => (
+                                        <tr
+                                            key={order._id}
+                                            className="hover:bg-slate-50/50 transition-all duration-300 group"
+                                        >
+                                            <td className="px-8 py-4">
+                                                <div className="flex items-center gap-4">
+                                                    <div
+                                                        className={`p-2.5 rounded-xl ${
+                                                            order.type === 'DirectSale'
+                                                                ? 'bg-slate-900 text-gold'
+                                                                : 'bg-primary/10 text-primary'
+                                                        }`}
+                                                    >
+                                                        {order.type === 'DirectSale' ? (
+                                                            <Store size={14} />
+                                                        ) : (
+                                                            <Calendar size={14} />
+                                                        )}
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="font-mono text-[7px] font-black text-slate-700 uppercase tracking-widest mb-0.5 leading-none">
+                                                            SEQ: {order._id.slice(-6).toUpperCase()}
+                                                        </p>
+
+                                                        <p className="font-black text-slate-900 uppercase tracking-tight text-xs">
+                                                            {order.type === 'DirectSale'
+                                                                ? 'In-Store POS'
+                                                                : 'Scheduled'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td className="px-8 py-4">
+                                                <div className="space-y-0.5">
+                                                    <p className="font-black text-slate-900 text-xs uppercase tracking-tight">
+                                                        {order.customerName}
+                                                    </p>
+
+                                                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                                                        <Phone size={8} className="text-slate-300" />
+                                                        {order.phone || 'GUEST_PROFILE'}
+                                                    </p>
+                                                </div>
+                                            </td>
+
+                                            <td className="px-8 py-4">
+                                                <select
+                                                    value={order.orderStatus}
+                                                    onChange={(e) =>
+                                                        handleStatusUpdate(order._id, e.target.value)
+                                                    }
+                                                    className={`px-4 py-2 rounded-xl text-[8px] font-black tracking-widest border-none cursor-pointer outline-none transition-all appearance-none text-center shadow-sm hover:scale-105 ${getStatusStyle(
+                                                        order.orderStatus
+                                                    )}`}
+                                                >
+                                                    <option value="Pending">PENDING</option>
+                                                    <option value="Confirmed">CONFIRMED</option>
+                                                    <option value="Preparing">PREPARING</option>
+                                                    <option value="Ready">READY</option>
+                                                    <option value="Delivered">DELIVERED</option>
+                                                    <option value="Cancelled">CANCELLED</option>
+                                                </select>
+                                            </td>
+
+                                            <td className="px-8 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="font-black text-slate-900 text-sm tracking-tight leading-none mb-1">
+                                                        Rs.{order.totalAmount.toLocaleString()}
+                                                    </span>
+
+                                                    <span className="text-[7px] font-black text-emerald-500 uppercase tracking-widest px-1.5 py-0.5 bg-emerald-50 rounded-md w-fit">
+                                                        Authorized
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <td className="px-8 py-4 text-right">
+                                                <button
+                                                    onClick={() =>
+                                                        navigate(`/orders/${order._id}`)
+                                                    }
+                                                    className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:bg-slate-900 hover:text-gold hover:border-slate-900 transition-all shadow-sm"
+                                                >
+                                                    <ChevronRight size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

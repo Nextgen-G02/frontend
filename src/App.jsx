@@ -54,7 +54,7 @@ function App() {
         {/* Order Management */}
         <Route path='/orders' element={<ProtectedRoute><AdminLayout><OrderList /></AdminLayout></ProtectedRoute>} />
         <Route path='/orders/new' element={<ProtectedRoute><AdminLayout><OrderForm /></AdminLayout></ProtectedRoute>} />
-        <Route path='/orders/edit/:id' element={<ProtectedRoute><AdminLayout><OrderForm /></AdminLayout></ProtectedRoute>} />
+        <Route path='/orders/edit/:id' element={<ProtectedRoute><AdminLayout><OrderDetails /></AdminLayout></ProtectedRoute>} />
         <Route path='/orders/summary' element={<ProtectedRoute><AdminLayout><ProductionSummary /></AdminLayout></ProtectedRoute>} />
         <Route path='/orders/:id' element={<ProtectedRoute><AdminLayout><OrderDetails /></AdminLayout></ProtectedRoute>} />
 
