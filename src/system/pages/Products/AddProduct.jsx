@@ -251,14 +251,14 @@ export default function AddProduct() {
 
               <div className="space-y-1.5">
                 <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product ID</label>
-                <input 
-                  name="productId" 
-                  value={form.productId} 
-                  readOnly 
-                  placeholder="Select category first..." 
-                  className={`${inputClass("productId")} bg-slate-100 cursor-not-allowed border-slate-200 text-slate-500`} 
+                <input
+                  name="productId"
+                  value={form.productId}
+                  readOnly
+                  placeholder="Select category first..."
+                  className={`${inputClass("productId")} bg-slate-100 cursor-not-allowed border-slate-200 text-slate-500`}
                 />
-                <p className="text-[10px] text-slate-400 mt-1 ml-1 italic font-medium">Auto-generated based on selected category</p>
+                {/* <p className="text-[10px] text-slate-400 mt-1 ml-1 italic font-medium">Auto-generated based on selected category</p> */}
                 {errors.productId && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.productId}</p>}
               </div>
 
@@ -271,12 +271,12 @@ export default function AddProduct() {
 
               <div className="space-y-1.5">
                 <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Description</label>
-                <textarea 
-                  name="description" 
-                  value={form.description} 
+                <textarea
+                  name="description"
+                  value={form.description}
                   onChange={handleChange}
-                  placeholder="Describe this product..." 
-                  className={`${inputClass("description")} min-h-[120px] py-4 resize-none`} 
+                  placeholder="Describe this product..."
+                  className={`${inputClass("description")} min-h-[120px] py-4 resize-none`}
                 />
                 {errors.description && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.description}</p>}
               </div>
