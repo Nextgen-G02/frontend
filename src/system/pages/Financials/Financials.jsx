@@ -23,9 +23,16 @@ export default function AdminFinancials() {
   const [dailyData, setDailyData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const getToday = () => new Date().toLocaleDateString('en-CA');
+  const getThirtyDaysAgo = () => {
+    const d = new Date();
+    d.setDate(d.getDate() - 30);
+    return d.toLocaleDateString('en-CA');
+  };
+
   const [dates, setDates] = useState({
-    startDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0]
+    startDate: getThirtyDaysAgo(),
+    endDate: getToday()
   });
 
   useEffect(() => {
@@ -303,62 +310,6 @@ export default function AdminFinancials() {
              </div>
           </div>
 
-          {/* Deep Insights */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 md:gap-10">
-            <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border border-slate-100 shadow-xl relative group overflow-hidden">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="p-3.5 bg-slate-50 text-primary rounded-xl border border-slate-100 shadow-sm"><PieChart size={20} md:size={24} /></div>
-                  <div>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">Revenue Dynamics</h2>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Flow Analysis</p>
-                  </div>
-                </div>
-                <ArrowRight size={20} md:size={24} className="text-slate-200 group-hover:text-primary transition-colors hover:translate-x-1" />
-              </div>
-              <div className="space-y-6 relative z-10">
-                <div className="p-6 md:p-7 bg-slate-50 rounded-[24px] md:rounded-[32px] border border-slate-100/50">
-                  <p className="text-[9px] font-black text-slate-900 uppercase tracking-[0.3em] mb-3">Transmission Synchronization</p>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium italic">"Revenue streams are aggregated across automated POS terminals and individual order settlements. Current liquidity indicates optimal operational velocity."</p>
-                </div>
-                <button 
-                  onClick={handleExport}
-                  className="w-full py-4.5 md:py-5 bg-slate-900 text-white rounded-xl md:rounded-2xl font-black text-[10px] uppercase tracking-[0.4em] shadow-xl hover:bg-primary transition-all duration-500 flex items-center justify-center gap-2.5"
-                >
-                  Export P&L Data
-                  <ArrowUpRight size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-white border border-slate-100 shadow-xl relative group overflow-hidden">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="p-3.5 bg-slate-50 text-primary rounded-xl border border-slate-100 shadow-sm"><Target size={20} md:size={24} /></div>
-                  <div>
-                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">Expansion Goals</h2>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 italic">Success Metrics</p>
-                  </div>
-                </div>
-                <TrendingUp size={20} md:size={24} className="text-emerald-500" />
-              </div>
-              <div className="space-y-6">
-                <div className="p-6 md:p-7 bg-slate-50 rounded-[24px] md:rounded-[32px] border border-slate-100/50">
-                  <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] mb-3">Efficiency Variance</p>
-                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium italic">"Registry optimization indicates 94.2% operational efficiency. Targeting a 3% reduction in procurement overhead to bolster quarterly yield."</p>
-                </div>
-                <div className="space-y-3">
-                    <div className="flex justify-between text-[9px] font-black uppercase tracking-[0.3em]">
-                       <span className="text-slate-400">Quarterly Target</span>
-                       <span className="text-primary">85% Complete</span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                       <div className="w-[85%] h-full bg-primary shadow-[0_0_12px_rgba(127,29,29,0.5)] transition-all duration-1000" />
-                    </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       ) : null}
     </div>

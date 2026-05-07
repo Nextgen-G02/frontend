@@ -10,9 +10,11 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../shared/context/AuthContext";
+import { useCart } from "../../shared/context/CartContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -101,6 +103,11 @@ export default function Navbar() {
             className="group relative p-2.5 text-slate-400 hover:text-primary transition-colors"
           >
             <ShoppingBag size={20} md:size={22} className="group-hover:scale-110 transition-transform" />
+            {cartCount > 0 && (
+              <span className="absolute top-1 right-1 bg-primary text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+                {cartCount}
+              </span>
+            )}
           </Link>
 
           {/* USER LOGGED IN */}

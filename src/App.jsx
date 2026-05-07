@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast'
 import Home from './web/pages/Home'
 import Login from './web/pages/Auth/Login'
 import Products from './web/pages/Products'
+import Cart from './web/pages/Cart'
 
 // System Pages
 import AdminDashboard from './system/pages/Dashboard/Dashboard'
@@ -39,6 +40,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/cart" element={<Cart />} />
 
         {/* Global Admin Wrapper */}
         <Route element={<ProtectedRoute><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} path="/admin" />
