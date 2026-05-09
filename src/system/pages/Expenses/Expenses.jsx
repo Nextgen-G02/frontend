@@ -7,7 +7,6 @@ import {
   Search, 
   Filter, 
   Calendar, 
-  DollarSign, 
   Loader2,
   Tag,
   FileText
@@ -29,7 +28,7 @@ export default function AdminExpenses() {
     category: ""
   });
 
-  const categories = ['Ingredients', 'Salaries', 'Shop Bills', 'Other'];
+  const categories = ['Ingredients', 'Salaries', 'Current Bill', 'Water Bill', 'Other'];
 
   useEffect(() => {
     fetchExpenses();
@@ -180,7 +179,8 @@ export default function AdminExpenses() {
                       <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
                         expense.category === 'Ingredients' ? 'bg-emerald-50 text-emerald-600' :
                         expense.category === 'Salaries' ? 'bg-indigo-50 text-indigo-600' :
-                        expense.category === 'Shop Bills' ? 'bg-amber-50 text-amber-600' :
+                        expense.category === 'Current Bill' ? 'bg-amber-50 text-amber-600' :
+                        expense.category === 'Water Bill' ? 'bg-blue-50 text-blue-600' :
                         'bg-slate-100 text-slate-600'
                       }`}>
                         {expense.category}
@@ -223,7 +223,7 @@ export default function AdminExpenses() {
           <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-10">
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-rose-50 text-rose-500 rounded-2xl"><DollarSign size={24} /></div>
+                <div className="p-4 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center font-black text-lg">Rs</div>
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">New Expense</h2>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Add details below</p>
