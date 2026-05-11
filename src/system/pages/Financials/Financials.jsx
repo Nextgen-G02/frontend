@@ -256,13 +256,30 @@ export default function AdminFinancials() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Where your money is spent</p>
                  </div>
                </div>
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                 {Object.entries(summary.expenseBreakdown).map(([category, amount]) => (
-                   <div key={category} className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50 hover:bg-slate-900 hover:text-white transition-all group">
-                     <p className="text-[9px] font-black text-slate-400 group-hover:text-white/50 uppercase tracking-[0.3em] mb-3">{category}</p>
-                     <p className="text-xl font-black tracking-tighter">Rs.{amount.toLocaleString()}</p>
-                   </div>
-                 ))}
+               <div className="space-y-6">
+                 {/* Main Categories Row */}
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                   {['Ingredients', 'Salaries', 'Other'].map(category => (
+                     summary.expenseBreakdown[category] !== undefined && (
+                       <div key={category} className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50 hover:bg-slate-900 hover:text-white transition-all group">
+                         <p className="text-[9px] font-black text-slate-400 group-hover:text-white/50 uppercase tracking-[0.3em] mb-3">{category}</p>
+                         <p className="text-xl font-black tracking-tighter">Rs.{(summary.expenseBreakdown[category] || 0).toLocaleString()}</p>
+                       </div>
+                     )
+                   ))}
+                 </div>
+
+                 {/* Bills Row (Centered) */}
+                 <div className="flex flex-wrap justify-center gap-6">
+                   {['Current Bill', 'Water Bill'].map(category => (
+                     summary.expenseBreakdown[category] !== undefined && (
+                       <div key={category} className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50 hover:bg-slate-900 hover:text-white transition-all group min-w-[280px]">
+                         <p className="text-[9px] font-black text-slate-400 group-hover:text-white/50 uppercase tracking-[0.3em] mb-3">{category}</p>
+                         <p className="text-xl font-black tracking-tighter">Rs.{(summary.expenseBreakdown[category] || 0).toLocaleString()}</p>
+                       </div>
+                     )
+                   ))}
+                 </div>
                </div>
             </div>
           )}
