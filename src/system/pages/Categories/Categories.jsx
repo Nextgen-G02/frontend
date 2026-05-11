@@ -275,13 +275,13 @@ export default function AdminCategoryManagement() {
                         <div className="flex justify-start gap-2 transition-all duration-300">
                           <button
                             onClick={() => startEdit(cat)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-white transition-all duration-300 border border-slate-100 shadow-sm"
+                            className="p-3 rounded-xl bg-white text-slate-600 hover:text-primary hover:shadow-xl transition-all duration-300 border border-slate-100 shadow-sm"
                           >
                             <Edit3 size={18} />
                           </button>
                           <button
                             onClick={() => handleDeleteClick(cat._id)}
-                            className="p-3 rounded-xl bg-slate-50 text-slate-600 hover:text-primary hover:bg-primary/5 transition-all duration-300 border border-slate-100 shadow-sm"
+                            className="p-3 rounded-xl transition-all border bg-white border-rose-100 text-rose-500 hover:text-rose-600 hover:shadow-xl"
                           >
                             <Trash2 size={18} />
                           </button>
@@ -320,7 +320,7 @@ export default function AdminCategoryManagement() {
               </h2>
 
               <p className="text-sm font-medium text-slate-400 mb-10 leading-relaxed px-4">
-                Permanently erase this definition? This action is irreversible and may impact linked catalog assets.
+                Are you sure you want to permanently delete this Category? This action cannot be undone and may affect related catalog items.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
