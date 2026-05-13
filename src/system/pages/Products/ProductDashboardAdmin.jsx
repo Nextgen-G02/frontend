@@ -277,7 +277,7 @@ export default function ProductDashboardAdmin() {
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Name</th>
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Category</th>
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Unit Value</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Inventory State</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Stock Availability</th>
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
                 </tr>
               </thead>
@@ -377,7 +377,7 @@ export default function ProductDashboardAdmin() {
                 <div className="p-3 bg-slate-900 text-gold rounded-2xl"><Edit3 size={24} /></div>
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Product</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Update Master Registry</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Edit the product</p>
                 </div>
               </div>
               <button onClick={() => setEditProduct(null)} className="p-4 hover:bg-slate-50 rounded-2xl transition-colors text-slate-400">
@@ -482,10 +482,10 @@ export default function ProductDashboardAdmin() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Measurement Unit</label>
-                  <select 
+                  <select
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 appearance-none cursor-pointer"
                     value={editForm.unit}
-                    onChange={(e) => setEditForm({...editForm, unit: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
                   >
                     <option value="pcs">pcs</option>
                     <option value="kg">kg</option>
