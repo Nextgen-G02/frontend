@@ -292,6 +292,7 @@ export default function AddProduct() {
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Price Rs.</label>
               <input type="number" name="price" value={form.price} onChange={handleChange} min="0.01" step="0.01"
+                onWheel={(e) => e.target.blur()}
                 placeholder="0.00" className={inputClass("price")} />
               {errors.price && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.price}</p>}
             </div>
@@ -299,6 +300,7 @@ export default function AddProduct() {
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Cost Price Rs.</label>
               <input type="number" name="costPrice" value={form.costPrice} onChange={handleChange} min="0.01" step="0.01"
+                onWheel={(e) => e.target.blur()}
                 placeholder="0.00" className={inputClass("costPrice")} />
               {errors.costPrice && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.costPrice}</p>}
             </div>
@@ -320,6 +322,7 @@ export default function AddProduct() {
               <div className="space-y-1.5">
                 <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({form.unit})</label>
                 <input type="number" name="weight" value={form.weight} onChange={handleChange} min="0" step="0.01"
+                  onWheel={(e) => e.target.blur()}
                   placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
                 {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
               </div>
@@ -328,6 +331,7 @@ export default function AddProduct() {
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock</label>
               <input type="number" name="stock" value={form.stock} onChange={handleChange} min="0"
+                onWheel={(e) => e.target.blur()}
                 placeholder="0" className={inputClass("stock")} />
               {errors.stock && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.stock}</p>}
             </div>
