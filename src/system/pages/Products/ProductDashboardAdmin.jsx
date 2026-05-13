@@ -12,7 +12,8 @@ import {
   Save,
   Settings,
   Image,
-  Upload
+  Upload,
+  Eye
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -31,6 +32,7 @@ export default function ProductDashboardAdmin() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [editForm, setEditForm] = useState({});
   const [allProducts, setAllProducts] = useState([]);
+  const [viewProduct, setViewProduct] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -277,7 +279,7 @@ export default function ProductDashboardAdmin() {
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Name</th>
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Category</th>
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Unit Value</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Inventory State</th>
+                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Stock Availability</th>
                   <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
                 </tr>
               </thead>
@@ -346,6 +348,12 @@ export default function ProductDashboardAdmin() {
                       <td className="px-6 md:px-12 py-6 md:py-8 text-right">
                         <div className="flex justify-end gap-2 md:gap-3 transition-all duration-300">
                           <button
+                            onClick={() => setViewProduct(p)}
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-600 hover:text-emerald-500 hover:shadow-xl transition-all"
+                          >
+                            <Eye size={18} md:size={20} />
+                          </button>
+                          <button
                             onClick={() => handleEditOpen(p)}
                             className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-600 hover:text-primary hover:shadow-xl transition-all"
                           >
@@ -368,6 +376,107 @@ export default function ProductDashboardAdmin() {
         )}
       </div>
 
+      {/* View Product Modal */}
+      {viewProduct && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+            onClick={() => setViewProduct(null)}
+          ></div>
+
+          <div className="relative w-full max-w-[800px] bg-white rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 md:p-12 max-h-[90vh] overflow-y-auto no-scrollbar">
+              <div className="flex items-center justify-between mb-10">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-slate-900 text-gold rounded-2xl">
+                    <Package size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Product Details</h2>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Detailed information from catalog</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setViewProduct(null)}
+                  className="p-3 hover:bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900 transition-all"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                {/* Image Section */}
+                <div className="space-y-6">
+                  <div className="aspect-square rounded-[32px] overflow-hidden border border-slate-100 shadow-inner bg-slate-50">
+                    <img
+                      src={viewProduct.images?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
+                      className="w-full h-full object-cover"
+                      alt={viewProduct.pName}
+                    />
+                  </div>
+                  
+                  <div className="p-6 bg-slate-50 rounded-[24px] border border-slate-100 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Product ID</span>
+                      <span className="px-3 py-1 bg-white rounded-lg text-[10px] font-black text-slate-900 border border-slate-100 uppercase">{viewProduct.productId}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</span>
+                      <span className="px-3 py-1 bg-slate-900 text-gold rounded-lg text-[10px] font-black uppercase">{viewProduct.pCategory}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Details Section */}
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-3xl font-black text-slate-900 leading-tight mb-2">{viewProduct.pName}</h3>
+                    <p className="text-sm font-medium text-slate-500 leading-relaxed italic">{viewProduct.description || "No description available for this product."}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-5 bg-emerald-50 rounded-[24px] border border-emerald-100">
+                      <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Selling Price</p>
+                      <p className="text-xl font-black text-emerald-600">Rs. {viewProduct.price?.toLocaleString()}</p>
+                    </div>
+                    <div className="p-5 bg-slate-50 rounded-[24px] border border-slate-100">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Cost Price</p>
+                      <p className="text-xl font-black text-slate-900">Rs. {viewProduct.costPrice?.toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border-b border-slate-50">
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Stock Level</span>
+                      <div className="flex items-center gap-3">
+                        <div className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${stockStatus(viewProduct.stock).class}`}>
+                          {stockStatus(viewProduct.stock).label}
+                        </div>
+                        <span className="text-base font-black text-slate-900">{viewProduct.stock} Units</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 border-b border-slate-50">
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Measurement</span>
+                      <span className="text-base font-black text-slate-900 uppercase">
+                        {viewProduct.weight ? `${viewProduct.weight} ${viewProduct.unit}` : `1 ${viewProduct.unit}`}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4">
+                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Expiry Date</span>
+                      <span className="text-sm font-black text-slate-900">
+                        {viewProduct.expiryDate ? new Date(viewProduct.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "N/A"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit Modal */}
       {editProduct && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
@@ -377,7 +486,7 @@ export default function ProductDashboardAdmin() {
                 <div className="p-3 bg-slate-900 text-gold rounded-2xl"><Edit3 size={24} /></div>
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Product</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Update Master Registry</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Edit the product</p>
                 </div>
               </div>
               <button onClick={() => setEditProduct(null)} className="p-4 hover:bg-slate-50 rounded-2xl transition-colors text-slate-400">
@@ -395,6 +504,19 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => setEditForm({ ...editForm, pName: e.target.value })}
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Category</label>
+                  <select
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 appearance-none cursor-pointer"
+                    value={editForm.pCategory}
+                    onChange={(e) => setEditForm({ ...editForm, pCategory: e.target.value })}
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map(cat => (
+                      <option key={cat._id} value={cat.name}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Description</label>
                   <textarea
@@ -410,11 +532,27 @@ export default function ProductDashboardAdmin() {
                     type="number"
                     min="0.01"
                     step="0.01"
+                    onWheel={(e) => e.target.blur()}
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.price}
                     onChange={(e) => {
-                      const val = Number(e.target.value);
-                      if (val >= 0) setEditForm({ ...editForm, price: val });
+                      const val = e.target.value;
+                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, price: val });
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Cost Price Rs.</label>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    onWheel={(e) => e.target.blur()}
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    value={editForm.costPrice}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, costPrice: val });
                     }}
                   />
                 </div>
@@ -472,20 +610,30 @@ export default function ProductDashboardAdmin() {
                   <input
                     type="number"
                     min="0"
+                    onWheel={(e) => e.target.blur()}
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
                     value={editForm.stock}
                     onChange={(e) => {
-                      const val = Number(e.target.value);
-                      if (val >= 0) setEditForm({ ...editForm, stock: val });
+                      const val = e.target.value;
+                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, stock: val });
                     }}
+                  />
+                </div>
+                <div className="space-y-4">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Expiry Date</label>
+                  <input
+                    type="date"
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    value={editForm.expiryDate ? new Date(editForm.expiryDate).toISOString().split('T')[0] : ""}
+                    onChange={(e) => setEditForm({ ...editForm, expiryDate: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Measurement Unit</label>
-                  <select 
+                  <select
                     className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 appearance-none cursor-pointer"
                     value={editForm.unit}
-                    onChange={(e) => setEditForm({...editForm, unit: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
                   >
                     <option value="pcs">pcs</option>
                     <option value="kg">kg</option>
@@ -496,93 +644,28 @@ export default function ProductDashboardAdmin() {
                     <option value="pkt">pkt</option>
                   </select>
                 </div>
-                <div className="space-y-2 flex flex-col justify-end">
-                  <label className="flex items-center gap-3 cursor-pointer group mb-2">
-                    <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-primary transition-colors">Raw Ingredient Status</span>
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={editForm.isIngredient}
-                        onChange={(e) => setEditForm({ ...editForm, isIngredient: e.target.checked })}
-                      />
-                      <div className="w-11 h-6 bg-slate-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </div>
-                  </label>
-                </div>
+                {['kg', 'g', 'ml', 'l'].includes(editForm.unit) && (
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({editForm.unit})</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      onWheel={(e) => e.target.blur()}
+                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                      value={editForm.weight}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, weight: val });
+                      }}
+                      placeholder={`Enter weight in ${editForm.unit}`}
+                    />
+                  </div>
+                )}
               </div>
 
-              {!editForm.isIngredient && (
-                <div className="p-8 bg-slate-900 rounded-[32px] text-white">
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-white/10 text-gold rounded-lg border border-white/10"><Settings size={18} /></div>
-                      <h3 className="text-base font-black text-white tracking-tight uppercase">Recipe Configuration</h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setEditForm(prev => ({
-                        ...prev,
-                        recipe: [...(prev.recipe || []), { ingredientId: "", quantity: 1 }]
-                      }))}
-                      className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                    >
-                      + Add Ingredient
-                    </button>
-                  </div>
 
-                  <div className="space-y-4">
-                    {(editForm.recipe || []).map((item, index) => (
-                      <div key={index} className="flex items-end gap-4">
-                        <div className="flex-1 space-y-2">
-                          <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Ingredient</label>
-                          <select
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-gold transition-all font-bold text-white text-sm"
-                            value={item.ingredientId?._id || item.ingredientId}
-                            onChange={(e) => {
-                              const newRecipe = [...editForm.recipe];
-                              newRecipe[index].ingredientId = e.target.value;
-                              setEditForm({ ...editForm, recipe: newRecipe });
-                            }}
-                          >
-                            <option value="" className="bg-slate-900">Choose...</option>
-                            {products.filter(p => p.isIngredient).map(p => (
-                              <option key={p._id} value={p._id} className="bg-slate-900">{p.pName} ({p.unit})</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div className="w-24 space-y-2">
-                          <label className="text-[9px] font-black text-white/30 uppercase tracking-widest ml-1">Qty</label>
-                          <input
-                            type="number"
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-sm"
-                            value={item.quantity}
-                            onChange={(e) => {
-                              const newRecipe = [...editForm.recipe];
-                              newRecipe[index].quantity = Number(e.target.value);
-                              setEditForm({ ...editForm, recipe: newRecipe });
-                            }}
-                          />
-                        </div>
-                        <button
-                          onClick={() => {
-                            const newRecipe = editForm.recipe.filter((_, i) => i !== index);
-                            setEditForm({ ...editForm, recipe: newRecipe });
-                          }}
-                          className="p-3 bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ))}
-                    {(!editForm.recipe || editForm.recipe.length === 0) && (
-                      <div className="py-8 text-center border-2 border-dashed border-white/5 rounded-[24px]">
-                        <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em]">No recipe ingredients assigned</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+
+
             </div>
 
             <div className="p-8 md:p-10 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-4 shrink-0">
