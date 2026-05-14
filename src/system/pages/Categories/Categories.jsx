@@ -8,9 +8,9 @@ export default function AdminCategoryManagement() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: "", df: "" });
+  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: ""});
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "", df: "" });
+  const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "" });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function AdminCategoryManagement() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Category created successfully");
-      setNewCategory({ name: "", prefix: "", description: "", df: "" });
+      setNewCategory({ name: "", prefix: "", description: "" });
       setIsFormOpen(false);
       fetchCategories();
     } catch (error) {
@@ -95,7 +95,7 @@ export default function AdminCategoryManagement() {
 
   const startEdit = (cat) => {
     setEditingId(cat._id);
-    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description, df: cat.df || "" });
+    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description  });  //df: cat.df || ""
     setIsFormOpen(true);
   };
 
@@ -116,7 +116,7 @@ export default function AdminCategoryManagement() {
             onClick={() => {
               if (editingId) {
                 setEditingId(null);
-                setNewCategory({ name: "", prefix: "", description: "", df: "" });
+                setNewCategory({ name: "", prefix: "", description: "" });
               } else {
                 setIsFormOpen(!isFormOpen);
               }
@@ -192,7 +192,7 @@ export default function AdminCategoryManagement() {
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
                   Category df
                 </label>
@@ -206,7 +206,7 @@ export default function AdminCategoryManagement() {
                   className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm"
                   placeholder="e.g. 1233"
                 />
-              </div>
+              </div> */}
 
 
               <div className="space-y-2">
