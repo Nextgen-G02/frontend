@@ -642,9 +642,10 @@ export default function ProductDashboardAdmin() {
                     <option value="l">l</option>
                     <option value="box">box</option>
                     <option value="pkt">pkt</option>
+                    {/* <option value="pkt">pkt</option> */}
                   </select>
                 </div>
-                {['kg', 'g', 'ml', 'l'].includes(editForm.unit) && (
+                {/* {['kg', 'g', 'ml', 'l'].includes(editForm.unit) && (
                   <div className="space-y-2">
                     <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({editForm.unit})</label>
                     <input
@@ -660,7 +661,24 @@ export default function ProductDashboardAdmin() {
                       placeholder={`Enter weight in ${editForm.unit}`}
                     />
                   </div>
-                )}
+                )} */}
+
+                {/* <div className="space-y-2">
+                    <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({editForm.unit})</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      onWheel={(e) => e.target.blur()}
+                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                      value={editForm.weight}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, weight: val });
+                      }}
+                      placeholder={`Enter weight in ${editForm.unit}`}
+                    />
+                  </div> */}
+                  
               </div>
 
 
