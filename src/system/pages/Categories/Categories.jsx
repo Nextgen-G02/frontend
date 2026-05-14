@@ -8,9 +8,9 @@ export default function AdminCategoryManagement() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: "" });
+  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: "", df: "" });
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "" });
+  const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "", df: "" });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -43,7 +43,7 @@ export default function AdminCategoryManagement() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Category created successfully");
-      setNewCategory({ name: "", prefix: "", description: "" });
+      setNewCategory({ name: "", prefix: "", description: "", df: "" });
       setIsFormOpen(false);
       fetchCategories();
     } catch (error) {
@@ -95,7 +95,7 @@ export default function AdminCategoryManagement() {
 
   const startEdit = (cat) => {
     setEditingId(cat._id);
-    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description });
+    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description, df: cat.df || "" });
     setIsFormOpen(true);
   };
 
@@ -116,7 +116,7 @@ export default function AdminCategoryManagement() {
             onClick={() => {
               if (editingId) {
                 setEditingId(null);
-                setNewCategory({ name: "", prefix: "", description: "" });
+                setNewCategory({ name: "", prefix: "", description: "", df: "" });
               } else {
                 setIsFormOpen(!isFormOpen);
               }
@@ -160,6 +160,8 @@ export default function AdminCategoryManagement() {
               </div>
             </div>
 
+            {/* Add category form */}
+
             <form onSubmit={editingId ? handleUpdate : handleCreate} className="space-y-6 relative z-10">
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
@@ -173,6 +175,7 @@ export default function AdminCategoryManagement() {
                   placeholder="e.g. Handmade Chocolates"
                 />
               </div>
+
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
                   Category Prefix (e.g. CAKE)
@@ -188,6 +191,24 @@ export default function AdminCategoryManagement() {
                   placeholder="e.g. CHOCO"
                 />
               </div>
+
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                  Category df
+                </label>
+                <input
+                  type="number"
+                  value={editingId ? editForm.df : newCategory.df}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    editingId ? setEditForm({ ...editForm, df: val }) : setNewCategory({ ...newCategory, df: val });
+                  }}
+                  className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm"
+                  placeholder="e.g. 1233"
+                />
+              </div>
+
+
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
                   Description
