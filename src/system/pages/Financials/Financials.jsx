@@ -34,11 +34,12 @@ export default function AdminFinancials() {
     startDate: getThirtyDaysAgo(),
     endDate: getToday()
   });
-
+//refresh the page 
   useEffect(() => {
     fetchAllData();
   }, [dates]);
 
+  //set the data range and fetch the data from the backend
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -48,6 +49,7 @@ export default function AdminFinancials() {
       };
 
       const [summaryRes, dailyRes, monthlyRes] = await Promise.all([
+
         axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/financial/summary`, { 
           params: dates, 
           ...config 
@@ -60,6 +62,7 @@ export default function AdminFinancials() {
           params: { year: new Date(dates.endDate).getFullYear() }, 
           ...config 
         })
+
       ]);
 
       setSummary(summaryRes.data.data);
@@ -72,7 +75,7 @@ export default function AdminFinancials() {
       setLoading(false);
     }
   };
-
+//get the summary Excel sheet
   const handleExport = () => {
     try {
       if (!dailyData.length) {
@@ -184,6 +187,7 @@ export default function AdminFinancials() {
         </div>
       ) : summary ? (
         <div className="space-y-10 animate-in fade-in duration-1000">
+          
           {/* Top Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="glass-card p-8 rounded-[32px] bg-white border border-slate-100 shadow-xl relative overflow-hidden group">
@@ -331,4 +335,4 @@ export default function AdminFinancials() {
       ) : null}
     </div>
   );
-}
+}

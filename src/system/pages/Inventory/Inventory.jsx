@@ -45,14 +45,14 @@ const InventoryDashboard = () => {
         fetchCategories();
         fetchHistory();
     }, []);
-
+//list of product categories getting  the database 
     const fetchCategories = async () => {
         try {
             const token = localStorage.getItem("token");
             const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/categories`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            // Fixed: categories are nested in .data.data
+            
             setCategories(response.data.data || []);
         } catch (error) {
             console.error("Failed to load categories");
@@ -85,7 +85,7 @@ const InventoryDashboard = () => {
             console.error("Failed to load history");
         }
     };
-
+//manually synchronize and refresh inventory data 
     const handleSync = async () => {
         try {
             setSyncing(true);
@@ -144,7 +144,7 @@ const InventoryDashboard = () => {
             setUpdating(false);
         }
     };
-
+//update the low stock alert Limit for a specific inventory item
     const updateThreshold = async (id, newLevel) => {
         try {
             const token = localStorage.getItem("token");
@@ -193,7 +193,8 @@ const InventoryDashboard = () => {
                 </button>
             </div>
 
-            {/* Quick Stats */}
+            {/*Total product and low stock items */}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <div className="glass-card p-8 md:p-10 rounded-[32px] md:rounded-[48px] bg-slate-900 border-none shadow-2xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
