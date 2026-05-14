@@ -88,7 +88,7 @@ export default function AdminSupplierAccounts() {
   };
 
   const handleSupplySubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault();  // Prevent page refresh when form submits
     try {
       const token = localStorage.getItem("token");
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/purchases`, {
@@ -157,6 +157,7 @@ export default function AdminSupplierAccounts() {
   };
 
   const renderLogRow = (log) => {
+    // Check if payment is fully completed
     const isCompleted = log.balance === 0;
     return (
       <tr key={log._id} className="group hover:bg-white transition-all duration-300 border-b border-slate-50/50">
