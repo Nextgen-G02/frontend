@@ -38,6 +38,14 @@ export default function AdminSupplierAccounts() {
   const [editingLog, setEditingLog] = useState(null);
   const [editPaidAmount, setEditPaidAmount] = useState("");
 
+  const [isRecordEditModalOpen, setIsRecordEditModalOpen] = useState(false);
+  const [recordFormData, setRecordFormData] = useState({
+    _id: "",
+    productName: "",
+    quantity: "",
+    unitPrice: ""
+  });
+
   const [newSupply, setNewSupply] = useState({
     productName: "",
     quantity: "",
@@ -137,6 +145,31 @@ export default function AdminSupplierAccounts() {
       fetchData();
     } catch (error) {
       toast.error("Failed to add payment installment.");
+    }
+  };
+
+  const handleRecordEditOpen = (log) => {
+    setRecordFormData({
+      _id: log._id,
+      productName: log.productName,
+      quantity: log.quantity,
+      unitPrice: log.unitPrice
+    });
+    setIsRecordEditModalOpen(true);
+  };
+
+  const handleRecordUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/purchases/${recordFormData._id}`, recordFormData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Supply record updated successfully.");
+      setIsRecordEditModalOpen(false);
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to update record details.");
     }
   };
 
@@ -241,6 +274,13 @@ export default function AdminSupplierAccounts() {
               </button>
             )}
             <button 
+              onClick={() => handleRecordEditOpen(log)}
+              className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-primary hover:bg-primary/5 transition-all"
+              title="Edit Record Details"
+            >
+              <Edit2 size={16} />
+            </button>
+            <button 
               onClick={() => confirmDeleteLog(log._id)}
               className="p-3 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
               title="Delete Record"
@@ -262,8 +302,11 @@ export default function AdminSupplierAccounts() {
     );
   }
 
+  // Calculate total cost of all purchases
   const totalCost = supplyLogs.reduce((acc, log) => acc + log.cost, 0);
+  // Calculate total paid amount
   const totalPaid = supplyLogs.reduce((acc, log) => acc + log.paidAmount, 0);
+  // Calculate total pending balance
   const totalBalance = supplyLogs.reduce((acc, log) => acc + log.balance, 0);
 
   return (
@@ -336,7 +379,7 @@ export default function AdminSupplierAccounts() {
                   value={newSupply.productName}
                   onChange={(e) => setNewSupply({...newSupply, productName: e.target.value})}
                   className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
-                  placeholder="e.g. White Sugar"
+                  placeholder="e.g. Chocolate Biscuit"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -550,6 +593,83 @@ export default function AdminSupplierAccounts() {
                     className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-primary transition-all"
                   >
                     Record Installment
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Record Details Modal */}
+      {isRecordEditModalOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsRecordEditModalOpen(false)}></div>
+          <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+            <div className="p-8">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-4 bg-primary/10 text-primary rounded-2xl">
+                  <Edit2 size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 uppercase tracking-tight">Edit Record</h2>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Update product, quantity or price</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleRecordUpdate} className="space-y-5">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
+                  <input 
+                    type="text" required
+                    value={recordFormData.productName}
+                    onChange={(e) => setRecordFormData({...recordFormData, productName: e.target.value})}
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
+                    <input 
+                      type="number" required min="0"
+                      value={recordFormData.quantity}
+                      onChange={(e) => setRecordFormData({...recordFormData, quantity: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Unit Price</label>
+                    <input 
+                      type="number" required min="0" step="0.01"
+                      value={recordFormData.unitPrice}
+                      onChange={(e) => setRecordFormData({...recordFormData, unitPrice: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                    />
+                  </div>
+                </div>
+                
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase">New Total:</span>
+                    <span className="text-sm font-black text-slate-900">
+                      Rs. {formatCurrency((parseFloat(recordFormData.quantity) || 0) * (parseFloat(recordFormData.unitPrice) || 0))}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button 
+                    type="button"
+                    onClick={() => setIsRecordEditModalOpen(false)}
+                    className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-primary transition-all"
+                  >
+                    Save Changes
                   </button>
                 </div>
               </form>

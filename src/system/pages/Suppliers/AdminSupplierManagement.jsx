@@ -64,7 +64,7 @@ export default function AdminSupplierManagement() {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success("Supplier has been removed from the system.");
-      fetchSuppliers();
+      fetchSuppliers(); // Refresh supplier list
     } catch (error) {
       toast.error("Failed to remove supplier profile. Please try again.");
     } finally {
@@ -77,20 +77,26 @@ export default function AdminSupplierManagement() {
     navigate(`/admin/suppliers/${id}/accounts`);
   };
 
+  // Update form inputs when user types
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Create or update supplier
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+
+      // Update existing supplier
       if (editingId) {
         await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/suppliers/${editingId}`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success("Supplier profile updated successfully.");
       } else {
+        
+        // Send POST request to create supplier
         await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/suppliers`, formData, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -359,6 +365,13 @@ export default function AdminSupplierManagement() {
                           title="View Accounts & Payments"
                         >
                           <Truck size={18} className="group-hover:scale-110 transition-transform" />
+                        </button>
+                        <button 
+                          onClick={() => handleEdit(s)}
+                          className="p-3 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-primary hover:shadow-xl transition-all group"
+                          title="Edit Profile"
+                        >
+                          <Edit3 size={18} className="group-hover:scale-110 transition-transform" />
                         </button>
                         <button 
                           onClick={() => handleDelete(s._id)}
