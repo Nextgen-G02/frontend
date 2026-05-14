@@ -75,6 +75,9 @@ export default function AddProduct() {
     if (form.stock === "" || Number(form.stock) < 0) newErrors.stock = "Stock quantity cannot be negative";
     if (!form.pCategory) newErrors.pCategory = "Category is required";
     if (!form.unit) newErrors.unit = "Unit is required";
+    if (['kg', 'g', 'ml', 'l'].includes(form.unit) && (form.weight === "" || Number(form.weight) <= 0)) {
+      newErrors.weight = "Weight/Volume is required and must be greater than 0";
+    }
     if (!form.description) newErrors.description = "Description is required";
 
     setErrors(newErrors);
@@ -85,7 +88,7 @@ export default function AddProduct() {
     const { name, value } = e.target;
 
     // Prevent negative values for specific numeric fields
-    if (["price", "costPrice", "stock"].includes(name) && value < 0) {
+    if (["price", "costPrice", "stock", "weight"].includes(name) && value < 0) {
       return;
     }
 
@@ -168,6 +171,7 @@ export default function AddProduct() {
           price: Number(form.price),
           costPrice: Number(form.costPrice),
           stock: Number(form.stock),
+          weight: Number(form.weight),
           images: form.pImg ? [form.pImg] : []
         })
       });
@@ -288,6 +292,7 @@ export default function AddProduct() {
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Price Rs.</label>
               <input type="number" name="price" value={form.price} onChange={handleChange} min="0.01" step="0.01"
+                onWheel={(e) => e.target.blur()}
                 placeholder="0.00" className={inputClass("price")} />
               {errors.price && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.price}</p>}
             </div>
@@ -295,24 +300,9 @@ export default function AddProduct() {
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Cost Price Rs.</label>
               <input type="number" name="costPrice" value={form.costPrice} onChange={handleChange} min="0.01" step="0.01"
+                onWheel={(e) => e.target.blur()}
                 placeholder="0.00" className={inputClass("costPrice")} />
               {errors.costPrice && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.costPrice}</p>}
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock</label>
-              <input type="number" name="stock" value={form.stock} onChange={handleChange} min="0"
-                placeholder="0" className={inputClass("stock")} />
-              {errors.stock && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.stock}</p>}
-            </div>
-          </div>
-
-          {/* Section: Thresholds & Units */}
-          <div className="flex flex-col gap-6">
-            <div className="space-y-1.5">
-              <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Expiry Date</label>
-              <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange}
-                className={inputClass("expiryDate")} />
             </div>
 
             <div className="space-y-1.5">
@@ -328,13 +318,33 @@ export default function AddProduct() {
               </select>
             </div>
 
+            {['kg', 'g', 'ml', 'l'].includes(form.unit) && (
+              <div className="space-y-1.5">
+                <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({form.unit})</label>
+                <input type="number" name="weight" value={form.weight} onChange={handleChange} min="0" step="0.01"
+                  onWheel={(e) => e.target.blur()}
+                  placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
+                {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
+              </div>
+            )}
+
             <div className="space-y-1.5">
-              <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Operational Status</label>
-              <select name="status" value={form.status} onChange={handleChange} className={inputClass("status")}>
-                <option>Active</option>
-                <option>Inactive</option>
-              </select>
+              <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock</label>
+              <input type="number" name="stock" value={form.stock} onChange={handleChange} min="0"
+                onWheel={(e) => e.target.blur()}
+                placeholder="0" className={inputClass("stock")} />
+              {errors.stock && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.stock}</p>}
             </div>
+          </div>
+
+          {/* Section: Thresholds & Units */}
+          <div className="flex flex-col gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Expiry Date</label>
+              <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange}
+                className={inputClass("expiryDate")} />
+            </div>
+
           </div>
 
           {/* Section: Product Image */}
