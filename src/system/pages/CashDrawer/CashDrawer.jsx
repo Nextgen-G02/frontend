@@ -41,7 +41,8 @@ export default function CashDrawer() {
     fetchTodayDrawer();
     fetchHistory();
   }, []);
-
+  
+//update to the today sales, expenses and opening balance
   const fetchTodayDrawer = async () => {
     try {
       setLoading(true);
@@ -56,7 +57,7 @@ export default function CashDrawer() {
       setLoading(false);
     }
   };
-
+//get the 30 day records
   const fetchHistory = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -101,7 +102,7 @@ export default function CashDrawer() {
       toast.error("Failed to close drawer");
     }
   };
-
+//backend update and handle the submission logic 
   const handleEditDrawer = async (e) => {
     e.preventDefault();
     try {
@@ -134,7 +135,7 @@ export default function CashDrawer() {
       toast.error(error.response?.data?.message || "Failed to withdraw cash");
     }
   };
-
+//show the edit interface 
   const openEditModal = (log) => {
     setEditData({
       id: log._id,
@@ -164,6 +165,8 @@ export default function CashDrawer() {
         </div>
       ) : drawer ? (
         <div className="max-w-5xl mx-auto flex flex-col gap-10">
+
+
           {/* Main Status Card */}
           <div className="space-y-10">
             <div className={`glass-card p-10 rounded-[48px] border-none shadow-2xl relative overflow-hidden group ${drawer.status === 'Open' ? 'bg-slate-900 text-white' : 'bg-emerald-600 text-white'
@@ -414,129 +417,7 @@ export default function CashDrawer() {
           </div>
         </div>
       )}
-
-      {/* Close Drawer Modal */}
-      {showCloseModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-amber-50 text-amber-500 rounded-2xl"><Lock size={24} /></div>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Close Drawer</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reconcile Cash</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleCloseDrawer} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Actual Physical Cash Count (Rs.)</label>
-                  <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">Rs.</span>
-                    <input
-                      required
-                      type="number"
-                      className="w-full pl-12 pr-6 py-5 bg-slate-50 border-none rounded-2xl text-lg font-black"
-                      placeholder="0.00"
-                      value={closeData.actualBalance}
-                      onChange={(e) => setCloseData({ ...closeData, actualBalance: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Observations / Notes</label>
-                  <textarea
-                    rows="3"
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold resize-none"
-                    placeholder="Document any discrepancies or notes..."
-                    value={closeData.notes}
-                    onChange={(e) => setCloseData({ ...closeData, notes: e.target.value })}
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowCloseModal(false)}
-                    className="flex-1 py-4 text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-slate-900 transition-colors"
-                  >
-                    Abort
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-amber-500 hover:text-slate-900 transition-all"
-                  >
-                    Close Drawer
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Withdraw Money Modal */}
-      {showWithdrawModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-10">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="p-4 bg-amber-50 text-amber-500 rounded-2xl"><ArrowDownCircle size={24} /></div>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Withdraw Money</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Admin Withdrawal from Drawer</p>
-                </div>
-              </div>
-
-              <form onSubmit={handleWithdraw} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Withdrawal Amount (Rs.)</label>
-                  <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">Rs.</span>
-                    <input
-                      required
-                      type="number"
-                      className="w-full pl-12 pr-6 py-5 bg-slate-50 border-none rounded-2xl text-lg font-black"
-                      placeholder="0.00"
-                      value={withdrawData.amount}
-                      onChange={(e) => setWithdrawData({ ...withdrawData, amount: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reason for Withdrawal</label>
-                  <input
-                    required
-                    type="text"
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold"
-                    placeholder="e.g. Bank Deposit, Petty Cash..."
-                    value={withdrawData.reason}
-                    onChange={(e) => setWithdrawData({ ...withdrawData, reason: e.target.value })}
-                  />
-                </div>
-
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowWithdrawModal(false)}
-                    className="flex-1 py-4 text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-slate-900 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-[2] py-4 bg-amber-500 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-slate-900 hover:text-white transition-all"
-                  >
-                    Confirm Withdrawal
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      
 
       {/* Edit Drawer Modal */}
       {showEditModal && (

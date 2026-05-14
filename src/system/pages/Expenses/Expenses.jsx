@@ -34,6 +34,7 @@ export default function AdminExpenses() {
     fetchExpenses();
   }, [filters]);
 
+  
   const fetchExpenses = async () => {
     try {
       setLoading(true);
