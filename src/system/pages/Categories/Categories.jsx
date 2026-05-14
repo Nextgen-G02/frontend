@@ -6,23 +6,26 @@ import { useNavigate } from "react-router-dom";
 
 export default function AdminCategoryManagement() {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]);   //stores all category data from backend
   const [loading, setLoading] = useState(true);
-  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: "" });
+  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: ""}); // store form input values
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "" });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [idToDelete, setIdToDelete] = useState(null);
+  const [idToDelete, setIdToDelete] = useState(null); // store selected category id before deletion
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  useEffect(() => {
+  //runs first component load
+  useEffect(() => {      
     fetchCategories();
   }, []);
 
+
+  //get categories from backend
   const fetchCategories = async () => {
-    try {
+    try { 
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/categories`);
-      setCategories(response.data.data);
+      setCategories(response.data.data);  // store response
     } catch (error) {
       toast.error("Failed to fetch categories");
     } finally {
@@ -30,14 +33,16 @@ export default function AdminCategoryManagement() {
     }
   };
 
+  // create category
   const handleCreate = async (e) => {
-    e.preventDefault();
-    if (!newCategory.name) return toast.error("Category name is required");
+    e.preventDefault();   // stop form refresh
+    if (!newCategory.name) return toast.error("Category name is required"); // check required feild
     if (!newCategory.prefix) return toast.error("Prefix is required");
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
+      const token = localStorage.getItem("token");  // get saved login token
+      // send category data to backend
+      await axios.post(      
         `${import.meta.env.VITE_BACKEND_URL}/api/categories`,
         newCategory,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -51,6 +56,7 @@ export default function AdminCategoryManagement() {
     }
   };
 
+  // update existing category
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!editForm.name) return toast.error("Category name is required");
@@ -77,6 +83,7 @@ export default function AdminCategoryManagement() {
     setShowDeleteModal(true);
   };
 
+  // prevent the accidental deletion
   const confirmDelete = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -95,7 +102,7 @@ export default function AdminCategoryManagement() {
 
   const startEdit = (cat) => {
     setEditingId(cat._id);
-    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description });
+    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description  });  //df: cat.df || ""
     setIsFormOpen(true);
   };
 
@@ -107,7 +114,6 @@ export default function AdminCategoryManagement() {
             <span className="w-10 h-1 bg-primary rounded-full"></span>          </div>
           <h1 className="heading-premium text-2xl md:text-5xl">
             Categories details
-            {/* <span className="italic font-medium text-slate-400">Categories</span> */}
           </h1>
         </div>
 
@@ -160,6 +166,8 @@ export default function AdminCategoryManagement() {
               </div>
             </div>
 
+            {/* Add category form */}
+
             <form onSubmit={editingId ? handleUpdate : handleCreate} className="space-y-6 relative z-10">
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
@@ -173,6 +181,7 @@ export default function AdminCategoryManagement() {
                   placeholder="e.g. Handmade Chocolates"
                 />
               </div>
+
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
                   Category Prefix (e.g. CAKE)
@@ -188,6 +197,24 @@ export default function AdminCategoryManagement() {
                   placeholder="e.g. CHOCO"
                 />
               </div>
+
+              {/* <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                  Category df
+                </label>
+                <input
+                  type="number"
+                  value={editingId ? editForm.df : newCategory.df}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    editingId ? setEditForm({ ...editForm, df: val }) : setNewCategory({ ...newCategory, df: val });
+                  }}
+                  className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs md:text-sm"
+                  placeholder="e.g. 1233"
+                />
+              </div> */}
+
+
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
                   Description
@@ -230,6 +257,8 @@ export default function AdminCategoryManagement() {
             </h2>
           </div>
           <div className="overflow-x-auto no-scrollbar">
+
+            
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 text-[9px]">

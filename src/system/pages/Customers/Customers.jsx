@@ -35,7 +35,8 @@ export default function AdminCustomerManagement() {
   useEffect(() => {
     fetchCustomers();
   }, []);
-
+  
+//get to the customer list
   const fetchCustomers = async () => {
     try {
       setLoading(true);
