@@ -6,23 +6,26 @@ import { useNavigate } from "react-router-dom";
 
 export default function AdminCategoryManagement() {
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]);   //stores all category data from backend
   const [loading, setLoading] = useState(true);
-  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: ""});
+  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: ""}); // store form input values
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "" });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [idToDelete, setIdToDelete] = useState(null);
+  const [idToDelete, setIdToDelete] = useState(null); // store selected category id before deletion
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  useEffect(() => {
+  //runs first component load
+  useEffect(() => {      
     fetchCategories();
   }, []);
 
+
+  //get categories from backend
   const fetchCategories = async () => {
-    try {
+    try { 
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/categories`);
-      setCategories(response.data.data);
+      setCategories(response.data.data);  // store response
     } catch (error) {
       toast.error("Failed to fetch categories");
     } finally {
@@ -30,14 +33,16 @@ export default function AdminCategoryManagement() {
     }
   };
 
+  // create category
   const handleCreate = async (e) => {
-    e.preventDefault();
-    if (!newCategory.name) return toast.error("Category name is required");
+    e.preventDefault();   // stop form refresh
+    if (!newCategory.name) return toast.error("Category name is required"); // check required feild
     if (!newCategory.prefix) return toast.error("Prefix is required");
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.post(
+      const token = localStorage.getItem("token");  // get saved login token
+      // send category data to backend
+      await axios.post(      
         `${import.meta.env.VITE_BACKEND_URL}/api/categories`,
         newCategory,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -51,6 +56,7 @@ export default function AdminCategoryManagement() {
     }
   };
 
+  // update existing category
   const handleUpdate = async (e) => {
     e.preventDefault();
     if (!editForm.name) return toast.error("Category name is required");
@@ -77,6 +83,7 @@ export default function AdminCategoryManagement() {
     setShowDeleteModal(true);
   };
 
+  // prevent the accidental deletion
   const confirmDelete = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -107,7 +114,6 @@ export default function AdminCategoryManagement() {
             <span className="w-10 h-1 bg-primary rounded-full"></span>          </div>
           <h1 className="heading-premium text-2xl md:text-5xl">
             Categories details
-            {/* <span className="italic font-medium text-slate-400">Categories</span> */}
           </h1>
         </div>
 
@@ -251,6 +257,8 @@ export default function AdminCategoryManagement() {
             </h2>
           </div>
           <div className="overflow-x-auto no-scrollbar">
+
+            
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/50 text-[9px]">

@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Package,
-  Settings,
-  Camera,
-  CheckCircle2,
-  ChevronRight,
-  AlertCircle,
-  Loader2,
-  X,
-  Save,
-  Image,
-  Upload
-} from "lucide-react";
+import {Package,Settings,Camera,CheckCircle2,ChevronRight,AlertCircle,Loader2,X,Save,Image,Upload} from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/products`;
@@ -42,7 +30,8 @@ export default function AddProduct() {
   });
 
   const [errors, setErrors] = useState({});
-
+ 
+  //load the category data
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -53,6 +42,7 @@ export default function AddProduct() {
         toast.error("Failed to fetch categories");
       }
     };
+
     const fetchAllProducts = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products`);
