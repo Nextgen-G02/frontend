@@ -18,6 +18,8 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
   
+  // true = login form
+  // false = register form
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +38,7 @@ export default function AuthPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault();  // Prevent page refresh
 
     try {
       setLoading(true);
@@ -50,7 +52,8 @@ export default function AuthPage() {
             email: formData.email,
             password: formData.password,
           }
-        : formData;
+          
+        : formData;   // Register sends all form data
 
       const response = await axios.post(url, payload);
 
