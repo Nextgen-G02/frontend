@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Package,
-  Settings,
-  Camera,
-  CheckCircle2,
-  ChevronRight,
-  AlertCircle,
-  Loader2,
-  X,
-  Save,
-  Image,
-  Upload
-} from "lucide-react";
+import {Package,Settings,Camera,CheckCircle2,ChevronRight,AlertCircle,Loader2,X,Save,Image,Upload} from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/products`;
@@ -42,7 +30,8 @@ export default function AddProduct() {
   });
 
   const [errors, setErrors] = useState({});
-
+ 
+  //load the category data
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -53,6 +42,7 @@ export default function AddProduct() {
         toast.error("Failed to fetch categories");
       }
     };
+
     const fetchAllProducts = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products`);
@@ -326,13 +316,13 @@ export default function AddProduct() {
                   placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
                 {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
               </div>
-            )}
+            )} 
 
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock</label>
               <input type="number" name="stock" value={form.stock} onChange={handleChange} min="0"
                 onWheel={(e) => e.target.blur()}
-                placeholder="0" className={inputClass("stock")} />
+                placeholder="0" className={inputClass("stock")}/>
               {errors.stock && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.stock}</p>}
             </div>
           </div>
@@ -342,7 +332,7 @@ export default function AddProduct() {
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Expiry Date</label>
               <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange}
-                className={inputClass("expiryDate")} />
+                className={inputClass("expiryDate")}/>
             </div>
 
           </div>
