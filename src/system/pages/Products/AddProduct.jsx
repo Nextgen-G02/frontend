@@ -22,6 +22,7 @@ export default function AddProduct() {
     expiryDate: "",
     unit: "pcs",
     status: "Active",
+    discountPercentage: "",
     description: "",
     // weight: 0,
     pImg: "",
@@ -70,6 +71,19 @@ export default function AddProduct() {
     //   newErrors.weight = "Weight/Volume is required and must be greater than 0";
     // }
     if (!form.description) newErrors.description = "Description is required";
+
+    if (form.discountPercentage !== "" && (Number(form.discountPercentage) < 0 || Number(form.discountPercentage) > 100)) {
+      newErrors.discountPercentage = "Discount percentage must be between 0 and 100";
+    }
+    
+    const priceVal = Number(form.price);
+    const costPriceVal = Number(form.costPrice);
+    const discountPercentVal = Number(form.discountPercentage) || 0;
+    const discountAmt = priceVal * (discountPercentVal / 100);
+    
+    if (priceVal > 0 && costPriceVal > 0 && (priceVal - discountAmt) <= costPriceVal) {
+      newErrors.discountPercentage = "Price after discount must be greater than cost price to ensure profit";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -163,6 +177,7 @@ export default function AddProduct() {
           price: Number(form.price),
           costPrice: Number(form.costPrice),
           stock: Number(form.stock),
+          discountPercentage: Number(form.discountPercentage) || 0,
         // weight: Number(form.weight),
           images: form.pImg ? [form.pImg] : []
         })
@@ -224,8 +239,10 @@ export default function AddProduct() {
                   {categories.length === 0 ? (
                     <p className="text-slate-300 text-xs italic">Loading categories...</p>
                   ) : (
-                    categories.map((cat) => {
-                      const isSelected = form?.pCategory === cat.name;
+                    categories
+                      .filter(cat => cat.status !== "Inactive")
+                      .map((cat) => {
+                        const isSelected = form?.pCategory === cat.name;
                       return (
                         <button
                           key={cat._id}
@@ -294,6 +311,14 @@ export default function AddProduct() {
                 onWheel={(e) => e.target.blur()}
                 placeholder="0.00" className={inputClass("costPrice")} />
               {errors.costPrice && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.costPrice}</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Discount % (Optional)</label>
+              <input type="number" name="discountPercentage" value={form.discountPercentage} onChange={handleChange} min="0" max="100" step="0.1"
+                onWheel={(e) => e.target.blur()}
+                placeholder="0" className={inputClass("discountPercentage")} />
+              {errors.discountPercentage && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.discountPercentage}</p>}
             </div>
 
             <div className="space-y-1.5">

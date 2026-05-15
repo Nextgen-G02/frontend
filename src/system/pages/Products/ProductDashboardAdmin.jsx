@@ -115,6 +115,16 @@ export default function ProductDashboardAdmin() {
       toast.error("Stock cannot be negative");
       return;
     }
+    
+    const p = Number(editForm.price);
+    const cp = Number(editForm.costPrice);
+    const dp = Number(editForm.discountPercentage) || 0;
+    const da = p * (dp / 100);
+    
+    if ((p - da) <= cp) {
+      toast.error("Selling price after discount must be greater than cost price to ensure profit");
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/update/${editProduct._id}`, {
         method: "PUT",
@@ -506,9 +516,11 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => setEditForm({ ...editForm, pCategory: e.target.value })}
                   >
                     <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat._id} value={cat.name}>{cat.name}</option>
-                    ))}
+                    {categories
+                      .filter(cat => cat.status !== "Inactive" || cat.name === editForm.pCategory)
+                      .map(cat => (
+                        <option key={cat._id} value={cat.name}>{cat.name}</option>
+                      ))}
                   </select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -547,6 +559,22 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, costPrice: val });
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Discount %</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    onWheel={(e) => e.target.blur()}
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    value={editForm.discountPercentage || 0}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "" || (Number(val) >= 0 && Number(val) <= 100)) setEditForm({ ...editForm, discountPercentage: val });
                     }}
                   />
                 </div>
