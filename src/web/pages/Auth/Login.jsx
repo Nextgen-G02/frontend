@@ -67,7 +67,7 @@ export default function AuthPage() {
           navigate("/admin");
           break;
         case "staff":
-          navigate("/staff");
+          navigate("/pos");
           break;
         default:
           navigate("/");
@@ -100,7 +100,7 @@ export default function AuthPage() {
           navigate("/admin");
           break;
         case "staff":
-          navigate("/staff");
+          navigate("/pos");
           break;
         default:
           navigate("/");
@@ -219,7 +219,7 @@ export default function AuthPage() {
               {/* EMAIL */}
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Email Address
+                  {isLogin ? "Email Address or NIC" : "Email Address"}
                 </label>
 
                 <div className="relative">
@@ -229,11 +229,11 @@ export default function AuthPage() {
                   />
 
                   <input
-                    type="email"
+                    type={isLogin ? "text" : "email"}
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="name@nirosha.com"
+                    placeholder={isLogin ? "name@nirosha.com or NIC" : "name@nirosha.com"}
                     className="w-full pl-12 md:pl-14 pr-5 md:pr-6 py-3 md:py-3.5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-[32px] outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:opacity-30 text-sm md:text-base"
                     required
                   />
