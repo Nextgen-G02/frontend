@@ -23,6 +23,9 @@ export default function AdminFinancials() {
   const [dailyData, setDailyData] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showOtherPopup, setShowOtherPopup] = useState(false);
+  const [otherExpenses, setOtherExpenses] = useState([]);
+  const [loadingOther, setLoadingOther] = useState(false);
   const getToday = () => new Date().toLocaleDateString('en-CA');
   const getThirtyDaysAgo = () => {
     const d = new Date();
@@ -36,10 +39,77 @@ export default function AdminFinancials() {
   });
 //refresh the page 
   useEffect(() => {
+    setOtherExpenses([]); // Reset on date change
     fetchAllData();
   }, [dates]);
 
   //set the data range and fetch the data from the backend
+  const fetchOtherExpenses = async () => {
+    if (otherExpenses.length > 0) return;
+    try {
+      setLoadingOther(true);
+      const token = localStorage.getItem("token");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      };
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/expenses`, {
+        params: { 
+          category: 'Other',
+          startDate: dates.startDate,
+          endDate: dates.endDate
+        },
+        ...config
+      });
+      setOtherExpenses(response.data.data);
+    } catch (error) {
+      console.error("Failed to fetch other expenses:", error);
+    } finally {
+      setLoadingOther(false);
+    }
+  };
+
+  const OtherExpensesPopup = () => (
+    <div className={`absolute right-full top-1/2 -translate-y-1/2 mr-6 w-80 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-6 z-[100] transition-all duration-300 origin-right ${showOtherPopup ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-4 pointer-events-none'}`}>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Expense Records</h4>
+        </div>
+        <div className="px-2.5 py-1 bg-white/5 text-slate-400 rounded-full text-[8px] font-bold uppercase border border-white/5">Other</div>
+      </div>
+      
+      <div className="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scrollbar">
+        {loadingOther ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="animate-spin text-primary" size={24} />
+          </div>
+        ) : otherExpenses.length > 0 ? (
+          otherExpenses.map((exp, idx) => (
+            <div key={idx} className="flex flex-col gap-1.5 p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all duration-300 group/item text-left hover:scale-[1.02]">
+              <div className="flex justify-between items-start gap-4">
+                <span className="text-[12px] font-bold text-white/90 leading-tight line-clamp-2">{exp.description}</span>
+                <span className="text-[11px] font-black text-primary whitespace-nowrap">Rs.{exp.amount.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <Calendar size={10} className="text-slate-600" />
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                  {new Date(exp.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-10 bg-white/[0.02] rounded-2xl border border-dashed border-white/5">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">No records found</p>
+          </div>
+        )}
+      </div>
+
+      {/* Triangle Arrow (Right-pointing) */}
+      <div className="absolute left-full top-1/2 -translate-y-1/2 -ml-0.5 border-8 border-transparent border-l-slate-900/95" />
+    </div>
+  );
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -265,9 +335,20 @@ export default function AdminFinancials() {
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                    {['Ingredients', 'Salaries', 'Other'].map(category => (
                      summary.expenseBreakdown[category] !== undefined && (
-                       <div key={category} className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50 hover:bg-slate-900 hover:text-white transition-all group">
+                       <div 
+                         key={category} 
+                         className="p-6 bg-slate-50 rounded-3xl border border-slate-100/50 hover:bg-slate-900 hover:text-white transition-all group relative cursor-default"
+                         onMouseEnter={() => {
+                           if (category === 'Other') {
+                             setShowOtherPopup(true);
+                             fetchOtherExpenses();
+                           }
+                         }}
+                         onMouseLeave={() => category === 'Other' && setShowOtherPopup(false)}
+                       >
                          <p className="text-[9px] font-black text-slate-400 group-hover:text-white/50 uppercase tracking-[0.3em] mb-3">{category}</p>
                          <p className="text-xl font-black tracking-tighter">Rs.{(summary.expenseBreakdown[category] || 0).toLocaleString()}</p>
+                         {category === 'Other' && <OtherExpensesPopup />}
                        </div>
                      )
                    ))}
