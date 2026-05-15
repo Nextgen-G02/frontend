@@ -23,7 +23,7 @@ export default function AddProduct() {
     unit: "pcs",
     status: "Active",
     description: "",
-    weight: 0,
+    // weight: 0,
     pImg: "",
     isIngredient: false,
     recipe: []
@@ -42,7 +42,7 @@ export default function AddProduct() {
         toast.error("Failed to fetch categories");
       }
     };
-
+//load product data  
     const fetchAllProducts = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products`);
@@ -65,9 +65,10 @@ export default function AddProduct() {
     if (form.stock === "" || Number(form.stock) < 0) newErrors.stock = "Stock quantity cannot be negative";
     if (!form.pCategory) newErrors.pCategory = "Category is required";
     if (!form.unit) newErrors.unit = "Unit is required";
-    if (['kg', 'g', 'ml', 'l'].includes(form.unit) && (form.weight === "" || Number(form.weight) <= 0)) {
-      newErrors.weight = "Weight/Volume is required and must be greater than 0";
-    }
+
+    // if (['kg', 'g', 'ml', 'l'].includes(form.unit) && (form.weight === "" || Number(form.weight) <= 0)) {
+    //   newErrors.weight = "Weight/Volume is required and must be greater than 0";
+    // }
     if (!form.description) newErrors.description = "Description is required";
 
     setErrors(newErrors);
@@ -78,27 +79,27 @@ export default function AddProduct() {
     const { name, value } = e.target;
 
     // Prevent negative values for specific numeric fields
-    if (["price", "costPrice", "stock", "weight"].includes(name) && value < 0) {
+    if (["price", "costPrice", "stock"].includes(name) && value < 0) {
       return;
     }
 
     setForm(prev => {
       let updatedForm = { ...prev, [name]: value };
 
-      // If category changes, update productId with the next sequential ID
+      // If category changes, update productId automatically
       if (name === "pCategory") {
         const selectedCat = categories.find(cat => cat.name === value);
         if (selectedCat) {
           const prefix = (selectedCat.prefix || value.substring(0, 3)).toUpperCase();
 
-          // Find all existing products with this prefix
+          // Filter product its category prifix
           const relatedIds = allProducts
             .map(p => p.productId)
             .filter(id => id && id.startsWith(`${prefix}-`));
 
           let nextNum = 1;
           if (relatedIds.length > 0) {
-            // Extract numeric parts and find the maximum
+            //find the maximum
             const nums = relatedIds.map(id => {
               const parts = id.split('-');
               const numStr = parts[parts.length - 1];
@@ -108,7 +109,7 @@ export default function AddProduct() {
             nextNum = Math.max(...nums) + 1;
           }
 
-          // Format as PREFIX-00X
+          //PREFIX-00X
           updatedForm.productId = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
         }
       }
@@ -126,6 +127,7 @@ export default function AddProduct() {
     }
   };
 
+  // image upload
   const handleFileChange = (e) => {
     const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
     if (file) {
@@ -161,7 +163,7 @@ export default function AddProduct() {
           price: Number(form.price),
           costPrice: Number(form.costPrice),
           stock: Number(form.stock),
-          weight: Number(form.weight),
+        // weight: Number(form.weight),
           images: form.pImg ? [form.pImg] : []
         })
       });
@@ -252,7 +254,6 @@ export default function AddProduct() {
                   placeholder="Select category first..."
                   className={`${inputClass("productId")} bg-slate-100 cursor-not-allowed border-slate-200 text-slate-500`}
                 />
-                {/* <p className="text-[10px] text-slate-400 mt-1 ml-1 italic font-medium">Auto-generated based on selected category</p> */}
                 {errors.productId && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.productId}</p>}
               </div>
 
@@ -277,7 +278,7 @@ export default function AddProduct() {
             </div>
           </div>
 
-          {/* Section: Valuation & Stock */}
+        
           <div className="flex flex-col gap-6">
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Price Rs.</label>
@@ -303,9 +304,9 @@ export default function AddProduct() {
                 <option value="g">g</option>
                 <option value="ml">ml</option>
                 <option value="l">l</option>
-                <option value="box">box</option>
+                {/* <option value="box">box</option>
                 <option value="pkt">pkt</option>
-                {/* <option value="botle">botle</option> */}
+                 <option value="botle">botle</option> */}
               </select>
             </div>
 
@@ -326,7 +327,7 @@ export default function AddProduct() {
                   placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
                 {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
               </div> */}
-            
+          
 
 
             <div className="space-y-1.5">
@@ -348,7 +349,7 @@ export default function AddProduct() {
 
           </div>
 
-          {/* Section: Product Image */}
+          {/*Product Image */}
           <div className="p-5 md:p-8 bg-slate-50 border border-slate-100 rounded-[24px] md:rounded-[36px]">
             <div className="flex items-center gap-3.5 mb-6">
               <div className="p-2.5 bg-slate-900 text-gold rounded-lg shadow-lg">
