@@ -2,19 +2,18 @@ import React from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ProductScroller from '../components/ProductScroller'
-import HeroCarousel from '../components/HeroCarousel'
+import HeroSection from '../components/HeroSection'
 import CustomizeCake from '../components/CustomizeCake'
-import BrandStory from '../components/BrandStory'
+import AboutSection from '../components/AboutSection'
 
 export default function Home() {
   return (
-    <div className="bg-white">
+    <div className="bg-[#FDFBF8]">
       <Navbar />
       
       {/* HERO SECTION */}
-      <div className="pt-20">
-        <HeroCarousel />
-      </div>
+      <HeroSection />
+
 
       {/* CUSTOMIZE CAKE SECTION */}
       <CustomizeCake />
@@ -23,11 +22,11 @@ export default function Home() {
       <ProductScroller
         title="Popular Cakes"
         category="cakes"
-        bgColor="#ff149305"
+        bgColor="#fbf9f4"
       />
 
-      {/* BRAND STORY */}
-      <BrandStory />
+      {/* ABOUT SECTION */}
+      {/* <AboutSection /> */}
 
       {/* POPULAR ITEMS */}
       <ProductScroller
@@ -39,7 +38,7 @@ export default function Home() {
       <ProductScroller
         title="Beverages"
         category="beverages"
-        bgColor="#ff149305"
+        bgColor="#fbf9f4"
       />
 
       <Footer />

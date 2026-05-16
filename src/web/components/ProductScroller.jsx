@@ -34,93 +34,96 @@ export default function ProductScroller({
   const visibleProducts = products.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <section className="py-16 md:py-24" style={{ backgroundColor: bgColor }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 md:py-28" style={{ backgroundColor: bgColor === 'transparent' ? 'transparent' : bgColor }}>
+      <div className="max-w-[1440px] mx-auto px-6 md:px-12">
         
-        {/* Header */}
-        <div className="flex justify-between items-end mb-8 md:mb-12 relative border-b border-black/5 pb-6 md:pb-8">
-          <div className="space-y-2 md:space-y-3">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 md:w-10 h-[1px] bg-primary"></div>
-              <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] md:tracking-[0.4em] text-primary">{category}</p>
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-12 md:mb-16 border-b border-slate-200 pb-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-[1px] bg-[#C29D59]"></span>
+              <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#C29D59]">{category}</p>
             </div>
-            <h2 className="heading-premium text-2xl md:text-4xl lg:text-5xl">
+            <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl text-slate-900 leading-tight">
               {title}
             </h2>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-4">
+          {/* Navigation Controls */}
+          <div className="flex items-center gap-4">
             <button 
               onClick={prev}
               disabled={startIndex === 0}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit"
+              className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-900 hover:bg-[#C29D59] hover:text-white hover:border-[#C29D59] transition-all duration-500 disabled:opacity-20 group"
             >
-              <span className="text-lg md:text-xl">←</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
             </button>
             <button 
               onClick={next}
               disabled={startIndex + itemsPerPage >= products.length}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-slate-200 flex items-center justify-center hover:bg-slate-900 hover:text-white hover:border-slate-900 transition-all duration-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-inherit"
+              className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-900 hover:bg-[#C29D59] hover:text-white hover:border-[#C29D59] transition-all duration-500 disabled:opacity-20 group"
             >
-              <span className="text-lg md:text-xl">→</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
             </button>
           </div>
         </div>
 
-        {/* PRODUCTS GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+        {/* PRODUCTS GRID / SCROLLER */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
           {visibleProducts.map((p) => (
-            <div key={p._id} className="group bg-white rounded-[20px] md:rounded-[32px] overflow-hidden border border-slate-100 shadow-premium hover:shadow-active transition-all duration-500 flex flex-col">
+            <div key={p._id} className="group flex flex-col h-full bg-white rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-700">
               
-              {/* Image Container */}
-              <div className="relative aspect-square overflow-hidden bg-slate-50">
-                {/* Category Badge */}
-                <div className="absolute top-2 right-2 md:top-4 md:right-4 z-10">
-                  <div className="bg-white/95 backdrop-blur-sm text-slate-900 px-2 md:px-4 py-1 md:py-1.5 rounded-full text-[7px] md:text-[10px] font-black uppercase tracking-widest shadow-sm border border-slate-100">
-                    {category}
-                  </div>
-                </div>
-
+              {/* Product Image Wrapper - Square aspect for better balance */}
+              <div className="relative aspect-square overflow-hidden bg-[#F9F6F2]">
                 <img
                   src={(p.images && p.images[0]) || (p.pImg && p.pImg[0]) || '/placeholder.png'}
                   alt={p.pName}
-                  className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110"
                 />
+                
+                {/* Overlay Badge */}
+                <div className="absolute top-3 left-3 z-10">
+                  <span className="bg-white/80 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest text-slate-900 shadow-sm border border-white/10">
+                    {category}
+                  </span>
+                </div>
+
+                {/* Quick Action Overlay */}
+                <div className="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                  <button className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-xl hover:bg-[#C29D59] hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-500">
+                    <Eye size={16} strokeWidth={1.5} />
+                  </button>
+                </div>
               </div>
 
-              {/* Product Info */}
-              <div className="p-3 md:p-6 flex flex-col flex-grow">
-                <h3 className="text-xs md:text-lg font-black text-slate-900 uppercase tracking-tight line-clamp-1 mb-0.5 md:mb-1">
-                  {p.pName}
-                </h3>
-                <p className="text-[8px] md:text-xs text-slate-400 font-medium line-clamp-1 mb-3 md:mb-6">
-                  {p.description || "Freshly baked handcrafted delicacy."}
-                </p>
+              {/* Product Content Section - Tighter padding */}
+              <div className="p-4 md:p-6 flex flex-col flex-grow bg-white">
+                <div className="mb-3">
+                  <div className="flex items-center gap-0.5 mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} size={8} className="fill-[#C29D59] text-[#C29D59] md:w-[10px]" />
+                    ))}
+                  </div>
+                  <h3 className="font-serif text-base md:text-xl text-slate-900 leading-tight group-hover:text-[#C29D59] transition-colors line-clamp-1">
+                    {p.pName}
+                  </h3>
+                  <p className="text-slate-400 text-[10px] md:text-xs mt-1.5 line-clamp-2 leading-relaxed font-medium">
+                    {p.description || "An artisanal delicacy crafted with premium ingredients."}
+                  </p>
+                </div>
 
-                <div className="mt-auto space-y-3 md:space-y-6">
-                  <div className="flex items-end justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-[6px] md:text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-0.5 md:mb-1">Unit Val</span>
-                      <p className="text-sm md:text-2xl font-black text-slate-900 tracking-tighter">
-                        <span className="text-[9px] md:text-sm text-slate-900 mr-0.5">Rs.</span>
-                        {p.price.toLocaleString()}
-                      </p>
-                    </div>
-                    
-                    <span className={`text-[7px] md:text-[10px] font-black uppercase tracking-widest ${p.stock < 10 ? 'text-gold' : 'text-slate-300'}`}>
-                      {p.stock < 10 ? 'Low Stock' : 'In Stock'}
-                    </span>
+                <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-slate-300">Investment</p>
+                    <p className="text-base md:text-xl font-bold text-slate-900 tracking-tighter">
+                      <span className="text-[10px] md:text-sm font-medium mr-0.5 text-slate-500">Rs.</span>
+                      {p.price.toLocaleString()}
+                    </p>
                   </div>
                   
-                  {/* Buttons */}
-                  <div className="grid grid-cols-2 gap-1.5 md:gap-3">
-                    <button className="flex items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-3 border border-slate-100 rounded-lg md:rounded-2xl text-[7px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-colors">
-                      <Eye size={10} className="md:w-[14px]" /> Details
-                    </button>
-                    <button className="flex items-center justify-center gap-1 md:gap-1.5 py-1.5 md:py-3 bg-[#0f172a] text-gold rounded-lg md:rounded-2xl text-[7px] md:text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-all shadow-lg shadow-slate-200">
-                      <ShoppingCart size={10} className="md:w-[14px]" /> Add to Cart
-                    </button>
-                  </div>
+                  <button className="bg-slate-900 text-white p-2.5 md:p-3.5 rounded-xl md:rounded-2xl hover:bg-[#C29D59] transition-all duration-500 shadow-lg shadow-slate-100 hover:-translate-y-1 active:scale-90">
+                    <ShoppingCart size={14} md:size={18} strokeWidth={1.5} />
+                  </button>
                 </div>
               </div>
 
