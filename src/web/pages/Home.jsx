@@ -26,7 +26,7 @@ export default function Home() {
       />
 
       {/* ABOUT SECTION */}
-      {/* <AboutSection /> */}
+      <AboutSection />
 
       {/* POPULAR ITEMS */}
       <ProductScroller
