@@ -71,7 +71,6 @@ export default function ProductDashboardAdmin() {
     }
   };
 
-
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -193,7 +192,6 @@ export default function ProductDashboardAdmin() {
 
   return (
     <div className="space-y-10 max-w-[1500px] mx-auto">
-      {/* Header Area */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2.5 mb-3">
@@ -202,11 +200,7 @@ export default function ProductDashboardAdmin() {
           </div>
           <h1 className="heading-premium text-2xl md:text-5xl leading-tight">
             Product Details
-            {/* <span className="italic font-medium text-slate-400">Inventory</span> */}
           </h1>
-          {/* <p className="text-slate-400 font-medium mt-2 md:mt-3 text-sm md:text-base">
-            Manage your premium collection and real-time stock levels.
-          </p> */}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
@@ -232,7 +226,7 @@ export default function ProductDashboardAdmin() {
         </div>
       </header>
 
-      {/* Categories Scroller */}
+      {/* Categories*/}
       <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar border-b border-slate-100">
         <button
           onClick={() => toggleCategory("All")}
@@ -257,7 +251,7 @@ export default function ProductDashboardAdmin() {
         ))}
       </div>
 
-      {/* Table Container */}
+      {/* Table  */}
       <div className="glass-card rounded-[24px] md:rounded-[40px] overflow-hidden bg-white/70 backdrop-blur-xl border-none shadow-xl">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 md:py-40 gap-6">
@@ -640,9 +634,9 @@ export default function ProductDashboardAdmin() {
                     <option value="g">g</option>
                     <option value="ml">ml</option>
                     <option value="l">l</option>
-                    <option value="box">box</option>
+                    {/* <option value="box">box</option>
                     <option value="pkt">pkt</option>
-                    {/* <option value="pkt">pkt</option> */}
+                     <option value="pkt">pkt</option> */}
                   </select>
                 </div>
                 {/* {['kg', 'g', 'ml', 'l'].includes(editForm.unit) && (
