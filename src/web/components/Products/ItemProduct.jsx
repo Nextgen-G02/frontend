@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import { ShoppingCart, Info, X } from "lucide-react";
 import { useCart } from "../../../shared/context/CartContext";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const ItemProduct = ({ searchParams }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  const generateSlug = (name, id) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + id;
+  };
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -115,7 +121,7 @@ const ItemProduct = ({ searchParams }) => {
 
               <div className="flex gap-2 border-t border-slate-50 pt-3.5">
                 <button
-                  onClick={() => setSelectedProduct(product)}
+                  onClick={() => navigate(`/product/${generateSlug(product.pName, product._id)}`)}
                   className="flex-1 border border-slate-100 rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5"
                 >
                   <Info size={12} />

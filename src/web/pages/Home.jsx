@@ -5,10 +5,16 @@ import ProductScroller from '../components/ProductScroller'
 import HeroSection from '../components/HeroSection'
 import CustomizeCake from '../components/CustomizeCake'
 import AboutSection from '../components/AboutSection'
+import SEO from '../../shared/components/SEO'
 
 export default function Home() {
   return (
     <div className="bg-[#FDFBF8]">
+      <SEO 
+        title="Home"
+        description="Welcome to Nirosha Sweet House, your premier destination for luxury custom cakes and authentic sweets."
+        url="/"
+      />
       <Navbar />
       
       {/* HERO SECTION */}

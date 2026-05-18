@@ -18,6 +18,8 @@
   
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
   --shadow-active: 0 20px 40px -12px hsla(38, 45%, 55%, 0.1);
+
+  --sidebar-bg: 240 10% 15%; /* Deep Charcoal */
 }
 
 body {
@@ -81,6 +83,17 @@ body {
   /* Status Badges */
   .badge-status {
     @apply px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
 

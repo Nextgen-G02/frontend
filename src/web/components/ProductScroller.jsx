@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Eye, ShoppingCart, Sparkles, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductScroller({
   title = "Design Cakes",
@@ -11,6 +12,11 @@ export default function ProductScroller({
   const [activeDot, setActiveDot] = useState(0);
   const scrollRef = React.useRef(null);
   const itemsPerPage = 4;
+  const navigate = useNavigate();
+
+  const generateSlug = (name, id) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + id;
+  };
 
   useEffect(() => {
     axios
@@ -99,7 +105,8 @@ export default function ProductScroller({
           {products.map((p) => (
             <div 
               key={p._id} 
-              className="flex-shrink-0 w-[220px] sm:w-[260px] md:w-[calc(33.333%-22px)] lg:w-[calc(25%-24px)] snap-center first:ml-4 last:mr-4"
+              className="flex-shrink-0 w-[220px] sm:w-[260px] md:w-[calc(33.333%-22px)] lg:w-[calc(25%-24px)] snap-center first:ml-4 last:mr-4 cursor-pointer"
+              onClick={() => navigate(`/product/${generateSlug(p.pName, p._id)}`)}
             >
               <div className="group flex flex-col h-full bg-white rounded-2xl md:rounded-[2rem] overflow-hidden border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-700">
                 
@@ -148,7 +155,13 @@ export default function ProductScroller({
                       </p>
                     </div>
                     
-                    <button className="bg-slate-900 text-white p-2.5 md:p-3 rounded-xl md:rounded-2xl hover:bg-[#C29D59] transition-all duration-500 shadow-lg shadow-slate-100 hover:-translate-y-1 active:scale-95 flex-shrink-0">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Add to cart functionality
+                      }}
+                      className="bg-slate-900 text-white p-2.5 md:p-3 rounded-xl md:rounded-2xl hover:bg-[#C29D59] transition-all duration-500 shadow-lg shadow-slate-100 hover:-translate-y-1 active:scale-95 flex-shrink-0"
+                    >
                       <ShoppingCart size={16} strokeWidth={1.5} />
                     </button>
                   </div>
