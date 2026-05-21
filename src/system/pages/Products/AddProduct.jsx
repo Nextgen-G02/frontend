@@ -335,15 +335,25 @@ export default function AddProduct() {
               </select>
             </div>
 
-            {['kg', 'g', 'ml', 'l'].includes(form.unit) && (
-              <div className="space-y-1.5">
-                <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({form.unit})</label>
-                <input type="number" name="weight" value={form.weight} onChange={handleChange} min="0" step="0.01"
-                  onWheel={(e) => e.target.blur()}
-                  placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
-                {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
-              </div>
-            )}
+            {
+              ['kg', 'g', 'ml', 'l'].includes(form.unit) && (
+                <div className="space-y-1.5">
+                  <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({form.unit})</label>
+                  <input type="number" name="weight" value={form.weight} onChange={handleChange} min="0" step="0.01"
+                    onWheel={(e) => e.target.blur()}
+                    placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
+                  {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
+                </div>
+              )
+            }
+
+            {<div className="space-y-1.5">
+              <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight </label>
+              <input type="number" name="weight" value={form.weight} onChange={handleChange} min="0" step="0.01"
+                onWheel={(e) => e.target.blur()}
+                placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
+              {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
+            </div>}
 
 
 
