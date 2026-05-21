@@ -43,7 +43,7 @@ export default function AddProduct() {
         toast.error("Failed to fetch categories");
       }
     };
-//load product data  
+    //load product data  
     const fetchAllProducts = async () => {
       try {
         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products`);
@@ -67,20 +67,20 @@ export default function AddProduct() {
     if (!form.pCategory) newErrors.pCategory = "Category is required";
     if (!form.unit) newErrors.unit = "Unit is required";
 
-    // if (['kg', 'g', 'ml', 'l'].includes(form.unit) && (form.weight === "" || Number(form.weight) <= 0)) {
-    //   newErrors.weight = "Weight/Volume is required and must be greater than 0";
-    // }
+    if (['kg', 'g', 'ml', 'l'].includes(form.unit) && (form.weight === "" || Number(form.weight) <= 0)) {
+      newErrors.weight = "Weight/Volume is required and must be greater than 0";
+    }
     if (!form.description) newErrors.description = "Description is required";
 
     if (form.discountPercentage !== "" && (Number(form.discountPercentage) < 0 || Number(form.discountPercentage) > 100)) {
       newErrors.discountPercentage = "Discount percentage must be between 0 and 100";
     }
-    
+
     const priceVal = Number(form.price);
     const costPriceVal = Number(form.costPrice);
     const discountPercentVal = Number(form.discountPercentage) || 0;
     const discountAmt = priceVal * (discountPercentVal / 100);
-    
+
     if (priceVal > 0 && costPriceVal > 0 && (priceVal - discountAmt) <= costPriceVal) {
       newErrors.discountPercentage = "Price after discount must be greater than cost price to ensure profit";
     }
@@ -178,7 +178,7 @@ export default function AddProduct() {
           costPrice: Number(form.costPrice),
           stock: Number(form.stock),
           discountPercentage: Number(form.discountPercentage) || 0,
-        // weight: Number(form.weight),
+          // weight: Number(form.weight),
           images: form.pImg ? [form.pImg] : []
         })
       });
@@ -243,20 +243,20 @@ export default function AddProduct() {
                       .filter(cat => cat.status !== "Inactive")
                       .map((cat) => {
                         const isSelected = form?.pCategory === cat.name;
-                      return (
-                        <button
-                          key={cat._id}
-                          type="button"
-                          onClick={() => handleChange({ target: { name: 'pCategory', value: cat.name } })}
-                          className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${isSelected
-                            ? "bg-slate-900 text-gold border-slate-900 shadow-md -translate-y-0.5"
-                            : "bg-white text-slate-400 border-slate-100 hover:border-slate-200"
-                            }`}
-                        >
-                          {cat.name}
-                        </button>
-                      );
-                    })
+                        return (
+                          <button
+                            key={cat._id}
+                            type="button"
+                            onClick={() => handleChange({ target: { name: 'pCategory', value: cat.name } })}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${isSelected
+                              ? "bg-slate-900 text-gold border-slate-900 shadow-md -translate-y-0.5"
+                              : "bg-white text-slate-400 border-slate-100 hover:border-slate-200"
+                              }`}
+                          >
+                            {cat.name}
+                          </button>
+                        );
+                      })
                   )}
                 </div>
                 {errors.pCategory && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.pCategory}</p>}
@@ -295,7 +295,7 @@ export default function AddProduct() {
             </div>
           </div>
 
-        
+
           <div className="flex flex-col gap-6">
             <div className="space-y-1.5">
               <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Price Rs.</label>
@@ -335,7 +335,7 @@ export default function AddProduct() {
               </select>
             </div>
 
-            {/* {['kg', 'g', 'ml', 'l'].includes(form.unit) && (
+            {['kg', 'g', 'ml', 'l'].includes(form.unit) && (
               <div className="space-y-1.5">
                 <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({form.unit})</label>
                 <input type="number" name="weight" value={form.weight} onChange={handleChange} min="0" step="0.01"
@@ -343,16 +343,8 @@ export default function AddProduct() {
                   placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
                 {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
               </div>
-            )} */}
-            
-            {/* <div className="space-y-1.5">
-                <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight </label>
-                <input type="number" name="weight" value={form.weight} onChange={handleChange} min="0" step="0.01"
-                  onWheel={(e) => e.target.blur()}
-                  placeholder={`Enter weight in ${form.unit}`} className={inputClass("weight")} />
-                {errors.weight && <p className="text-[9px] font-bold text-primary mt-1.5 ml-1">{errors.weight}</p>}
-              </div> */}
-          
+            )}
+
 
 
             <div className="space-y-1.5">

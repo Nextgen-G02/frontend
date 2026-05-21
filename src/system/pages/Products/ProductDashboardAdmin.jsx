@@ -247,18 +247,20 @@ export default function ProductDashboardAdmin() {
         >
           All
         </button>
-        {categories.map(cat => (
-          <button
-            key={cat._id}
-            onClick={() => toggleCategory(cat.name)}
-            className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
-              ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
-              : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
-              }`}
-          >
-            {cat.name}
-          </button>
-        ))}
+        {categories
+          .filter(cat => cat.status !== "Inactive")
+          .map(cat => (
+            <button
+              key={cat._id}
+              onClick={() => toggleCategory(cat.name)}
+              className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
+                ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
+                : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
+                }`}
+            >
+              {cat.name}
+            </button>
+          ))}
       </div>
 
       {/* Table  */}
