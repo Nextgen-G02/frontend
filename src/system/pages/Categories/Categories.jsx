@@ -106,6 +106,9 @@ export default function AdminCategoryManagement() {
     setIsFormOpen(true);
   };
 
+  const activeCount = categories.filter(cat => cat.status !== 'Inactive').length;
+  const inactiveCount = categories.filter(cat => cat.status === 'Inactive').length;
+
   return (
     <div className="space-y-10 max-w-[1500px] mx-auto animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
@@ -136,13 +139,21 @@ export default function AdminCategoryManagement() {
             {isFormOpen && !editingId ? 'Close Panel' : 'New Category'}
           </button>
 
-          <div className="flex items-center gap-3.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
-            <div className="p-2.5 bg-white rounded-lg shadow-sm">
-              <Layers className="text-primary" size={20} md:size={22} />
+          <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-2.5 px-3 py-1.5 bg-emerald-50/50 rounded-xl border border-emerald-100/50">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <div>
+                <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest leading-none">Active</p>
+                <p className="text-sm font-black text-slate-900 mt-1">{activeCount} Classes</p>
+              </div>
             </div>
-            <div className="pr-4">
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Categories</p>
-              <p className="text-xs font-bold text-slate-900 mt-1">{categories.length} Active Classes</p>
+            <div className="w-px h-8 bg-slate-200"></div>
+            <div className="flex items-center gap-2.5 px-3 py-1.5 bg-rose-50/50 rounded-xl border border-rose-100/50">
+              <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+              <div>
+                <p className="text-[8px] font-black text-rose-600 uppercase tracking-widest leading-none">Inactive</p>
+                <p className="text-sm font-black text-slate-900 mt-1">{inactiveCount} Classes</p>
+              </div>
             </div>
           </div>
         </div>
