@@ -42,8 +42,8 @@ const Cart = () => {
       return;
     }
 
-    const itemsToOrder = selectedItems.size === 0 
-      ? cart 
+    const itemsToOrder = selectedItems.size === 0
+      ? cart
       : cart.filter(item => selectedItems.has(item._id));
 
     if (itemsToOrder.length === 0) {
@@ -70,7 +70,7 @@ const Cart = () => {
 
     try {
       const token = localStorage.getItem('token');
-      
+
       // 1. Save the order as Pending
       const orderResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, {
         method: 'POST',
@@ -188,7 +188,8 @@ const Cart = () => {
                 to="/products"
                 className="inline-flex items-center gap-3 bg-slate-900 text-gold px-10 py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 shadow-2xl shadow-slate-200"
               >
-                Browse Catalog
+                Add To cart
+
               </Link>
             </div>
           ) : (
@@ -210,7 +211,7 @@ const Cart = () => {
                         {isSelected ? <CheckCircle2 size={24} className="fill-primary/10" /> : <Circle size={24} />}
                       </button>
 
-                      <div 
+                      <div
                         onDoubleClick={() => setDetailProduct(item)}
                         className="w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden shrink-0 border border-slate-50 cursor-pointer"
                       >

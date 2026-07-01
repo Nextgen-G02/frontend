@@ -8,9 +8,9 @@ export default function AdminCategoryManagement() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);   //stores all category data from backend
   const [loading, setLoading] = useState(true);
-  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: ""}); // store form input values
+  const [newCategory, setNewCategory] = useState({ name: "", prefix: "", description: "", status: "Active"}); // store form input values
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "" });
+  const [editForm, setEditForm] = useState({ name: "", prefix: "", description: "", status: "Active" });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState(null); // store selected category id before deletion
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -48,7 +48,7 @@ export default function AdminCategoryManagement() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Category created successfully");
-      setNewCategory({ name: "", prefix: "", description: "" });
+      setNewCategory({ name: "", prefix: "", description: "", status: "Active" });
       setIsFormOpen(false);
       fetchCategories();
     } catch (error) {
@@ -102,9 +102,12 @@ export default function AdminCategoryManagement() {
 
   const startEdit = (cat) => {
     setEditingId(cat._id);
-    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description  });  //df: cat.df || ""
+    setEditForm({ name: cat.name, prefix: cat.prefix, description: cat.description, status: cat.status || "Active"  });  //df: cat.df || ""
     setIsFormOpen(true);
   };
+
+  const activeCount = categories.filter(cat => cat.status !== 'Inactive').length;
+  const inactiveCount = categories.filter(cat => cat.status === 'Inactive').length;
 
   return (
     <div className="space-y-10 max-w-[1500px] mx-auto animate-in fade-in duration-700">
@@ -122,7 +125,7 @@ export default function AdminCategoryManagement() {
             onClick={() => {
               if (editingId) {
                 setEditingId(null);
-                setNewCategory({ name: "", prefix: "", description: "" });
+                setNewCategory({ name: "", prefix: "", description: "", status: "Active" });
               } else {
                 setIsFormOpen(!isFormOpen);
               }
@@ -136,13 +139,21 @@ export default function AdminCategoryManagement() {
             {isFormOpen && !editingId ? 'Close Panel' : 'New Category'}
           </button>
 
-          <div className="flex items-center gap-3.5 bg-slate-50 p-1.5 rounded-xl border border-slate-100">
-            <div className="p-2.5 bg-white rounded-lg shadow-sm">
-              <Layers className="text-primary" size={20} md:size={22} />
+          <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex items-center gap-2.5 px-3 py-1.5 bg-emerald-50/50 rounded-xl border border-emerald-100/50">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <div>
+                <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest leading-none">Active</p>
+                <p className="text-sm font-black text-slate-900 mt-1">{activeCount} Classes</p>
+              </div>
             </div>
-            <div className="pr-4">
-              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Categories</p>
-              <p className="text-xs font-bold text-slate-900 mt-1">{categories.length} Active Classes</p>
+            <div className="w-px h-8 bg-slate-200"></div>
+            <div className="flex items-center gap-2.5 px-3 py-1.5 bg-rose-50/50 rounded-xl border border-rose-100/50">
+              <span className="w-2 h-2 rounded-full bg-rose-400"></span>
+              <div>
+                <p className="text-[8px] font-black text-rose-600 uppercase tracking-widest leading-none">Inactive</p>
+                <p className="text-sm font-black text-slate-900 mt-1">{inactiveCount} Classes</p>
+              </div>
             </div>
           </div>
         </div>
@@ -227,6 +238,20 @@ export default function AdminCategoryManagement() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-900 uppercase tracking-widest ml-1">
+                  Status
+                </label>
+                <select
+                  value={editingId ? editForm.status : newCategory.status}
+                  onChange={(e) => editingId ? setEditForm({ ...editForm, status: e.target.value }) : setNewCategory({ ...newCategory, status: e.target.value })}
+                  className="w-full px-5 py-3 md:py-3.5 bg-slate-50 border border-black rounded-xl outline-none focus:ring-4 focus:ring-black/10 focus:border-black transition-all font-bold text-slate-900 text-xs md:text-sm"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -265,6 +290,7 @@ export default function AdminCategoryManagement() {
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category name</th>
                   <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Unique ID</th>
                   <th className="pl-8 md:pl-10 pr-4 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Category description</th>
+                  <th className="px-8 md:px-10 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
                   <th className="px-4 py-5 font-black text-slate-400 uppercase tracking-[0.3em]">Actions</th>
                 </tr>
               </thead>
@@ -299,6 +325,11 @@ export default function AdminCategoryManagement() {
                       </td>
                       <td className="pl-8 md:pl-10 pr-4 py-5 md:py-6">
                         <p className="text-slate-900 font-medium text-sm">{cat.description || "No scope defined."}</p>
+                      </td>
+                      <td className="px-8 md:px-10 py-5 md:py-6">
+                        <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${cat.status === "Inactive" ? "bg-rose-100 text-rose-600" : "bg-emerald-100 text-emerald-600"}`}>
+                          {cat.status || "Active"}
+                        </span>
                       </td>
                       <td className="px-4 py-5 md:py-6">
                         <div className="flex justify-start gap-2 transition-all duration-300">

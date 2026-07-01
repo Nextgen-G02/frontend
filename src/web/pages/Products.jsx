@@ -8,7 +8,9 @@ import SEO from '../../shared/components/SEO';
 const Products = () => {
   const [searchParams, setSearchParams] = useState({
     search: '',
-    category: 'all'
+    category: 'all',
+    minPrice: '',
+    maxPrice: ''
   });
 
   return (
