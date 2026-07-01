@@ -8,6 +8,10 @@
   --primary-accent-soft: 0 72% 95%;
   --primary-rgb: 0, 72%, 27%;
 
+
+  --secondary-accent: 38 45% 55%;
+  /* Elegant Gold */
+  --accent-gold: 38 45% 55%;
   --canvas-bg: 30 30% 98%;
   /* Soft Cream */
   --surface-cream: 30 30% 98%;
