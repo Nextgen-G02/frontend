@@ -29,13 +29,19 @@ const ItemProduct = ({ searchParams }) => {
     };
 
     fetchProducts();
-  }, [searchParams]);
+  }, []);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.pName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchParams.search.toLowerCase());
     const matchesCategory = searchParams.category === "all" || product.pCategory === searchParams.category;
-    return matchesSearch && matchesCategory;
+    
+    // Price range validation
+    const price = product.price || 0;
+    const matchesMinPrice = !searchParams.minPrice || price >= Number(searchParams.minPrice);
+    const matchesMaxPrice = !searchParams.maxPrice || price <= Number(searchParams.maxPrice);
+
+    return matchesSearch && matchesCategory && matchesMinPrice && matchesMaxPrice;
   });
 
   if (loading) {

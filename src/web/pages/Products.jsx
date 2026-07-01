@@ -7,7 +7,9 @@ import Footer from '../components/Footer';
 const Products = () => {
   const [searchParams, setSearchParams] = useState({
     search: '',
-    category: 'all'
+    category: 'all',
+    minPrice: '',
+    maxPrice: ''
   });
 
   return (

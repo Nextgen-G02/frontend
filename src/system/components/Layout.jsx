@@ -68,7 +68,7 @@ export default function AdminLayout({ children }) {
     <div className="flex min-h-screen bg-[#F8F9FA]">
       {/* Sidebar - Desktop */}
       <aside 
-        className={`sidebar-premium hidden md:flex flex-col fixed h-screen transition-all duration-500 ease-in-out z-50 ${collapsed ? 'w-20' : 'w-72'}`}
+        className={`sidebar-premium hidden md:flex flex-col sticky top-0 h-screen shrink-0 transition-all duration-500 ease-in-out z-50 ${collapsed ? 'w-20' : 'w-72'}`}
       >
         <div className="p-6 md:p-8 flex items-center justify-between">
           {!collapsed && (
@@ -111,7 +111,7 @@ export default function AdminLayout({ children }) {
       </aside>
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col transition-all duration-500 ${collapsed ? 'md:ml-20' : 'md:ml-72'}`}>
+      <main className="flex-1 flex flex-col min-w-0 transition-all duration-500">
         {/* Top Header - Hidden on POS and Orders */}
         {!(location.pathname === '/pos' || location.pathname.startsWith('/orders')) && (
           <header className="h-16 md:h-20 bg-white sticky top-0 z-40 px-6 md:px-10 flex items-center justify-between shadow-sm">

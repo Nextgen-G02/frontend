@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react'
 const SearchProduct = ({ setSearchParams }) => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -14,7 +16,9 @@ const SearchProduct = ({ setSearchParams }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.data || data);
+          const allCategories = data.data || data;
+          const activeCategories = allCategories.filter(cat => cat.status !== 'Inactive');
+          setCategories(activeCategories);
         }
       } catch (err) {
         console.error("Failed to fetch categories:", err);
@@ -31,6 +35,18 @@ const SearchProduct = ({ setSearchParams }) => {
   const handleCategoryChange = (e) => {
     setCategory(e.target.value);
     setSearchParams((prev) => ({ ...prev, category: e.target.value }));
+  };
+
+  const handleMinPriceChange = (e) => {
+    const val = e.target.value;
+    setMinPrice(val);
+    setSearchParams((prev) => ({ ...prev, minPrice: val }));
+  };
+
+  const handleMaxPriceChange = (e) => {
+    const val = e.target.value;
+    setMaxPrice(val);
+    setSearchParams((prev) => ({ ...prev, maxPrice: val }));
   };
 
   return (
@@ -68,6 +84,31 @@ const SearchProduct = ({ setSearchParams }) => {
             <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col w-full">
+          <label className="text-slate-500 font-black uppercase text-[15px] tracking-widest mb-3 ml-2">Price Range (Rs.)</label>
+          <div className="flex items-center gap-3">
+            <input
+              type="number"
+              value={minPrice}
+              onChange={handleMinPriceChange}
+              onWheel={(e) => e.target.blur()}
+              placeholder="Min"
+              min="0"
+              className="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50/50 text-slate-900 font-bold text-sm md:text-base focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all placeholder:text-slate-300 shadow-inner"
+            />
+            <span className="text-slate-400 font-black text-lg">-</span>
+            <input
+              type="number"
+              value={maxPrice}
+              onChange={handleMaxPriceChange}
+              onWheel={(e) => e.target.blur()}
+              placeholder="Max"
+              min="0"
+              className="w-full px-5 py-4 rounded-2xl border border-slate-100 bg-slate-50/50 text-slate-900 font-bold text-sm md:text-base focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all placeholder:text-slate-300 shadow-inner"
+            />
           </div>
         </div>
 
