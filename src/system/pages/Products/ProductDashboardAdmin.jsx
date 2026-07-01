@@ -24,14 +24,12 @@ export default function ProductDashboardAdmin() {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
   const [search, setSearch] = useState("");
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [editForm, setEditForm] = useState({});
-  const [allProducts, setAllProducts] = useState([]);
   const [viewProduct, setViewProduct] = useState(null);
   const [editImageFile, setEditImageFile] = useState(null);
 
@@ -115,6 +113,16 @@ export default function ProductDashboardAdmin() {
     }
     if (editForm.stock < 0) {
       toast.error("Stock cannot be negative");
+      return;
+    }
+    
+    const p = Number(editForm.price);
+    const cp = Number(editForm.costPrice);
+    const dp = Number(editForm.discountPercentage) || 0;
+    const da = p * (dp / 100);
+    
+    if ((p - da) <= cp) {
+      toast.error("Selling price after discount must be greater than cost price to ensure profit");
       return;
     }
     try {
@@ -252,18 +260,20 @@ export default function ProductDashboardAdmin() {
         >
           All
         </button>
-        {categories.map(cat => (
-          <button
-            key={cat._id}
-            onClick={() => toggleCategory(cat.name)}
-            className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
-              ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
-              : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
-              }`}
-          >
-            {cat.name}
-          </button>
-        ))}
+        {categories
+          .filter(cat => cat.status !== "Inactive")
+          .map(cat => (
+            <button
+              key={cat._id}
+              onClick={() => toggleCategory(cat.name)}
+              className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
+                ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
+                : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
+                }`}
+            >
+              {cat.name}
+            </button>
+          ))}
       </div>
 
       {/* Table  */}
@@ -521,9 +531,11 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => setEditForm({ ...editForm, pCategory: e.target.value })}
                   >
                     <option value="">Select Category</option>
-                    {categories.map(cat => (
-                      <option key={cat._id} value={cat.name}>{cat.name}</option>
-                    ))}
+                    {categories
+                      .filter(cat => cat.status !== "Inactive" || cat.name === editForm.pCategory)
+                      .map(cat => (
+                        <option key={cat._id} value={cat.name}>{cat.name}</option>
+                      ))}
                   </select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
@@ -562,6 +574,22 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, costPrice: val });
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Discount %</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    onWheel={(e) => e.target.blur()}
+                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    value={editForm.discountPercentage || 0}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "" || (Number(val) >= 0 && Number(val) <= 100)) setEditForm({ ...editForm, discountPercentage: val });
                     }}
                   />
                 </div>
