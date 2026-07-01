@@ -3,6 +3,7 @@ import SearchProduct from '../components/Products/SearchProduct';
 import ItemProduct from '../components/Products/ItemProduct';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import SEO from '../../shared/components/SEO';
 
 const Products = () => {
   const [searchParams, setSearchParams] = useState({
@@ -14,6 +15,11 @@ const Products = () => {
 
   return (
     <div className="bg-slate-50/30 min-h-screen flex flex-col">
+      <SEO 
+        title="Our Collection"
+        description="Browse our luxury collection of custom cakes, freshly baked sweets, and premium beverages."
+        url="/products"
+      />
       <Navbar />
 
       <main className="flex-grow pt-24 pb-20 px-4 md:px-8">

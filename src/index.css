@@ -1,32 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Outfit:wght@100..900&display=swap');
 @import "tailwindcss";
 
 :root {
+<<<<<<< HEAD
   /* Premium Heritage Palette */
   --primary-accent: 0 72% 27%;
   --primary-accent-dark: 0 72% 20%;
   --primary-accent-soft: 0 72% 95%;
   --primary-rgb: 0, 72%, 27%;
+=======
+  /* Boutique Elegant Palette */
+  --primary-accent: 240 10% 15%; /* Deep Charcoal */
+  --secondary-accent: 38 45% 55%; /* Elegant Gold */
+  --accent-gold: 38 45% 55%;
+>>>>>>> 08194caef8aeb0f1f89c9ebcaf5c235c2fde360a
   
-  --secondary-accent: 47 95% 53%; /* Gold/Yellow */
+  --canvas-bg: 30 30% 98%; /* Soft Cream */
+  --surface-cream: 30 30% 98%;
   
-  --sidebar-bg: 240 10% 10%;
-  --canvas-bg: 0 0% 98%;
-  
-  --surface-white: 0 0% 100%;
-  --border-subtle: 240 10% 90%;
-  
-  --text-main: 240 10% 10%;
+  --text-main: 240 10% 15%;
   --text-muted: 240 5% 45%;
   
-  --font-serif: 'Playfair Display', serif;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Outfit', sans-serif;
   
-  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
-  --shadow-active: 0 20px 40px -12px hsla(0, 72%, 27% / 0.2);
-  
-  --transition-cubic: 0.4, 0, 0.2, 1;
+  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  --shadow-active: 0 20px 40px -12px hsla(38, 45%, 55%, 0.1);
+
+  --sidebar-bg: 240 10% 15%; /* Deep Charcoal */
 }
 
+<<<<<<< HEAD
 @theme {
   --color-primary: hsl(var(--primary-accent));
   --color-primary-dark: hsl(var(--primary-accent-dark));
@@ -35,13 +39,14 @@
 }
 
 
+=======
+>>>>>>> 08194caef8aeb0f1f89c9ebcaf5c235c2fde360a
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-sans);
   background-color: hsl(var(--canvas-bg));
   color: hsl(var(--text-main));
   margin: 0;
   -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.015em;
 }
 
 @layer utilities {
@@ -97,6 +102,17 @@ body {
   /* Status Badges */
   .badge-status {
     @apply px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
 
