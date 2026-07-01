@@ -47,125 +47,122 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
         scrolled
-          ? "bg-white/80 backdrop-blur-xl shadow-xl shadow-black/5 py-2.5"
-          : "bg-transparent py-4 md:py-6"
+          ? "bg-white/90 backdrop-blur-xl border-b border-stone-200 py-2 md:py-3"
+          : "bg-transparent py-3 md:py-4"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex items-center justify-between h-full">
 
-        {/* LOGO */}
+        {/* LOGO - VERTICALLY CENTERED */}
         <Link
           to="/"
-          className="flex items-center gap-2 md:gap-3 group"
+          className="flex items-center gap-1 md:gap-2 group h-full flex-shrink-0"
         >
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center h-full">
             <img 
               src="/images/nirosha bg removed.png" 
               alt="Nirosha Sweet House" 
-              className="h-8 md:h-10 lg:h-12 w-auto object-contain scale-125 md:scale-150 translate-y-0.5 transition-transform duration-500 group-hover:scale-[1.35] md:group-hover:scale-[1.6]"
+              className="h-6 md:h-12 w-auto object-contain transition-transform duration-500 group-hover:scale-110"
             />
           </div>
 
-          <div className="flex flex-col">
-            <span className="text-[12px] md:text-sm lg:text-lg font-black text-slate-900 leading-none tracking-tight">
-              Nirosha <span className="italic font-medium text-slate-400">Sweet House</span>
+          <div className="flex flex-col justify-center">
+            <span className="font-serif text-[10px] md:text-2xl tracking-tighter text-slate-900 leading-none">
+              NIROSHA
             </span>
-            <p className="text-[6px] md:text-[7px] lg:text-[8px] font-black text-primary uppercase tracking-[0.3em] mt-1">
-              Confectionary Excellence
-            </p>
+            <span className="text-[4px] md:text-[9px] font-sans font-light tracking-[0.2em] md:tracking-[0.4em] text-stone-400 uppercase leading-none mt-0.5 md:mt-1">
+              Sweet House
+            </span>
           </div>
         </Link>
 
-        {/* DESKTOP LINKS */}
-        <div className="hidden md:flex items-center gap-6 lg:gap-10">
+        {/* NAVIGATION LINKS - VISIBLE ON DESKTOP ONLY */}
+        <div className="hidden md:flex items-center gap-6 lg:gap-10 h-full">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               to={link.path}
-              className={`text-[9px] lg:text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative group/link ${
+              className={`text-[11px] font-medium uppercase tracking-[0.2em] transition-all duration-300 relative group/link flex items-center h-full ${
                 location.pathname === link.path
-                  ? "text-primary"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "text-slate-900"
+                  : "text-stone-400 hover:text-slate-900"
               }`}
             >
               {link.name}
-              <span className={`absolute -bottom-1 left-0 h-[2px] bg-primary transition-all duration-500 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`}></span>
+              <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[1px] bg-slate-900 transition-all duration-500 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`}></span>
             </Link>
           ))}
+          <Link
+            to="/contact"
+            className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-900 relative group/link ml-4 flex items-center h-full whitespace-nowrap"
+          >
+            GET IN TOUCH
+            <span className="absolute bottom-0 left-0 w-full h-[1px] bg-slate-900/30 group-hover:bg-slate-900 transition-colors"></span>
+          </Link>
         </div>
 
         {/* RIGHT ACTIONS */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-3 md:gap-6 h-full">
+          
+          {/* SEARCH (ICON ONLY) */}
+          <button className="text-stone-400 hover:text-slate-900 transition-colors hidden sm:flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </button>
 
           {/* CART */}
           <Link
             to="/cart"
-            className="group relative p-2 md:p-2.5 text-slate-400 hover:text-primary transition-colors"
+            className="group relative p-1 text-slate-400 hover:text-slate-900 transition-colors"
           >
-            <ShoppingBag size={18} md:size={22} className="group-hover:scale-110 transition-transform" />
+            <ShoppingBag size={18} md:size={20} strokeWidth={1.5} className="group-hover:scale-105 transition-transform" />
             {cartCount > 0 && (
-              <span className="absolute top-0.5 right-0.5 bg-primary text-white text-[7px] md:text-[8px] font-black w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+              <span className="absolute -top-0.5 -right-0.5 bg-slate-900 text-white text-[7px] md:text-[8px] font-bold w-3 h-3 md:w-4 md:h-4 rounded-full flex items-center justify-center">
                 {cartCount}
               </span>
             )}
           </Link>
 
-          {/* USER LOGGED IN */}
-          {user ? (
-            <div className="hidden md:flex items-center gap-3 lg:gap-4">
-
-              {(user.role === "admin" || user.role === "staff") && (
-                <Link
-                  to="/admin"
-                  className="flex items-center gap-2 bg-slate-900 text-gold px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg lg:rounded-xl text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary hover:text-white transition-all duration-500 shadow-xl shadow-slate-100"
+          {/* AUTH / DASHBOARD (Desktop only) */}
+          <div className="hidden md:flex items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-4">
+                {(user.role === "admin" || user.role === "staff") && (
+                  <Link
+                    to="/admin"
+                    className="p-1 text-slate-400 hover:text-slate-900 transition-colors"
+                  >
+                    <LayoutDashboard size={20} strokeWidth={1.5} />
+                  </Link>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="text-[10px] font-medium uppercase tracking-widest text-slate-500 hover:text-rose-600 transition-colors"
                 >
-                  <LayoutDashboard size={12} lg:size={16} />
-                  System
-                </Link>
-              )}
-
-              <div className="flex items-center gap-2 px-2 py-1 lg:px-3 lg:py-1.5 bg-slate-50 rounded-lg lg:rounded-xl border border-slate-100 group">
-                <User size={12} lg:size={16} className="text-primary" />
-                <span className="text-[8px] lg:text-[10px] font-black uppercase text-slate-900 tracking-widest">
-                  {(user.role === "admin" || user.role === "staff") ? "Admin" : user.firstName}
-                </span>
+                  Logout
+                </button>
               </div>
-
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 bg-rose-50 text-rose-500 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg lg:rounded-xl text-[8px] lg:text-[10px] font-black uppercase tracking-[0.2em] hover:bg-rose-500 hover:text-white transition-all duration-500"
+            ) : (
+              <Link
+                to="/login"
+                className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-900"
               >
-                <LogOut size={12} lg:size={16} />
-                Exit
-              </button>
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              className="hidden md:flex items-center gap-2.5 bg-slate-900 text-gold px-4 py-2 lg:px-6 lg:py-3 rounded-lg lg:rounded-xl text-[8px] lg:text-[10px] font-black uppercase tracking-[0.3em] hover:bg-primary hover:text-white transition-all duration-500 shadow-xl shadow-slate-100"
-            >
-              <User size={12} lg:size={16} />
-              Sign Up
-            </Link>
-          )}
+                Log In
+              </Link>
+            )}
+          </div>
 
           {/* MOBILE MENU BUTTON */}
           <button
-            className="md:hidden p-2"
-            onClick={() =>
-              setMobileMenuOpen(!mobileMenuOpen)
-            }
+            className="md:hidden p-2 text-slate-900 transition-transform active:scale-90"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? (
-              <X size={28} />
-            ) : (
-              <Menu size={28} />
-            )}
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
+
 
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
