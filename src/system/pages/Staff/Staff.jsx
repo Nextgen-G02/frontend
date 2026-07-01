@@ -29,7 +29,9 @@ export default function AdminStaffManagement() {
     lastName: "",
     email: "",
     password: "",
-    role: "staff"
+    role: "staff",
+    nic: "",
+    address: ""
   });
 
   useEffect(() => {
@@ -59,7 +61,9 @@ export default function AdminStaffManagement() {
       lastName: user.lastName,
       email: user.email,
       password: "", // Don't show old password
-      role: user.role
+      role: user.role,
+      nic: user.nic || "",
+      address: user.address || ""
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -67,7 +71,7 @@ export default function AdminStaffManagement() {
   const handleCancel = () => {
     setIsEditing(false);
     setEditingId(null);
-    setFormData({ firstName: "", lastName: "", email: "", password: "", role: "staff" });
+    setFormData({ firstName: "", lastName: "", email: "", password: "", role: "staff", nic: "", address: "" });
   };
 
   const handleSubmit = async (e) => {
@@ -198,6 +202,29 @@ export default function AdminStaffManagement() {
               </div>
 
               <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">National ID (NIC)</label>
+                <div className="relative">
+                   <Shield className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                   <input 
+                    type="text" placeholder="e.g. 199912345678 or 991234567V" required
+                    value={formData.nic}
+                    onChange={(e) => setFormData({...formData, nic: e.target.value})}
+                    className="w-full pl-12 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Residential Address</label>
+                <textarea 
+                  placeholder="Street, City, Province" required
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm min-h-[80px] resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Access Role</label>
                 <div className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl font-bold text-slate-400 text-xs shadow-sm flex items-center gap-2">
                   <BadgeCheck size={14} className="text-emerald-500" />
@@ -263,6 +290,11 @@ export default function AdminStaffManagement() {
                             <p className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit lowercase">
                               <Mail size={10} className="text-primary"/> {user.email}
                             </p>
+                            {user.nic && (
+                              <p className="text-[9px] text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
+                                <Shield size={10} /> {user.nic}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

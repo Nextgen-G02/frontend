@@ -8,6 +8,7 @@ import Home from './web/pages/Home'
 import Login from './web/pages/Auth/Login'
 import Products from './web/pages/Products'
 import Cart from './web/pages/Cart'
+import ProductDetails from './web/pages/ProductDetails'
 
 // System Pages
 import AdminDashboard from './system/pages/Dashboard/Dashboard'
@@ -40,6 +41,7 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
 
         {/* Global Admin Wrapper */}

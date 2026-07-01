@@ -43,13 +43,17 @@ export default function AdminSupplierAccounts() {
     _id: "",
     productName: "",
     quantity: "",
-    unitPrice: ""
+    unitPrice: "",
+    sellingPrice: "",
+    discount: ""
   });
 
   const [newSupply, setNewSupply] = useState({
     productName: "",
     quantity: "",
     unitPrice: "",
+    sellingPrice: "",
+    discount: "",
     cost: "0.00",
     paidAmount: "",
     supplyDate: new Date().toISOString().split('T')[0]
@@ -96,7 +100,19 @@ export default function AdminSupplierAccounts() {
   };
 
   const handleSupplySubmit = async (e) => {
-    e.preventDefault();  // Prevent page refresh when form submits
+    e.preventDefault();
+    
+    // Profit Validation
+    const disc = parseFloat(newSupply.discount) || 0;
+    const sPrice = parseFloat(newSupply.sellingPrice) || 0;
+    const uPrice = parseFloat(newSupply.unitPrice) || 0;
+    const finalSPrice = sPrice * (1 - disc / 100);
+    
+    if (finalSPrice < uPrice) {
+      toast.error(`Profit Loss! Final selling price (Rs. ${finalSPrice.toFixed(2)}) cannot be lower than cost price.`);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/purchases`, {
@@ -110,6 +126,8 @@ export default function AdminSupplierAccounts() {
         productName: "",
         quantity: "",
         unitPrice: "",
+        sellingPrice: "",
+        discount: "",
         cost: "0.00",
         paidAmount: "",
         supplyDate: new Date().toISOString().split('T')[0]
@@ -153,13 +171,27 @@ export default function AdminSupplierAccounts() {
       _id: log._id,
       productName: log.productName,
       quantity: log.quantity,
-      unitPrice: log.unitPrice
+      unitPrice: log.unitPrice,
+      sellingPrice: log.sellingPrice || "",
+      discount: log.discount || ""
     });
     setIsRecordEditModalOpen(true);
   };
 
   const handleRecordUpdate = async (e) => {
     e.preventDefault();
+
+    // Profit Validation
+    const disc = parseFloat(recordFormData.discount) || 0;
+    const sPrice = parseFloat(recordFormData.sellingPrice) || 0;
+    const uPrice = parseFloat(recordFormData.unitPrice) || 0;
+    const finalSPrice = sPrice * (1 - disc / 100);
+    
+    if (finalSPrice < uPrice) {
+      toast.error(`Profit Loss! Final selling price (Rs. ${finalSPrice.toFixed(2)}) cannot be lower than cost price.`);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
       await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/purchases/${recordFormData._id}`, recordFormData, {
@@ -210,7 +242,10 @@ export default function AdminSupplierAccounts() {
                 {isCompleted && <CheckCircle2 size={14} className="text-emerald-500" />}
               </p>
               <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">
-                {log.quantity} units @ Rs. {formatCurrency(log.unitPrice)}
+                {log.quantity} units @ Cost: Rs. {formatCurrency(log.unitPrice)} | Sell: Rs. {formatCurrency(log.sellingPrice || 0)} {log.discount > 0 && <span className="text-rose-400 ml-1">(-{log.discount}%)</span>}
+              </p>
+              <p className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em] mt-1">
+                Net Profit: Rs. {formatCurrency(((log.sellingPrice || 0) * (1 - (log.discount || 0) / 100) - (log.unitPrice || 0)) * log.quantity)}
               </p>
             </div>
           </div>
@@ -382,19 +417,19 @@ export default function AdminSupplierAccounts() {
                   placeholder="e.g. Chocolate Biscuit"
                 />
               </div>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
+                <input 
+                  type="number" required min="0"
+                  value={newSupply.quantity}
+                  onChange={(e) => setNewSupply({...newSupply, quantity: e.target.value})}
+                  className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                  placeholder="0"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
-                  <input 
-                    type="number" required min="0"
-                    value={newSupply.quantity}
-                    onChange={(e) => setNewSupply({...newSupply, quantity: e.target.value})}
-                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
-                    placeholder="0"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Unit Price</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Cost Price</label>
                   <input 
                     type="number" required min="0" step="0.01"
                     value={newSupply.unitPrice}
@@ -402,6 +437,38 @@ export default function AdminSupplierAccounts() {
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
                     placeholder="0.00"
                   />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Selling Price</label>
+                  <input 
+                    type="number" required min="0" step="0.01"
+                    value={newSupply.sellingPrice}
+                    onChange={(e) => setNewSupply({...newSupply, sellingPrice: e.target.value})}
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Discount (%)</label>
+                  <input 
+                    type="number" min="0" max="100" step="0.1"
+                    value={newSupply.discount}
+                    onChange={(e) => setNewSupply({...newSupply, discount: e.target.value})}
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Profit/Unit</label>
+                  <div className={`w-full px-5 py-3.5 rounded-xl font-black text-xs border ${
+                    (parseFloat(newSupply.sellingPrice) * (1 - (parseFloat(newSupply.discount) || 0) / 100) - parseFloat(newSupply.unitPrice)) >= 0
+                    ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                    : "bg-rose-50 text-rose-600 border-rose-100"
+                  }`}>
+                    Rs. {formatCurrency(Math.max(0, (parseFloat(newSupply.sellingPrice) * (1 - (parseFloat(newSupply.discount) || 0) / 100) - (parseFloat(newSupply.unitPrice) || 0))))}
+                  </div>
                 </div>
               </div>
               <div className="space-y-1.5">
@@ -627,24 +694,54 @@ export default function AdminSupplierAccounts() {
                     className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
                   />
                 </div>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
+                  <input 
+                    type="number" required min="0"
+                    value={recordFormData.quantity}
+                    onChange={(e) => setRecordFormData({...recordFormData, quantity: e.target.value})}
+                    className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Quantity</label>
-                    <input 
-                      type="number" required min="0"
-                      value={recordFormData.quantity}
-                      onChange={(e) => setRecordFormData({...recordFormData, quantity: e.target.value})}
-                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Unit Price</label>
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Cost Price</label>
                     <input 
                       type="number" required min="0" step="0.01"
                       value={recordFormData.unitPrice}
                       onChange={(e) => setRecordFormData({...recordFormData, unitPrice: e.target.value})}
                       className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
                     />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Selling Price</label>
+                    <input 
+                      type="number" required min="0" step="0.01"
+                      value={recordFormData.sellingPrice}
+                      onChange={(e) => setRecordFormData({...recordFormData, sellingPrice: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Discount (%)</label>
+                    <input 
+                      type="number" min="0" max="100" step="0.1"
+                      value={recordFormData.discount}
+                      onChange={(e) => setRecordFormData({...recordFormData, discount: e.target.value})}
+                      className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Profit/Unit</label>
+                    <div className={`w-full px-5 py-3.5 rounded-xl font-black text-xs border ${
+                      (parseFloat(recordFormData.sellingPrice) * (1 - (parseFloat(recordFormData.discount) || 0) / 100) - parseFloat(recordFormData.unitPrice)) >= 0
+                      ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                      : "bg-rose-50 text-rose-600 border-rose-100"
+                    }`}>
+                      Rs. {formatCurrency(Math.max(0, (parseFloat(recordFormData.sellingPrice) * (1 - (parseFloat(recordFormData.discount) || 0) / 100) - (parseFloat(recordFormData.unitPrice) || 0))))}
+                    </div>
                   </div>
                 </div>
                 
