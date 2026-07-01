@@ -199,8 +199,9 @@ export default function AddProduct() {
         setTimeout(() => navigate("/adminproduct"), 2000);
       } else {
         const errData = await response.json();
-        setErrors({ submit: errData.message || "Failed to add product" });
-        toast.error(errData.message || "Failed to add product");
+        const errorMessage = errData.error || errData.message || "Failed to add product";
+        setErrors({ submit: errorMessage });
+        toast.error(errorMessage);
       }
     } catch {
       setErrors({ submit: "Connection error" });

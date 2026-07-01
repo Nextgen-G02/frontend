@@ -2,18 +2,15 @@
 @import "tailwindcss";
 
 :root {
-<<<<<<< HEAD
   /* Premium Heritage Palette */
   --primary-accent: 0 72% 27%;
   --primary-accent-dark: 0 72% 20%;
   --primary-accent-soft: 0 72% 95%;
   --primary-rgb: 0, 72%, 27%;
-=======
+
   /* Boutique Elegant Palette */
-  --primary-accent: 240 10% 15%; /* Deep Charcoal */
   --secondary-accent: 38 45% 55%; /* Elegant Gold */
   --accent-gold: 38 45% 55%;
->>>>>>> 08194caef8aeb0f1f89c9ebcaf5c235c2fde360a
   
   --canvas-bg: 30 30% 98%; /* Soft Cream */
   --surface-cream: 30 30% 98%;
@@ -30,17 +27,12 @@
   --sidebar-bg: 240 10% 15%; /* Deep Charcoal */
 }
 
-<<<<<<< HEAD
 @theme {
   --color-primary: hsl(var(--primary-accent));
   --color-primary-dark: hsl(var(--primary-accent-dark));
   --color-primary-soft: hsl(var(--primary-accent-soft));
   --color-gold: hsl(var(--secondary-accent));
 }
-
-
-=======
->>>>>>> 08194caef8aeb0f1f89c9ebcaf5c235c2fde360a
 body {
   font-family: var(--font-sans);
   background-color: hsl(var(--canvas-bg));
