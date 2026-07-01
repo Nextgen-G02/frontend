@@ -33,6 +33,7 @@ export default function ProductDashboardAdmin() {
   const [editForm, setEditForm] = useState({});
   const [allProducts, setAllProducts] = useState([]);
   const [viewProduct, setViewProduct] = useState(null);
+  const [editImageFile, setEditImageFile] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -90,6 +91,7 @@ export default function ProductDashboardAdmin() {
 
   const handleEditOpen = (product) => {
     setEditProduct(product);
+    setEditImageFile(null);
     // Support multiple possible field names for description for legacy data compatibility
     const desc = product.description || product.pDescription || product.pDesc || "";
     setEditForm({
@@ -116,13 +118,25 @@ export default function ProductDashboardAdmin() {
       return;
     }
     try {
+      const formData = new FormData();
+      Object.keys(editForm).forEach(key => {
+        if (key !== 'images' && key !== 'recipe' && typeof editForm[key] !== 'object') {
+          formData.append(key, editForm[key]);
+        }
+      });
+      
+      if (editImageFile) {
+        formData.append('image', editImageFile);
+      } else if (editForm.images && editForm.images.length > 0) {
+        formData.append('images', JSON.stringify(editForm.images));
+      }
+
       const res = await fetch(`${API_BASE}/update/${editProduct._id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`
         },
-        body: JSON.stringify(editForm),
+        body: formData,
       });
 
       const data = await res.json();
@@ -153,6 +167,7 @@ export default function ProductDashboardAdmin() {
         toast.error("Image must be less than 5MB");
         return;
       }
+      setEditImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setEditForm(prev => ({ ...prev, images: [reader.result] }));

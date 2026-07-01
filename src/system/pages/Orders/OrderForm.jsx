@@ -148,6 +148,8 @@ const OrderForm = () => {
         return formData.items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
     };
 
+    const formatRs = (amount) => `Rs. ${Number(amount || 0).toLocaleString()}`;
+
     const removeItem = (index) => {
         setFormData(prev => ({
             ...prev,
@@ -327,55 +329,68 @@ const OrderForm = () => {
                                 </div>
                             </div>
 
-                            <div className="p-6 md:p-8 space-y-4">
+                            <div className="p-4 md:p-6 space-y-3 overflow-x-auto">
+                                {formData.items.length > 0 && (
+                                    <div className="hidden lg:grid gap-4 px-5 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 lg:grid-cols-[minmax(180px,2fr)_120px_150px_minmax(130px,1fr)_88px]">
+                                        <span>Product</span>
+                                        <span>Unit Price</span>
+                                        <span>Quantity</span>
+                                        <span className="text-right pr-2">Total</span>
+                                        <span className="text-center">Actions</span>
+                                    </div>
+                                )}
+
                                 {formData.items.map((item, index) => (
-                                    <div key={index} className="p-6 rounded-[24px] bg-slate-50/50 border border-slate-100 hover:bg-white hover:border-primary/20 hover:shadow-xl hover:shadow-slate-200/20 transition-all duration-500 group/row">
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                                            <div className="md:col-span-4 space-y-1.5">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Asset Node</label>
+                                    <div key={index} className="p-4 md:p-5 rounded-2xl bg-slate-50/80 border border-slate-100 hover:bg-white hover:border-primary/20 hover:shadow-lg transition-all duration-300 min-w-[640px] lg:min-w-0">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(180px,2fr)_120px_150px_minmax(130px,1fr)_88px] gap-4 lg:items-center">
+                                            {/* Product name */}
+                                            <div className="space-y-1.5 min-w-0 sm:col-span-2 lg:col-span-1">
+                                                <label className="lg:hidden text-[10px] font-black text-slate-400 uppercase tracking-widest">Product</label>
                                                 {item.isCustom ? (
                                                     <input 
                                                         type="text" 
                                                         value={item.pName}
                                                         onChange={(e) => handleItemChange(index, 'pName', e.target.value)}
-                                                        className="w-full px-4 py-2.5 bg-white border border-primary/20 rounded-xl text-xs font-black outline-none uppercase"
-                                                        placeholder="Enter Custom Asset Name..."
+                                                        className="w-full px-4 py-3 bg-white border border-primary/30 rounded-xl text-sm font-bold text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 normal-case"
+                                                        placeholder="Custom item name"
                                                     />
                                                 ) : (
-                                                    <div className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-900 uppercase truncate">
+                                                    <div className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 break-words">
                                                         {item.pName}
                                                     </div>
                                                 )}
                                             </div>
-                                            
-                                            <div className="md:col-span-2 space-y-1.5">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Valuation</label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400">Rs.</span>
+
+                                            {/* Unit price */}
+                                            <div className="space-y-1.5">
+                                                <label className="lg:hidden text-[10px] font-black text-slate-400 uppercase tracking-widest">Unit Price</label>
+                                                <div className="flex items-center gap-2 px-3 py-3 bg-white border border-slate-200 rounded-xl focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
+                                                    <span className="text-sm font-bold text-slate-500 shrink-0">Rs.</span>
                                                     <input 
                                                         type="number"
                                                         value={item.price}
                                                         onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value) || 0)}
-                                                        className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black outline-none focus:border-primary transition-colors"
+                                                        className="w-full min-w-0 text-sm font-bold text-slate-900 outline-none bg-transparent"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="md:col-span-3 space-y-1.5">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Quantity / Unit</label>
-                                                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl px-2 py-1.5 shadow-sm">
-                                                    <button type="button" onClick={() => handleItemChange(index, 'quantity', Math.max(0, (item.quantity || 1) - 1))} className="p-1.5 text-slate-300 hover:text-rose-500 transition-colors"><Minus size={14} /></button>
+                                            {/* Quantity */}
+                                            <div className="space-y-1.5">
+                                                <label className="lg:hidden text-[10px] font-black text-slate-400 uppercase tracking-widest">Quantity</label>
+                                                <div className="flex items-center bg-white border border-slate-200 rounded-xl overflow-hidden focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
+                                                    <button type="button" onClick={() => handleItemChange(index, 'quantity', Math.max(0, (item.quantity || 1) - 1))} className="px-3 py-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"><Minus size={14} /></button>
                                                     <input 
                                                         type="number" step="0.1" value={item.quantity}
                                                         onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
-                                                        className="w-12 text-center text-xs font-black outline-none bg-transparent"
+                                                        className="w-10 text-center text-sm font-bold outline-none bg-transparent"
                                                     />
-                                                    <button type="button" onClick={() => handleItemChange(index, 'quantity', (item.quantity || 1) + 1)} className="p-1.5 text-slate-300 hover:text-emerald-500 transition-colors"><Plus size={14} /></button>
-                                                    <div className="w-px h-5 bg-slate-100 mx-2"></div>
+                                                    <button type="button" onClick={() => handleItemChange(index, 'quantity', (item.quantity || 1) + 1)} className="px-3 py-3 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 transition-colors"><Plus size={14} /></button>
+                                                    <div className="w-px self-stretch bg-slate-100"></div>
                                                     <select 
                                                         value={item.unit || 'pcs'} 
                                                         onChange={(e) => handleItemChange(index, 'unit', e.target.value)}
-                                                        className="text-[10px] font-black text-primary bg-transparent outline-none uppercase cursor-pointer"
+                                                        className="px-3 py-3 text-xs font-bold text-primary bg-transparent outline-none uppercase cursor-pointer min-w-[52px]"
                                                     >
                                                         <option value="pcs">pcs</option>
                                                         <option value="kg">kg</option>
@@ -384,20 +399,27 @@ const OrderForm = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="md:col-span-2 text-right">
-                                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">Net val</p>
-                                                <p className="text-sm font-black text-slate-900 tracking-tighter">Rs.{(item.price * item.quantity).toLocaleString()}</p>
+                                            {/* Line total */}
+                                            <div className="space-y-1.5">
+                                                <label className="lg:hidden text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</label>
+                                                <div className="px-4 py-3 bg-primary/5 border border-primary/20 rounded-xl text-right">
+                                                    <p className="text-base font-black text-slate-900 tabular-nums">
+                                                        {formatRs(item.price * item.quantity)}
+                                                    </p>
+                                                </div>
                                             </div>
 
-                                            <div className="md:col-span-1 flex justify-end gap-2">
+                                            {/* Actions */}
+                                            <div className="flex items-center justify-end lg:justify-center gap-2 sm:col-span-2 lg:col-span-1">
                                                 <button 
                                                     type="button" 
+                                                    title="Details"
                                                     onClick={() => setExpandedItems(prev => ({ ...prev, [index]: !prev[index] }))}
-                                                    className={`p-2.5 rounded-xl transition-all shadow-sm ${expandedItems[index] ? 'bg-primary text-white' : 'bg-white border border-slate-200 text-slate-300 hover:text-primary hover:border-primary'}`}
+                                                    className={`p-2.5 rounded-xl transition-all ${expandedItems[index] ? 'bg-primary text-white shadow-md' : 'bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-primary'}`}
                                                 >
                                                     <FileText size={16} />
                                                 </button>
-                                                <button type="button" onClick={() => removeItem(index)} className="p-2.5 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all border border-rose-100 shadow-sm"><Trash2 size={16} /></button>
+                                                <button type="button" title="Remove" onClick={() => removeItem(index)} className="p-2.5 bg-white text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all border border-rose-100"><Trash2 size={16} /></button>
                                             </div>
                                         </div>
 

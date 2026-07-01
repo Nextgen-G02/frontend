@@ -6,6 +6,7 @@
   --primary-accent: 0 72% 27%;
   --primary-accent-dark: 0 72% 20%;
   --primary-accent-soft: 0 72% 95%;
+  --primary-rgb: 0, 72%, 27%;
   
   --secondary-accent: 47 95% 53%; /* Gold/Yellow */
   
@@ -24,6 +25,13 @@
   --shadow-active: 0 20px 40px -12px hsla(0, 72%, 27% / 0.2);
   
   --transition-cubic: 0.4, 0, 0.2, 1;
+}
+
+@theme {
+  --color-primary: hsl(var(--primary-accent));
+  --color-primary-dark: hsl(var(--primary-accent-dark));
+  --color-primary-soft: hsl(var(--primary-accent-soft));
+  --color-gold: hsl(var(--secondary-accent));
 }
 
 

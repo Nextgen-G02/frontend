@@ -12,6 +12,7 @@ export default function AddProduct() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [allProducts, setAllProducts] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
   const [form, setForm] = useState({
     productId: "",
     pName: "",
@@ -135,6 +136,7 @@ export default function AddProduct() {
         toast.error("Image must be less than 5MB");
         return;
       }
+      setImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setForm(prev => ({ ...prev, pImg: reader.result }));
@@ -152,20 +154,28 @@ export default function AddProduct() {
 
     setLoading(true);
     try {
+      const formData = new FormData();
+      Object.keys(form).forEach(key => {
+        if (key !== 'pImg' && key !== 'recipe' && key !== 'price' && key !== 'costPrice' && key !== 'stock') {
+          formData.append(key, form[key]);
+        }
+      });
+      formData.append('price', Number(form.price));
+      formData.append('costPrice', Number(form.costPrice));
+      formData.append('stock', Number(form.stock));
+      
+      if (imageFile) {
+        formData.append('image', imageFile);
+      } else if (form.pImg) {
+        formData.append('images', JSON.stringify([form.pImg]));
+      }
+
       const response = await fetch(`${API_BASE}/add`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "Authorization": `Bearer ${localStorage.getItem("token")}`
         },
-        body: JSON.stringify({
-          ...form,
-          price: Number(form.price),
-          costPrice: Number(form.costPrice),
-          stock: Number(form.stock),
-        // weight: Number(form.weight),
-          images: form.pImg ? [form.pImg] : []
-        })
+        body: formData
       });
 
       if (response.ok) {
