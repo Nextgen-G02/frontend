@@ -146,8 +146,8 @@ export default function AddProduct() {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image must be less than 5MB");
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error("Image must be less than 1MB");
         return;
       }
       setImageFile(file);
@@ -199,8 +199,9 @@ export default function AddProduct() {
         setTimeout(() => navigate("/adminproduct"), 2000);
       } else {
         const errData = await response.json();
-        setErrors({ submit: errData.message || "Failed to add product" });
-        toast.error(errData.message || "Failed to add product");
+        const errorMessage = errData.error || errData.message || "Failed to add product";
+        setErrors({ submit: errorMessage });
+        toast.error(errorMessage);
       }
     } catch {
       setErrors({ submit: "Connection error" });
