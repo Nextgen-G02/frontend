@@ -145,8 +145,8 @@ export default function AddProduct() {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image must be less than 5MB");
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error("Image must be less than 1MB");
         return;
       }
       const reader = new FileReader();
