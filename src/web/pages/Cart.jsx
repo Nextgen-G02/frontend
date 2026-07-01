@@ -56,21 +56,23 @@ const Cart = () => {
       customerName: `${user.firstName} ${user.lastName}`,
       phone: user.phone || "0000000000",
       address: user.address || "Web Order",
-      type: 'Order', // Changed from 'DirectSale' to 'Order' so it stays as 'Pending'
+      type: 'Order',
       items: itemsToOrder.map(item => ({
         pName: item.pName,
-        category: item.pCategory, // Added required category field
+        category: item.pCategory,
         quantity: item.quantity,
         price: item.price
       })),
       totalAmount: selectedTotal,
-      paymentStatus: 'Unpaid', // Changed to match enum ['Paid', 'Unpaid']
+      paymentStatus: 'Unpaid',
       orderStatus: 'Pending'
     };
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, {
+      
+      // 1. Save the order as Pending
+      const orderResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,23 +81,83 @@ const Cart = () => {
         body: JSON.stringify(orderData)
       });
 
-      if (response.ok) {
-        toast.success("Order placed successfully!");
-        
-        // Remove ordered items from cart
+      if (!orderResponse.ok) {
+        const error = await orderResponse.json();
+        toast.error(error.message || "Failed to create order");
+        setIsOrdering(false);
+        return;
+      }
+
+      const createdOrder = await orderResponse.json();
+
+      // 2. Request PayHere Hash
+      const hashResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/hash`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          order_id: createdOrder._id,
+          amount: selectedTotal,
+          currency: "LKR"
+        })
+      });
+
+      if (!hashResponse.ok) {
+        toast.error("Failed to securely initiate payment");
+        setIsOrdering(false);
+        return;
+      }
+
+      const { hash, amount, currency } = await hashResponse.json();
+
+      // 3. Define PayHere configuration
+      payhere.onCompleted = function onCompleted(orderId) {
+        toast.success("Payment completed successfully!");
         itemsToOrder.forEach(item => removeFromCart(item._id));
         setSelectedItems(new Set());
-        
-        // Redirect or show success
+        setIsOrdering(false);
         navigate('/products');
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "Failed to place order");
-      }
+      };
+
+      payhere.onDismissed = function onDismissed() {
+        toast.error("Payment dismissed");
+        setIsOrdering(false);
+      };
+
+      payhere.onError = function onError(error) {
+        console.error("PayHere error:", error);
+        toast.error("An error occurred during payment");
+        setIsOrdering(false);
+      };
+
+      const payment = {
+        sandbox: import.meta.env.VITE_PAYHERE_ENV === "sandbox",
+        merchant_id: import.meta.env.VITE_PAYHERE_MERCHANT_ID,
+        return_url: `${window.location.origin}/products`,
+        cancel_url: `${window.location.origin}/cart`,
+        notify_url: `${import.meta.env.VITE_BACKEND_URL}/api/payment/notify`,
+        order_id: createdOrder._id,
+        items: "Nirosha Sweet House Order",
+        amount: amount,
+        currency: currency,
+        hash: hash,
+        first_name: user.firstName,
+        last_name: user.lastName,
+        email: user.email || "customer@example.com",
+        phone: user.phone || "0000000000",
+        address: user.address || "Web Order",
+        city: "Colombo",
+        country: "Sri Lanka"
+      };
+
+      // 4. Start PayHere
+      payhere.startPayment(payment);
+
     } catch (err) {
       console.error("Order error:", err);
       toast.error("An error occurred while placing your order");
-    } finally {
       setIsOrdering(false);
     }
   };

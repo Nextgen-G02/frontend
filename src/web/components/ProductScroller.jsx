@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Eye, ShoppingCart, Sparkles, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useCart } from "../../shared/context/CartContext";
+import { toast } from "react-hot-toast";
 
 export default function ProductScroller({
   title = "Design Cakes",
@@ -13,6 +15,7 @@ export default function ProductScroller({
   const scrollRef = React.useRef(null);
   const itemsPerPage = 4;
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   const generateSlug = (name, id) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + id;
@@ -158,7 +161,8 @@ export default function ProductScroller({
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Add to cart functionality
+                        addToCart(p);
+                        toast.success(`${p.pName} added to cart!`);
                       }}
                       className="bg-slate-900 text-white p-2.5 md:p-3 rounded-xl md:rounded-2xl hover:bg-[#C29D59] transition-all duration-500 shadow-lg shadow-slate-100 hover:-translate-y-1 active:scale-95 flex-shrink-0"
                     >

@@ -12,8 +12,14 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem('cart');
-    return savedCart ? JSON.parse(savedCart) : [];
+    try {
+      const savedCart = localStorage.getItem('cart');
+      const parsed = savedCart ? JSON.parse(savedCart) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.error("Failed to parse cart from local storage", e);
+      return [];
+    }
   });
 
   useEffect(() => {
@@ -21,14 +27,16 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = (product) => {
+    if (!product || !product._id) return;
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item._id === product._id);
+      const currentCart = Array.isArray(prevCart) ? prevCart : [];
+      const existingItem = currentCart.find((item) => item._id === product._id);
       if (existingItem) {
-        return prevCart.map((item) =>
+        return currentCart.map((item) =>
           item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prevCart, { ...product, quantity: 1 }];
+      return [...currentCart, { ...product, quantity: 1 }];
     });
   };
 

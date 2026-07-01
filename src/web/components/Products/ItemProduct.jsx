@@ -20,7 +20,7 @@ const ItemProduct = ({ searchParams }) => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products/`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/products`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });

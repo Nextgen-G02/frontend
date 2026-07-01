@@ -8,7 +8,7 @@ const SearchProduct = ({ setSearchParams }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/categories/`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/categories`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
