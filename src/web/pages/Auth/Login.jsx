@@ -380,16 +380,16 @@ export default function AuthPage() {
 
         <div className="space-y-2">
           <label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">
-            {isLogin ? "Email Address" : "Email Address"}
+            {isLogin ? "Email Address or NIC" : "Email Address"}
           </label>
           <div className="relative">
             <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
             <input
-              type="email"
+              type={isLogin ? "text" : "email"}
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="yourname@example.com"
+              placeholder={isLogin ? "Email or NIC (e.g. 991234567V)" : "yourname@example.com"}
               className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-[#C29D59] transition-all font-medium text-slate-900 placeholder:opacity-30 text-sm"
               required
             />

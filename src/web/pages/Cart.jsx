@@ -14,6 +14,31 @@ const Cart = () => {
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [detailProduct, setDetailProduct] = useState(null);
   const [isOrdering, setIsOrdering] = useState(false);
+  const [isCheckoutMode, setIsCheckoutMode] = useState(false);
+  const [checkoutFormData, setCheckoutFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: 'Colombo', // Default City
+    scheduleDate: '',
+    scheduleTime: ''
+  });
+
+  // Pre-fill form when user logs in or switches to checkout
+  useEffect(() => {
+    if (user) {
+      setCheckoutFormData(prev => ({
+        ...prev,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || ''
+      }));
+    }
+  }, [user]);
 
   const toggleSelection = (cartItemId) => {
     setSelectedItems(prev => {
@@ -35,13 +60,13 @@ const Cart = () => {
       .filter(item => selectedItems.has(item.cartItemId || item._id))
       .reduce((total, item) => total + (item.price * item.quantity), 0);
 
-  const handleOrder = async () => {
+  const handleCheckout = () => {
     if (!user) {
       toast.error("Please login to place an order");
       navigate('/login');
       return;
     }
-
+    
     const itemsToOrder = selectedItems.size === 0
       ? cart
       : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
@@ -51,18 +76,50 @@ const Cart = () => {
       return;
     }
 
+    setIsCheckoutMode(true);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setCheckoutFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePlaceOrder = async (e) => {
+    if (e) e.preventDefault();
+    
+    const itemsToOrder = selectedItems.size === 0
+      ? cart
+      : cart.filter(item => selectedItems.has(item._id));
+
+    if (itemsToOrder.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    if (!checkoutFormData.firstName || !checkoutFormData.phone || !checkoutFormData.address) {
+      toast.error("Please fill in all required delivery details");
+      return;
+    }
+
     setIsOrdering(true);
     const orderData = {
-      customerName: `${user.firstName} ${user.lastName}`,
-      phone: user.phone || "0000000000",
-      address: user.address || "Web Order",
+      customerName: `${checkoutFormData.firstName} ${checkoutFormData.lastName}`,
+      phone: checkoutFormData.phone,
+      address: `${checkoutFormData.address}, ${checkoutFormData.city}`,
+      scheduleDate: checkoutFormData.scheduleDate,
+      scheduleTime: checkoutFormData.scheduleTime,
       type: 'Order',
       source: 'Website',
       items: itemsToOrder.map(item => ({
         pName: item.pName,
         category: item.pCategory,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
+        customization: item.customization ? {
+          message: item.customization.message || "",
+          flavor: item.customization.flavor || "",
+          specialInstructions: item.customization.weight ? `Weight: ${item.customization.weight} kg` : ""
+        } : undefined
       })),
       totalAmount: selectedTotal,
       paymentStatus: 'Unpaid',
@@ -114,12 +171,32 @@ const Cart = () => {
       const { hash, amount, currency } = await hashResponse.json();
 
       // 3. Define PayHere configuration
-      payhere.onCompleted = function onCompleted(orderId) {
+      payhere.onCompleted = async function onCompleted(orderId) {
         toast.success("Payment completed successfully!");
+<<<<<<< HEAD
+        
+        try {
+          // Fallback for localhost: Tell backend payment is complete since webhook cannot reach localhost
+          await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${createdOrder._id}/payment`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ paymentStatus: 'Paid' })
+          });
+        } catch (error) {
+          console.error("Local status update failed:", error);
+        }
+
+        itemsToOrder.forEach(item => removeFromCart(item._id));
+=======
         itemsToOrder.forEach(item => removeFromCart(item.cartItemId || item._id));
+>>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
         setSelectedItems(new Set());
         setIsOrdering(false);
-        navigate('/products');
+        setIsCheckoutMode(false);
+        navigate('/my-orders');
       };
 
       payhere.onDismissed = function onDismissed() {
@@ -133,23 +210,23 @@ const Cart = () => {
         setIsOrdering(false);
       };
 
-      const payment = {
-        sandbox: import.meta.env.VITE_PAYHERE_ENV === "sandbox",
+      const payhereConfig = {
+        sandbox: import.meta.env.VITE_PAYHERE_ENV === 'sandbox',
         merchant_id: import.meta.env.VITE_PAYHERE_MERCHANT_ID,
-        return_url: `${window.location.origin}/products`,
+        return_url: `${window.location.origin}/cart`,
         cancel_url: `${window.location.origin}/cart`,
         notify_url: `${import.meta.env.VITE_BACKEND_URL}/api/payment/notify`,
         order_id: createdOrder._id,
         items: "Nirosha Sweet House Order",
-        amount: amount,
-        currency: currency,
+        amount: parseFloat(selectedTotal).toFixed(2),
+        currency: "LKR",
         hash: hash,
-        first_name: user.firstName,
-        last_name: user.lastName,
-        email: user.email || "customer@example.com",
-        phone: user.phone || "0000000000",
-        address: user.address || "Web Order",
-        city: "Colombo",
+        first_name: checkoutFormData.firstName,
+        last_name: checkoutFormData.lastName,
+        email: checkoutFormData.email || "customer@example.com",
+        phone: checkoutFormData.phone,
+        address: checkoutFormData.address,
+        city: checkoutFormData.city,
         country: "Sri Lanka"
       };
 
@@ -195,8 +272,17 @@ const Cart = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Items List */}
+              {/* Main Content Area (Items or Checkout Form) */}
               <div className="lg:col-span-2 space-y-4">
+<<<<<<< HEAD
+                {isCheckoutMode ? (
+                  <div className="bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-50 animate-in fade-in slide-in-from-right-4 duration-500">
+                    <div className="flex items-center justify-between mb-8">
+                      <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Delivery Details</h2>
+                      <button 
+                        onClick={() => setIsCheckoutMode(false)}
+                        className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors"
+=======
                 {cart.map((item) => {
                   const itemId = item.cartItemId || item._id;
                   const isSelected = selectedItems.has(itemId);
@@ -209,9 +295,12 @@ const Cart = () => {
                       <button
                         onClick={() => toggleSelection(itemId)}
                         className={`p-1 transition-all duration-300 ${isSelected ? 'text-primary' : 'text-slate-200 hover:text-slate-300'}`}
+>>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
                       >
-                        {isSelected ? <CheckCircle2 size={24} className="fill-primary/10" /> : <Circle size={24} />}
+                        Back to Cart
                       </button>
+<<<<<<< HEAD
+=======
 
                       <div
                         onDoubleClick={() => setDetailProduct(item)}
@@ -274,16 +363,196 @@ const Cart = () => {
                           Rs.{(item.price * item.quantity).toLocaleString()}
                         </div>
                       </div>
+>>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
                     </div>
-                  );
-                })}
 
-                <button
-                  onClick={clearCart}
-                  className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-rose-500 transition-colors ml-4 mt-4"
-                >
-                  Clear Shopping Cart
-                </button>
+                    <form className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">First Name *</label>
+                          <input 
+                            type="text" 
+                            name="firstName"
+                            value={checkoutFormData.firstName}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                            placeholder="John"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Last Name</label>
+                          <input 
+                            type="text" 
+                            name="lastName"
+                            value={checkoutFormData.lastName}
+                            onChange={handleInputChange}
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                            placeholder="Doe"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Email Address</label>
+                          <input 
+                            type="email" 
+                            name="email"
+                            value={checkoutFormData.email}
+                            onChange={handleInputChange}
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                            placeholder="john@example.com"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Phone Number *</label>
+                          <input 
+                            type="tel" 
+                            name="phone"
+                            value={checkoutFormData.phone}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                            placeholder="0771234567"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Delivery Address *</label>
+                        <input 
+                          type="text" 
+                          name="address"
+                          value={checkoutFormData.address}
+                          onChange={handleInputChange}
+                          required
+                          className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                          placeholder="123 Main Street"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">City *</label>
+                          <input 
+                            type="text" 
+                            name="city"
+                            value={checkoutFormData.city}
+                            onChange={handleInputChange}
+                            required
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                            placeholder="Colombo"
+                          />
+                        </div>
+                      </div>
+
+                      <hr className="border-slate-100 my-6" />
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preferred Date</label>
+                          <input 
+                            type="date" 
+                            name="scheduleDate"
+                            value={checkoutFormData.scheduleDate}
+                            onChange={handleInputChange}
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preferred Time</label>
+                          <input 
+                            type="time" 
+                            name="scheduleTime"
+                            value={checkoutFormData.scheduleTime}
+                            onChange={handleInputChange}
+                            className="w-full bg-slate-50 border-none rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/20"
+                          />
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <>
+                    {cart.map((item) => {
+                      const isSelected = selectedItems.has(item._id);
+                      return (
+                        <div
+                          key={item._id}
+                          className={`bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] shadow-sm border transition-all flex items-center gap-4 md:gap-6 group hover:shadow-xl hover:shadow-black/5 ${isSelected ? 'border-primary/20 bg-white' : 'border-slate-50 opacity-70'}`}
+                        >
+                          {/* Selection Radio/Toggle */}
+                          <button
+                            onClick={() => toggleSelection(item._id)}
+                            className={`p-1 transition-all duration-300 ${isSelected ? 'text-primary' : 'text-slate-200 hover:text-slate-300'}`}
+                          >
+                            {isSelected ? <CheckCircle2 size={24} className="fill-primary/10" /> : <Circle size={24} />}
+                          </button>
+
+                          <div
+                            onDoubleClick={() => setDetailProduct(item)}
+                            className="w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden shrink-0 border border-slate-50 cursor-pointer"
+                          >
+                            <img src={item.images?.[0] || "/images/cake_main.png"} alt={item.pName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" title="Double click for details" />
+                          </div>
+
+                          <div className="flex-grow">
+                            <h3 className="font-black text-slate-900 text-sm md:text-lg uppercase tracking-tight leading-none mb-2">{item.pName}</h3>
+                            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">{item.pCategory}</p>
+                            {item.customization && (
+                              <div className="space-y-1 mb-4 text-[11px] font-medium text-slate-500">
+                                {item.customization.weight && (
+                                  <div><span className="font-bold text-slate-700">Weight:</span> {item.customization.weight} kg</div>
+                                )}
+                                {item.customization.flavor && (
+                                  <div><span className="font-bold text-slate-700">Flavor:</span> {item.customization.flavor}</div>
+                                )}
+                                {item.customization.message && (
+                                  <div><span className="font-bold text-slate-700">Message:</span> "{item.customization.message}"</div>
+                                )}
+                              </div>
+                            )}
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span className="font-black text-slate-900 w-8 text-center text-sm">{item.quantity}</span>
+                              <button
+                                onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="text-right flex flex-col justify-between items-end h-20 md:h-28">
+                            <button
+                              onClick={() => removeFromCart(item._id)}
+                              className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
+                            >
+                              <Trash2 size={20} />
+                            </button>
+                            <div className="font-black text-slate-900 text-sm md:text-base">
+                              Rs.{(item.price * item.quantity).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    <button
+                      onClick={clearCart}
+                      className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-rose-500 transition-colors ml-4 mt-4"
+                    >
+                      Clear Shopping Cart
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* Summary */}
@@ -308,11 +577,11 @@ const Cart = () => {
                   </div>
 
                   <button
-                    onClick={handleOrder}
+                    onClick={isCheckoutMode ? handlePlaceOrder : handleCheckout}
                     disabled={isOrdering || cart.length === 0}
                     className="w-full bg-slate-900 text-gold py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] shadow-xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isOrdering ? 'Processing...' : 'Order product'}
+                    {isOrdering ? 'Processing...' : (isCheckoutMode ? 'Place Order' : 'Checkout')}
                   </button>
                 </div>
               </div>

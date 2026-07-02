@@ -26,6 +26,29 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+<<<<<<< HEAD
+  const isSameCustomization = (c1, c2) => {
+    if (!c1 && !c2) return true;
+    if (!c1 || !c2) return false;
+    return c1.message === c2.message && c1.flavor === c2.flavor && c1.weight === c2.weight;
+  };
+
+  const addToCart = (product) => {
+    if (!product || !product._id) return;
+    setCart((prevCart) => {
+      const currentCart = Array.isArray(prevCart) ? prevCart : [];
+      const existingItem = currentCart.find((item) => 
+        item._id === product._id && isSameCustomization(item.customization, product.customization)
+      );
+      if (existingItem) {
+        return currentCart.map((item) =>
+          (item._id === product._id && isSameCustomization(item.customization, product.customization))
+            ? { ...item, quantity: item.quantity + (product.quantity || 1) } 
+            : item
+        );
+      }
+      return [...currentCart, { ...product, quantity: product.quantity || 1 }];
+=======
   const addToCart = (product, quantity = 1, customProps = {}) => {
     if (!product || !product._id) return;
     setCart((prevCart) => {
@@ -63,6 +86,7 @@ export const CartProvider = ({ children }) => {
           ...customProps
         }
       ];
+>>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
     });
   };
 

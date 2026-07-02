@@ -121,6 +121,21 @@ export default function ProductDetails() {
 
   // Add to cart handler
   const handleAddToCart = () => {
+<<<<<<< HEAD
+    const cartItem = {
+      ...product,
+      price: basePrice * weightMultiplier,
+      quantity,
+      images,
+      customization: {
+        weight: selectedWeight ? selectedWeight.weight : null,
+        flavor: selectedFlavor,
+        message: cakeMessage
+      }
+    };
+    
+    addToCart(cartItem);
+=======
     const customProps = {
       price: basePrice * weightMultiplier,
       selectedFlavor: selectedFlavor || null,
@@ -129,6 +144,7 @@ export default function ProductDetails() {
     };
 
     addToCart(product, quantity, customProps);
+>>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
     toast.success(`${product.pName} added to cart!`);
   };
 
@@ -166,7 +182,7 @@ export default function ProductDetails() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-14">
             
             {/* Left Column: Image Gallery */}
-            <div className="space-y-4 relative lg:col-span-5">
+            <div className="space-y-4 md:sticky md:top-24 lg:top-28 lg:col-span-5 self-start">
               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                 <span className="bg-[#C29D59] text-white text-[10px] uppercase font-bold tracking-widest py-1.5 px-3 rounded-full shadow-lg">
                   {product.pCategory}
@@ -221,7 +237,7 @@ export default function ProductDetails() {
 
             {/* Right Column: Product Details & Customization */}
             <div className="flex flex-col lg:col-span-7">
-              <div className="md:sticky md:top-24 lg:top-28">
+              <div>
                 
                 {/* Header Info */}
                 <div className="mb-6">
@@ -252,13 +268,10 @@ export default function ProductDetails() {
                     </div>
                   </div>
 
-                  <div className="flex items-end gap-3 mb-6 md:mb-8">
-                    <span className="text-3xl md:text-4xl font-bold text-slate-900">Rs. {totalPrice.toLocaleString()}</span>
+                  {/* Price */}
+                  <div className="flex items-end gap-3 mb-4">
+                    <span className="text-3xl font-bold text-slate-900">Rs. {totalPrice.toLocaleString()}</span>
                   </div>
-                  
-                  <p className="text-slate-500 text-sm leading-relaxed mb-6 md:mb-8">
-                    {product.description}
-                  </p>
                 </div>
 
                 {/* Customization Panel */}
@@ -325,8 +338,8 @@ export default function ProductDetails() {
                   </div>
                 )}
 
-                {/* Actions - Hidden on mobile as we use Sticky Add to Cart */}
-                <div className="hidden lg:flex flex-col sm:flex-row gap-4 mb-8">
+                {/* Actions */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-8">
                   {/* Quantity */}
                   <div className="flex items-center justify-between bg-white border border-slate-200 rounded-2xl p-2 w-full sm:w-32 h-14">
                     <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all">
@@ -460,7 +473,7 @@ export default function ProductDetails() {
       </main>
 
       {/* Mobile Sticky Add to Cart */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-slate-100 lg:hidden z-50 flex items-center justify-between gap-4">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-slate-100 md:hidden z-50 flex items-center justify-between gap-4">
         <div>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Price</p>
           <p className="font-bold text-slate-900 text-lg">Rs. {totalPrice.toLocaleString()}</p>

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { 
-  UserPlus, 
-  UserX, 
-  Shield, 
-  Mail, 
-  Key, 
-  User, 
+import {
+  UserPlus,
+  UserX,
+  Shield,
+  Mail,
+  Key,
+  User,
   MoreVertical,
   Loader2,
   Lock,
@@ -23,7 +23,7 @@ export default function AdminStaffManagement() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -140,7 +140,7 @@ export default function AdminStaffManagement() {
         {/* Create/Edit Staff Form */}
         <div className="xl:col-span-4 glass-card p-8 md:p-10 rounded-[32px] md:rounded-[40px] bg-white relative overflow-hidden group border border-slate-100">
           <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 rounded-full -mr-20 -mt-20 opacity-50 group-hover:scale-110 transition-transform duration-700" />
-          
+
           <div className="flex items-center gap-4 mb-8 text-slate-900 relative z-10">
             <div className={`p-3.5 ${isEditing ? 'bg-emerald-500' : 'bg-slate-900'} text-white rounded-xl shadow-xl shadow-slate-200`}>
               {isEditing ? <BadgeCheck size={22} /> : <UserPlus size={22} />}
@@ -156,29 +156,42 @@ export default function AdminStaffManagement() {
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Staff Name</label>
                 <div className="grid grid-cols-2 gap-3">
-                   <input 
+                  <input
                     type="text" placeholder="First Name" required
                     value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                     className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm"
                   />
-                  <input 
+                  <input
                     type="text" placeholder="Last Name" required
                     value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                     className="w-full px-5 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">National ID (NIC) *</label>
                 <div className="relative">
-                   <Mail className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-                   <input 
-                    type="email" placeholder="staff@nirosha.com" required
+                  <Shield className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                  <input
+                    type="text" placeholder="e.g. 199912345678 or 991234567V" required
+                    value={formData.nic}
+                    onChange={(e) => setFormData({ ...formData, nic: e.target.value })}
+                    className="w-full pl-12 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address (Optional)</label>
+                <div className="relative">
+                  <Mail className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                  <input
+                    type="email" placeholder="staff@nirosha.com"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full pl-12 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm"
                   />
                 </div>
@@ -186,29 +199,16 @@ export default function AdminStaffManagement() {
 
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">
-                  {isEditing ? 'New Password (Optional)' : 'Password'}
+                  {isEditing ? 'New Password (Optional)' : 'Password *'}
                 </label>
                 <div className="relative">
-                   <Lock className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-                   <input 
-                    type="password" 
-                    placeholder="••••••••" 
+                  <Lock className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+                  <input
+                    type="password"
+                    placeholder="••••••••"
                     required={!isEditing}
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full pl-12 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">National ID (NIC)</label>
-                <div className="relative">
-                   <Shield className="absolute left-4.5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-                   <input 
-                    type="text" placeholder="e.g. 199912345678 or 991234567V" required
-                    value={formData.nic}
-                    onChange={(e) => setFormData({...formData, nic: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full pl-12 pr-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm"
                   />
                 </div>
@@ -216,10 +216,10 @@ export default function AdminStaffManagement() {
 
               <div className="space-y-2">
                 <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Residential Address</label>
-                <textarea 
+                <textarea
                   placeholder="Street, City, Province" required
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-bold text-slate-900 placeholder:text-slate-300 text-xs shadow-sm min-h-[80px] resize-none"
                 />
               </div>
@@ -238,7 +238,7 @@ export default function AdminStaffManagement() {
                 {isEditing ? 'Update Member' : 'Add Staff Member'}
               </button>
               {isEditing && (
-                <button 
+                <button
                   type="button"
                   onClick={handleCancel}
                   className="px-6 py-4.5 md:py-5 bg-slate-100 text-slate-400 rounded-xl md:rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] hover:bg-slate-200 transition-all"
@@ -288,7 +288,7 @@ export default function AdminStaffManagement() {
                           <div>
                             <p className="font-black text-slate-900 uppercase tracking-tight text-base leading-tight">{user.firstName} {user.lastName}</p>
                             <p className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit lowercase">
-                              <Mail size={10} className="text-primary"/> {user.email}
+                              <Mail size={10} className="text-primary" /> {user.email}
                             </p>
                             {user.nic && (
                               <p className="text-[9px] text-slate-400 font-medium mt-1.5 flex items-center gap-1.5">
@@ -299,25 +299,24 @@ export default function AdminStaffManagement() {
                         </div>
                       </td>
                       <td className="px-8 md:px-10 py-5 md:py-6">
-                        <span className={`px-4 py-1.5 border rounded-full flex items-center gap-2 w-fit shadow-sm ${
-                          user.role === 'admin' 
-                          ? 'bg-primary/5 text-primary border-primary/20' 
-                          : 'bg-slate-50 text-slate-600 border-slate-100'
-                        }`}>
+                        <span className={`px-4 py-1.5 border rounded-full flex items-center gap-2 w-fit shadow-sm ${user.role === 'admin'
+                            ? 'bg-primary/5 text-primary border-primary/20'
+                            : 'bg-slate-50 text-slate-600 border-slate-100'
+                          }`}>
                           {user.role === 'admin' ? <BadgeCheck size={12} /> : <User size={12} />}
                           <span className="text-[10px] font-black uppercase tracking-widest">{user.role}</span>
                         </span>
                       </td>
                       <td className="px-8 md:px-10 py-5 md:py-6 text-right">
-                        <div className="flex justify-end items-center gap-2 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                          <button 
+                        <div className="flex justify-end items-center gap-2">
+                          <button
                             onClick={() => handleEdit(user)}
                             className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 border border-slate-100 transition-all"
                           >
                             <Settings size={18} />
                           </button>
                           {user.role !== 'admin' && (
-                            <button 
+                            <button
                               onClick={() => handleDelete(user._id)}
                               className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-primary hover:bg-rose-50 border border-slate-100 transition-all"
                             >
@@ -326,12 +325,12 @@ export default function AdminStaffManagement() {
                           )}
                         </div>
                         {user.role === 'admin' && (
-                           <div className="flex justify-end group-hover:hidden transition-opacity">
-                              <div className="px-4 py-2 rounded-lg bg-slate-100 flex items-center gap-2.5">
-                                <Lock size={10} className="text-slate-400" />
-                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Admin Owner</span>
-                              </div>
-                           </div>
+                          <div className="flex justify-end group-hover:hidden transition-opacity">
+                            <div className="px-4 py-2 rounded-lg bg-slate-100 flex items-center gap-2.5">
+                              <Lock size={10} className="text-slate-400" />
+                              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Admin Owner</span>
+                            </div>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -341,32 +340,32 @@ export default function AdminStaffManagement() {
             </table>
           </div>
         </div>
-    </div>
+      </div>
 
       {/* Custom Deletion Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setIsDeleteModalOpen(false)}></div>
-          
+
           <div className="bg-white w-full max-w-md rounded-[32px] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
             <div className="p-8 text-center">
               <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
                 <AlertTriangle size={40} />
               </div>
-              
+
               <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-2">Are you sure?</h2>
               <p className="text-sm font-medium text-slate-400 leading-relaxed mb-8">
                 Remove this staff member from the system? This action cannot be undone.
               </p>
 
               <div className="flex gap-3">
-                <button 
+                <button
                   onClick={() => setIsDeleteModalOpen(false)}
                   className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 hover:text-slate-900 transition-all"
                 >
                   No, Keep them
                 </button>
-                <button 
+                <button
                   onClick={executeDelete}
                   className="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-rose-100 hover:bg-rose-600 transition-all"
                 >

@@ -9,6 +9,9 @@ import Login from './web/pages/Auth/Login'
 import Products from './web/pages/Products'
 import Cart from './web/pages/Cart'
 import ProductDetails from './web/pages/ProductDetails'
+import CustomizeCakeForm from './web/pages/CustomizeCakeForm'
+import MyOrders from './web/pages/MyOrders'
+import About from './web/pages/About'
 
 // System Pages
 import AdminDashboard from './system/pages/Dashboard/Dashboard'
@@ -39,10 +42,13 @@ function App() {
       <Toaster position="top-right" reverseOrder={false} />
       <Routes>
         <Route path='/' element={<Home />} />
+        <Route path='/about' element={<About />} />
         <Route path='/login' element={<Login />} />
         <Route path="/products" element={<Products />} />
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/customize" element={<CustomizeCakeForm />} />
+        <Route path="/my-orders" element={<MyOrders />} />
 
         {/* Global Admin Wrapper */}
         <Route element={<ProtectedRoute><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} path="/admin" />

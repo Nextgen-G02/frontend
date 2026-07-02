@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import AdminCustomCakes from '../CustomCakes/AdminCustomCakes';
 
 const OrderList = () => {
     const navigate = useNavigate();
@@ -28,6 +29,7 @@ const OrderList = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const [activeTab, setActiveTab] = useState('Standard');
 
     useEffect(() => {
         fetchOrders();
@@ -163,7 +165,39 @@ const OrderList = () => {
                     </div>
                 </header>
 
-                {/* Metrics */}
+                {/* Tabs */}
+                <div className="flex gap-4 border-b border-slate-200">
+                    <button 
+                        onClick={() => setActiveTab('Standard')}
+                        className={`pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all ${
+                            activeTab === 'Standard' 
+                            ? 'border-b-2 border-primary text-primary' 
+                            : 'border-b-2 border-transparent text-slate-400 hover:text-slate-600'
+                        }`}
+                    >
+                        Standard Orders
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('Custom')}
+                        className={`pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all ${
+                            activeTab === 'Custom' 
+                            ? 'border-b-2 border-primary text-primary' 
+                            : 'border-b-2 border-transparent text-slate-400 hover:text-slate-600'
+                        }`}
+                    >
+                        Custom Requests
+                    </button>
+                </div>
+
+                {activeTab === 'Custom' && (
+                    <div className="-mx-4 md:-mx-8">
+                        <AdminCustomCakes />
+                    </div>
+                )}
+
+                {activeTab === 'Standard' && (
+                    <>
+                        {/* Metrics */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     {[
                         {
@@ -437,6 +471,8 @@ const OrderList = () => {
                         </table>
                     </div>
                 </div>
+                    </>
+                )}
             </div>
         </div>
     );
