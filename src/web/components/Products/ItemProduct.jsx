@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ShoppingCart, Info, X } from "lucide-react";
+import { ShoppingCart, Info, X, CreditCard } from "lucide-react";
 import { useCart } from "../../../shared/context/CartContext";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -125,23 +125,36 @@ const ItemProduct = ({ searchParams }) => {
                 </div>
               </div>
 
-              <div className="flex gap-2 border-t border-slate-50 pt-3.5">
-                <button
-                  onClick={() => navigate(`/product/${generateSlug(product.pName, product._id)}`)}
-                  className="flex-1 border border-slate-100 rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5"
-                >
-                  <Info size={12} />
-                  Details
-                </button>
+              <div className="flex flex-col gap-2 border-t border-slate-50 pt-3.5">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => navigate(`/product/${generateSlug(product.pName, product._id)}`)}
+                    className="flex-1 bg-gold/10 border border-gold/40 rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-800 hover:bg-gold hover:text-white transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Info size={12} />
+                    Details
+                  </button>
+                  <button
+                    onClick={() => {
+                      addToCart(product);
+                      toast.success(`${product.pName} added to cart!`);
+                    }}
+                    className="flex-1 bg-primary/5 border border-primary/30 rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <ShoppingCart size={12} />
+                    Add to Cart
+                  </button>
+                </div>
                 <button
                   onClick={() => {
                     addToCart(product);
                     toast.success(`${product.pName} added to cart!`);
+                    navigate('/cart');
                   }}
-                  className="flex-1 bg-slate-900 text-gold rounded-lg py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg shadow-slate-100 flex items-center justify-center gap-1.5"
+                  className="w-full bg-slate-900 text-gold rounded-lg py-2 text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 hover:text-white transition-all shadow-lg shadow-slate-100 flex items-center justify-center gap-1.5 active:bg-slate-950"
                 >
-                  <ShoppingCart size={12} />
-                  Add to Cart
+                  <CreditCard size={12} />
+                  Buy Now
                 </button>
               </div>
             </div>
