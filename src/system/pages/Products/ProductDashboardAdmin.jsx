@@ -115,12 +115,12 @@ export default function ProductDashboardAdmin() {
       toast.error("Stock cannot be negative");
       return;
     }
-    
+
     const p = Number(editForm.price);
     const cp = Number(editForm.costPrice);
     const dp = Number(editForm.discountPercentage) || 0;
     const da = p * (dp / 100);
-    
+
     if ((p - da) <= cp) {
       toast.error("Selling price after discount must be greater than cost price to ensure profit");
       return;
@@ -132,7 +132,7 @@ export default function ProductDashboardAdmin() {
           formData.append(key, editForm[key]);
         }
       });
-      
+
       if (editImageFile) {
         formData.append('image', editImageFile);
       } else if (editForm.images && editForm.images.length > 0) {
@@ -208,27 +208,26 @@ export default function ProductDashboardAdmin() {
   );
 
   const stockStatus = (stock) => {
-    if (stock <= 3) return { label: "Low Stock", class: "bg-rose-50 text-rose-600" };
-    if (stock <= 6) return { label: "Limited", class: "bg-amber-50 text-amber-600" };
-    return { label: "In Stock", class: "bg-emerald-50 text-emerald-600" };
+    if (stock <= 3) return { label: "Low Stock", class: "bg-[#FCE8E6] text-[#C5221F] border-[#F5C2C1]" };
+    if (stock <= 6) return { label: "Limited", class: "bg-[#FAF3E5] text-[#9E7A3E] border-[#EADFC9]" };
+    return { label: "In Stock", class: "bg-[#E6F4EA] text-[#137333] border-[#A8DAB5]" };
   };
 
   return (
-    <div className="space-y-10 max-w-[1500px] mx-auto">
+    <div className="space-y-10 max-w-[1500px] mx-auto animate-in fade-in duration-700">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
-        <div>
-          <div className="flex items-center gap-2.5 mb-3">
-            <span className="w-10 h-1 bg-primary rounded-full"></span>
-            <p className="text-primary font-black uppercase tracking-[0.4em] text-[9px]"></p>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-8 md:w-12 h-[1px] md:h-[2px] bg-gold"></div>
           </div>
-          <h1 className="heading-premium text-2xl md:text-5xl leading-tight">
-            Product Details
+          <h1 className="heading-premium text-3xl md:text-5xl lg:text-6xl leading-none">
+            Product <span className="italic font-normal text-slate-400">Details</span>
           </h1>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
           <div className="relative group flex-1 sm:flex-none">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={16} md:size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-gold transition-colors" size={16} md:size={18} />
             <input
               type="text"
               placeholder="Search catalog..."
@@ -237,12 +236,12 @@ export default function ProductDashboardAdmin() {
                 setSearch(e.target.value);
                 if (e.target.value) setSelectedCategory("All");
               }}
-              className="pl-11 pr-5 py-3 rounded-lg md:rounded-xl bg-white border border-slate-200 outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary w-full sm:w-60 md:w-64 transition-all font-bold text-slate-900 placeholder:text-slate-200 shadow-sm text-xs md:text-sm"
+              className="pl-11 pr-5 py-3 rounded-lg md:rounded-xl bg-white border border-slate-200 outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold w-full sm:w-60 md:w-64 transition-all font-bold text-slate-900 placeholder:text-slate-300 shadow-sm text-xs md:text-sm"
             />
           </div>
           <button
             onClick={() => navigate("/addproduct")}
-            className="py-3 px-6 md:px-8 bg-slate-900 text-gold rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-[0.3em] shadow-2xl shadow-slate-200 hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-2.5"
+            className="py-3 px-6 md:px-8 bg-gold text-white rounded-lg md:rounded-xl font-bold text-[9px] md:text-[10px] uppercase tracking-[0.3em] shadow-lg shadow-gold/10 hover:bg-gold/90 transition-all duration-500 flex items-center justify-center gap-2.5"
           >
             <Plus size={18} md:size={20} /> Add New Product
           </button>
@@ -253,8 +252,8 @@ export default function ProductDashboardAdmin() {
       <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar border-b border-slate-100">
         <button
           onClick={() => toggleCategory("All")}
-          className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === "All"
-            ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
+          className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-bold text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === "All"
+            ? "bg-gold text-white border-gold shadow-lg -translate-y-0.5 shadow-gold/10"
             : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
             }`}
         >
@@ -266,8 +265,8 @@ export default function ProductDashboardAdmin() {
             <button
               key={cat._id}
               onClick={() => toggleCategory(cat.name)}
-              className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-black text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
-                ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5"
+              className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-bold text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
+                ? "bg-gold text-white border-gold shadow-lg -translate-y-0.5 shadow-gold/10"
                 : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
                 }`}
             >
@@ -294,12 +293,12 @@ export default function ProductDashboardAdmin() {
           <div className="overflow-x-auto no-scrollbar">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50">
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Name</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Category</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Unit Value</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Stock Availability</th>
-                  <th className="px-6 md:px-10 py-6 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
+                <tr className="bg-slate-100 text-xs md:text-sm border-b border-slate-200">
+                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Product Name</th>
+                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Category</th>
+                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Unit Value</th>
+                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Stock Availability</th>
+                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
 
@@ -318,10 +317,10 @@ export default function ProductDashboardAdmin() {
                             />
                           </div>
                           <div>
-                            <p className="font-black text-slate-900 group-hover:text-primary transition-colors  text-sm md:text-base">{p.pName}</p>
-                            <div className="flex items-center gap-2 mt-1 px-1.5 py-0.5 bg-slate-50 rounded-md w-fit">
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{p.productId}</span>
-                            </div>
+                            <p className="font-bold text-slate-900 group-hover:text-gold transition-colors text-sm md:text-base">{p.pName}</p>
+                            <span className="px-2 py-0.5 bg-[#F3EAD3] text-[#84632A] border border-[#DFCE9F] text-[9px] font-bold rounded-md uppercase tracking-wider w-fit mt-1.5 inline-block shadow-sm">
+                              {p.productId}
+                            </span>
                           </div>
                         </div>
                       </td>
@@ -330,20 +329,20 @@ export default function ProductDashboardAdmin() {
                         <div className="flex flex-wrap justify-start gap-1.5">
                           {Array.isArray(p.pCategory) ? (
                             p.pCategory.map((cat, idx) => (
-                              <span key={idx} className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-600 text-[8px] font-black uppercase tracking-widest border border-slate-100 whitespace-nowrap">
+                              <span key={idx} className="px-3 py-1 bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap shadow-sm">
                                 {cat}
                               </span>
                             ))
                           ) : (
-                            <span className="px-3.5 md:px-4 py-1.5 rounded-full bg-slate-50 text-slate-600 text-[9px] md:text-[10px] font-black uppercase tracking-widest border border-slate-100 whitespace-nowrap">
+                            <span className="px-3 py-1 bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-bold rounded-lg uppercase tracking-wider whitespace-nowrap shadow-sm">
                               {p.pCategory}
                             </span>
                           )}
                         </div>
                       </td>
 
-                      <td className="px-6 md:px-10 py-4 md:py-6 font-black text-slate-900 text-base md:text-lg tracking-tighter">
-                        <span className="text-primary text-[9px] mr-1 opacity-50 font-black">Rs.</span>
+                      <td className="px-6 md:px-10 py-4 md:py-6 font-bold text-slate-900 text-base md:text-lg tracking-tighter">
+                        <span className="text-slate-900 text-[10px] mr-1 font-bold">Rs.</span>
                         {p.price.toLocaleString()}
                       </td>
 
@@ -357,7 +356,7 @@ export default function ProductDashboardAdmin() {
                           </div>
                           <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                             <div
-                              className={`h-full transition-all duration-1000 shadow-[0_0_8px_rgba(0,0,0,0.1)] ${p.stock <= 3 ? 'bg-primary' : 'bg-emerald-500'}`}
+                              className={`h-full transition-all duration-1000 shadow-[0_0_8px_rgba(0,0,0,0.1)] ${p.stock <= 3 ? 'bg-[#C5221F]' : 'bg-[#137333]'}`}
                               style={{ width: `${Math.min(100, (p.stock / 20) * 100)}%` }}
                             ></div>
                           </div>
@@ -374,7 +373,7 @@ export default function ProductDashboardAdmin() {
                           </button>
                           <button
                             onClick={() => handleEditOpen(p)}
-                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-600 hover:text-primary hover:shadow-xl transition-all"
+                            className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-white border border-slate-100 text-slate-600 hover:text-gold hover:shadow-xl transition-all"
                           >
                             <Edit3 size={18} md:size={20} />
                           </button>
@@ -407,7 +406,7 @@ export default function ProductDashboardAdmin() {
             <div className="p-8 md:p-12 max-h-[90vh] overflow-y-auto no-scrollbar">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 bg-slate-900 text-gold rounded-2xl">
+                  <div className="p-3 bg-gold/10 text-gold rounded-2xl">
                     <Package size={24} />
                   </div>
                   <div>
@@ -433,7 +432,7 @@ export default function ProductDashboardAdmin() {
                       alt={viewProduct.pName}
                     />
                   </div>
-                  
+
                   <div className="p-6 bg-slate-50 rounded-[24px] border border-slate-100 space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Product ID</span>
@@ -441,7 +440,7 @@ export default function ProductDashboardAdmin() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</span>
-                      <span className="px-3 py-1 bg-slate-900 text-gold rounded-lg text-[10px] font-black uppercase">{viewProduct.pCategory}</span>
+                      <span className="px-3 py-1 bg-[#F3EAD3] text-[#84632A] border border-[#DFCE9F] rounded-lg text-[10px] font-black uppercase">{viewProduct.pCategory}</span>
                     </div>
                   </div>
                 </div>
@@ -474,7 +473,7 @@ export default function ProductDashboardAdmin() {
                         <span className="text-base font-black text-slate-900">{viewProduct.stock} Units</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between p-4 border-b border-slate-50">
                       <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Measurement</span>
                       <span className="text-base font-black text-slate-900 uppercase">
@@ -499,13 +498,12 @@ export default function ProductDashboardAdmin() {
       {/* Edit Modal */}
       {editProduct && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
+          <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col border border-slate-100">
             <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-slate-900 text-gold rounded-2xl"><Edit3 size={24} /></div>
+                <div className="p-3 bg-gold/10 text-gold rounded-2xl"><Edit3 size={24} /></div>
                 <div>
                   <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Product</h2>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Edit the product</p>
                 </div>
               </div>
               <button onClick={() => setEditProduct(null)} className="p-4 hover:bg-slate-50 rounded-2xl transition-colors text-slate-400">
@@ -518,7 +516,7 @@ export default function ProductDashboardAdmin() {
                 <div className="space-y-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Name</label>
                   <input
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
                     value={editForm.pName}
                     onChange={(e) => setEditForm({ ...editForm, pName: e.target.value })}
                   />
@@ -526,7 +524,7 @@ export default function ProductDashboardAdmin() {
                 <div className="space-y-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Category</label>
                   <select
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 appearance-none cursor-pointer"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm appearance-none cursor-pointer"
                     value={editForm.pCategory}
                     onChange={(e) => setEditForm({ ...editForm, pCategory: e.target.value })}
                   >
@@ -541,7 +539,7 @@ export default function ProductDashboardAdmin() {
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Description</label>
                   <textarea
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 min-h-[100px] resize-none"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm min-h-[100px] resize-none"
                     value={editForm.description || ""}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     placeholder="Describe this product..."
@@ -554,7 +552,7 @@ export default function ProductDashboardAdmin() {
                     min="0.01"
                     step="0.01"
                     onWheel={(e) => e.target.blur()}
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
                     value={editForm.price}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -569,7 +567,7 @@ export default function ProductDashboardAdmin() {
                     min="0.01"
                     step="0.01"
                     onWheel={(e) => e.target.blur()}
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
                     value={editForm.costPrice}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -585,7 +583,7 @@ export default function ProductDashboardAdmin() {
                     max="100"
                     step="0.1"
                     onWheel={(e) => e.target.blur()}
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
                     value={editForm.discountPercentage || 0}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -599,11 +597,11 @@ export default function ProductDashboardAdmin() {
                     Product Image
                   </label>
                   <div
-                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-primary'); }}
-                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-primary'); }}
+                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-gold'); }}
+                    onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-gold'); }}
                     onDrop={(e) => {
                       e.preventDefault();
-                      e.currentTarget.classList.remove('border-primary');
+                      e.currentTarget.classList.remove('border-gold');
                       const file = e.dataTransfer.files[0];
                       if (file) handleFileChange({ target: { files: [file] } });
                     }}
@@ -648,7 +646,7 @@ export default function ProductDashboardAdmin() {
                     type="number"
                     min="0"
                     onWheel={(e) => e.target.blur()}
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
                     value={editForm.stock}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -660,7 +658,7 @@ export default function ProductDashboardAdmin() {
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Expiry Date</label>
                   <input
                     type="date"
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
                     value={editForm.expiryDate ? new Date(editForm.expiryDate).toISOString().split('T')[0] : ""}
                     onChange={(e) => setEditForm({ ...editForm, expiryDate: e.target.value })}
                   />
@@ -668,7 +666,7 @@ export default function ProductDashboardAdmin() {
                 <div className="space-y-2">
                   <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Measurement Unit</label>
                   <select
-                    className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5 appearance-none cursor-pointer"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm appearance-none cursor-pointer"
                     value={editForm.unit}
                     onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
                   >
@@ -677,62 +675,21 @@ export default function ProductDashboardAdmin() {
                     <option value="g">g</option>
                     <option value="ml">ml</option>
                     <option value="l">l</option>
-                    {/* <option value="box">box</option>
-                    <option value="pkt">pkt</option>
-                     <option value="pkt">pkt</option> */}
                   </select>
                 </div>
-                {/* {['kg', 'g', 'ml', 'l'].includes(editForm.unit) && (
-                  <div className="space-y-2">
-                    <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({editForm.unit})</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      onWheel={(e) => e.target.blur()}
-                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
-                      value={editForm.weight}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, weight: val });
-                      }}
-                      placeholder={`Enter weight in ${editForm.unit}`}
-                    />
-                  </div>
-                )} */}
-
-                {/* <div className="space-y-2">
-                    <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Weight / Volume ({editForm.unit})</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      onWheel={(e) => e.target.blur()}
-                      className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-primary/5"
-                      value={editForm.weight}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, weight: val });
-                      }}
-                      placeholder={`Enter weight in ${editForm.unit}`}
-                    />
-                  </div> */}
-                  
               </div>
-
-
-
-
             </div>
 
             <div className="p-8 md:p-10 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-4 shrink-0">
               <button
                 onClick={() => setEditProduct(null)}
-                className="px-8 py-4 bg-primary text-black rounded-xl font-black text-[10px] uppercase tracking-widest hover:opacity-90 transition-all shadow-lg"
+                className="px-8 py-4 bg-[#FCE8E6] text-[#C5221F] rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#FAD2CF] transition-all border border-[#F5C2C1] flex items-center justify-center gap-2 shadow-sm"
               >
                 Discard
               </button>
               <button
                 onClick={handleEditSave}
-                className="px-10 py-4 bg-slate-900 text-gold rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center gap-3 hover:bg-primary hover:text-white transition-all shadow-xl shadow-slate-200"
+                className="px-10 py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-gold transition-all shadow-xl"
               >
                 Save Changes
                 <Save size={16} />
@@ -750,15 +707,15 @@ export default function ProductDashboardAdmin() {
           ></div>
 
           <div className="relative w-full max-w-[440px] bg-white rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 fade-in duration-300">
-            <div className="h-2 w-full bg-primary"></div>
+            <div className="h-2 w-full bg-gold"></div>
 
             <div className="p-8 md:p-12 text-center">
-              <div className="w-20 h-20 bg-rose-50 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-inner">
-                <Trash2 size={36} className="text-primary animate-pulse" />
+              <div className="w-20 h-20 bg-amber-50/50 rounded-[28px] flex items-center justify-center mx-auto mb-8 shadow-inner">
+                <Trash2 size={36} className="text-gold animate-pulse" />
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase leading-tight mb-4">
-                Confirm <span className="text-primary italic">Deletion</span>
+              <h2 className="text-2xl md:text-3xl font-serif text-slate-800 tracking-tight uppercase leading-tight mb-4 font-bold">
+                Confirm <span className="text-gold italic font-normal">Deletion</span>
               </h2>
 
               <p className="text-sm font-medium text-slate-400 mb-10 leading-relaxed px-4">
@@ -768,13 +725,13 @@ export default function ProductDashboardAdmin() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => setDeleteId(null)}
-                  className="flex-1 py-4.5 bg-slate-50 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 hover:text-slate-600 transition-all border border-slate-100 shadow-sm"
+                  className="flex-1 py-4.5 bg-slate-100 text-slate-600 rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-slate-200 hover:text-slate-900 transition-all border border-slate-200/50 shadow-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleDelete(deleteId)}
-                  className="flex-1 py-4.5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 hover:bg-primary transition-all duration-500"
+                  className="flex-1 py-4.5 bg-gold text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg hover:bg-gold/90 transition-all duration-300"
                 >
                   Delete
                 </button>
