@@ -697,6 +697,7 @@ export default function ProductDashboardAdmin() {
                       onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
                     >
                       <option value="pcs">pcs</option>
+                      <option value="box">box</option>
                       <option value="kg">kg</option>
                       <option value="g">g</option>
                       <option value="ml">ml</option>
