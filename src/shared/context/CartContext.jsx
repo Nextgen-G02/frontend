@@ -26,29 +26,55 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product) => {
+  const addToCart = (product, quantity = 1, customProps = {}) => {
     if (!product || !product._id) return;
     setCart((prevCart) => {
       const currentCart = Array.isArray(prevCart) ? prevCart : [];
-      const existingItem = currentCart.find((item) => item._id === product._id);
-      if (existingItem) {
-        return currentCart.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
-        );
+      
+      const existingItemIndex = currentCart.findIndex((item) => {
+        if (item._id !== product._id) return false;
+        if (customProps.selectedFlavor && item.selectedFlavor !== customProps.selectedFlavor) return false;
+        if (customProps.cakeMessage && item.cakeMessage !== customProps.cakeMessage) return false;
+        if (customProps.selectedWeight?.weight && item.selectedWeight?.weight !== customProps.selectedWeight?.weight) return false;
+        return true;
+      });
+
+      if (existingItemIndex > -1) {
+        const updatedCart = [...currentCart];
+        updatedCart[existingItemIndex] = {
+          ...updatedCart[existingItemIndex],
+          quantity: updatedCart[existingItemIndex].quantity + quantity
+        };
+        return updatedCart;
       }
-      return [...currentCart, { ...product, quantity: 1 }];
+
+      // Generate a unique composite key for the item configuration
+      const flavorStr = customProps.selectedFlavor || "";
+      const msgStr = customProps.cakeMessage || "";
+      const weightStr = customProps.selectedWeight?.weight || "";
+      const cartItemId = `${product._id}_${flavorStr}_${msgStr}_${weightStr}`;
+
+      return [
+        ...currentCart,
+        {
+          ...product,
+          cartItemId,
+          quantity,
+          ...customProps
+        }
+      ];
     });
   };
 
-  const removeFromCart = (productId) => {
-    setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
+  const removeFromCart = (cartItemId) => {
+    setCart((prevCart) => prevCart.filter((item) => (item.cartItemId || item._id) !== cartItemId));
   };
 
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (cartItemId, quantity) => {
     if (quantity < 1) return;
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item._id === productId ? { ...item, quantity } : item
+        (item.cartItemId || item._id) === cartItemId ? { ...item, quantity } : item
       )
     );
   };

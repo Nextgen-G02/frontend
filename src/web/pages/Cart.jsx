@@ -15,13 +15,13 @@ const Cart = () => {
   const [detailProduct, setDetailProduct] = useState(null);
   const [isOrdering, setIsOrdering] = useState(false);
 
-  const toggleSelection = (productId) => {
+  const toggleSelection = (cartItemId) => {
     setSelectedItems(prev => {
       const next = new Set(prev);
-      if (next.has(productId)) {
-        next.delete(productId);
+      if (next.has(cartItemId)) {
+        next.delete(cartItemId);
       } else {
-        next.add(productId);
+        next.add(cartItemId);
       }
       return next;
     });
@@ -32,7 +32,7 @@ const Cart = () => {
   const selectedTotal = selectedItems.size === 0
     ? cart.reduce((total, item) => total + (item.price * item.quantity), 0)
     : cart
-      .filter(item => selectedItems.has(item._id))
+      .filter(item => selectedItems.has(item.cartItemId || item._id))
       .reduce((total, item) => total + (item.price * item.quantity), 0);
 
   const handleOrder = async () => {
@@ -44,7 +44,7 @@ const Cart = () => {
 
     const itemsToOrder = selectedItems.size === 0
       ? cart
-      : cart.filter(item => selectedItems.has(item._id));
+      : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
 
     if (itemsToOrder.length === 0) {
       toast.error("Your cart is empty");
@@ -115,7 +115,7 @@ const Cart = () => {
       // 3. Define PayHere configuration
       payhere.onCompleted = function onCompleted(orderId) {
         toast.success("Payment completed successfully!");
-        itemsToOrder.forEach(item => removeFromCart(item._id));
+        itemsToOrder.forEach(item => removeFromCart(item.cartItemId || item._id));
         setSelectedItems(new Set());
         setIsOrdering(false);
         navigate('/products');
@@ -197,15 +197,16 @@ const Cart = () => {
               {/* Items List */}
               <div className="lg:col-span-2 space-y-4">
                 {cart.map((item) => {
-                  const isSelected = selectedItems.has(item._id);
+                  const itemId = item.cartItemId || item._id;
+                  const isSelected = selectedItems.has(itemId);
                   return (
                     <div
-                      key={item._id}
+                      key={itemId}
                       className={`bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] shadow-sm border transition-all flex items-center gap-4 md:gap-6 group hover:shadow-xl hover:shadow-black/5 ${isSelected ? 'border-primary/20 bg-white' : 'border-slate-50 opacity-70'}`}
                     >
                       {/* Selection Radio/Toggle */}
                       <button
-                        onClick={() => toggleSelection(item._id)}
+                        onClick={() => toggleSelection(itemId)}
                         className={`p-1 transition-all duration-300 ${isSelected ? 'text-primary' : 'text-slate-200 hover:text-slate-300'}`}
                       >
                         {isSelected ? <CheckCircle2 size={24} className="fill-primary/10" /> : <Circle size={24} />}
@@ -220,17 +221,33 @@ const Cart = () => {
 
                       <div className="flex-grow">
                         <h3 className="font-black text-slate-900 text-sm md:text-lg uppercase tracking-tight leading-none mb-2">{item.pName}</h3>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-4">{item.pCategory}</p>
+                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">{item.pCategory}</p>
+                        
+                        {/* Customization Details */}
+                        {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
+                          <div className="text-[11px] text-slate-500 space-y-0.5 mb-3 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100 max-w-xs md:max-w-sm">
+                            {item.selectedWeight && (
+                              <div><span className="font-semibold text-slate-700">Weight:</span> {item.selectedWeight.weight}</div>
+                            )}
+                            {item.selectedFlavor && (
+                              <div><span className="font-semibold text-slate-700">Flavor:</span> {item.selectedFlavor}</div>
+                            )}
+                            {item.cakeMessage && (
+                              <div><span className="font-semibold text-slate-700">Message:</span> "{item.cakeMessage}"</div>
+                            )}
+                          </div>
+                        )}
+
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                            onClick={() => updateQuantity(itemId, item.quantity - 1)}
                             className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
                           >
                             <Minus size={14} />
                           </button>
                           <span className="font-black text-slate-900 w-8 text-center text-sm">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                            onClick={() => updateQuantity(itemId, item.quantity + 1)}
                             className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
                           >
                             <Plus size={14} />
@@ -240,7 +257,7 @@ const Cart = () => {
 
                       <div className="text-right flex flex-col justify-between items-end h-20 md:h-28">
                         <button
-                          onClick={() => removeFromCart(item._id)}
+                          onClick={() => removeFromCart(itemId)}
                           className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
                         >
                           <Trash2 size={20} />

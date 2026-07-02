@@ -17,11 +17,13 @@ import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../../shared/components/SEO';
+import { useCart } from '../../shared/context/CartContext';
 
 export default function ProductDetails() {
   const { id: slug } = useParams();
   const id = slug.length >= 24 ? slug.slice(-24) : slug;
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   const generateSlug = (name, id) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + id;
@@ -119,21 +121,14 @@ export default function ProductDetails() {
 
   // Add to cart handler
   const handleAddToCart = () => {
-    // Basic Add to Cart Implementation (Can be tied to Context/Redux)
-    const cartItem = {
-      productId: product._id,
-      name: product.pName,
+    const customProps = {
       price: basePrice * weightMultiplier,
-      quantity,
-      image: images[0],
-      customization: {
-        weight: selectedWeight ? selectedWeight.weight : null,
-        flavor: selectedFlavor,
-        message: cakeMessage
-      }
+      selectedFlavor: selectedFlavor || null,
+      cakeMessage: cakeMessage || null,
+      selectedWeight: selectedWeight || null
     };
-    
-    console.log("Added to cart:", cartItem);
+
+    addToCart(product, quantity, customProps);
     toast.success(`${product.pName} added to cart!`);
   };
 
