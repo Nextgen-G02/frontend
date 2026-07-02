@@ -150,10 +150,24 @@ export default function AdminCustomerManagement() {
                 </div>
                 <div>
                   <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">{customer.name}</h2>
-                  <div className="flex items-center gap-1.5 mt-1.5 px-2 py-0.5 bg-slate-50 rounded-md w-fit">
-                    <Mail size={10} className="text-primary" />
-                    <span className="text-[9px] font-black uppercase tracking-widest leading-none text-slate-400">Authorized Member</span>
-                  </div>
+                  {customer.isRegistered ? (
+                    <div className="flex flex-col gap-1.5 mt-1.5">
+                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md w-fit">
+                        <CheckCircle2 size={10} className="text-emerald-600" />
+                        <span className="text-[9px] font-black uppercase tracking-widest leading-none">Registered Member</span>
+                      </div>
+                      {customer.email && customer.email !== 'N/A' && (
+                        <div className="flex items-center gap-1 text-slate-400 ml-1">
+                          <Mail size={10} />
+                          <span className="text-[10px] font-semibold select-all">{customer.email}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 mt-1.5 px-2 py-0.5 bg-slate-50 text-slate-500 rounded-md w-fit">
+                      <span className="text-[9px] font-black uppercase tracking-widest leading-none">Walk-in Guest</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
