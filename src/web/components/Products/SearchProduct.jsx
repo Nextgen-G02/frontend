@@ -6,6 +6,7 @@ const SearchProduct = ({ setSearchParams }) => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [categories, setCategories] = useState([]);
+  const maxLimit = 50000;
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -37,16 +38,74 @@ const SearchProduct = ({ setSearchParams }) => {
     setSearchParams((prev) => ({ ...prev, category: e.target.value }));
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === '-' || e.key === 'e' || e.key === '+') {
+      e.preventDefault();
+    }
+  };
+
   const handleMinPriceChange = (e) => {
-    const val = e.target.value;
+    let val = e.target.value;
+    if (val !== "") {
+      const num = Number(val);
+      if (num < 0) val = "0";
+    }
     setMinPrice(val);
     setSearchParams((prev) => ({ ...prev, minPrice: val }));
   };
 
   const handleMaxPriceChange = (e) => {
-    const val = e.target.value;
+    let val = e.target.value;
+    if (val !== "") {
+      const num = Number(val);
+      if (num < 0) val = "0";
+    }
     setMaxPrice(val);
     setSearchParams((prev) => ({ ...prev, maxPrice: val }));
+  };
+
+  // Piecewise mapping for price range slider to optimize 0 - 5000 range.
+  // 0% - 50% maps to Rs. 0 - Rs. 5,000 (Rs. 100 per 1% step)
+  // 50% - 100% maps to Rs. 5,000 - Rs. 50,000 (Rs. 900 per 1% step)
+  const priceToPosition = (price) => {
+    const p = Math.max(0, Math.min(Number(price || 0), maxLimit));
+    if (p <= 5000) {
+      return (p / 5000) * 50;
+    } else {
+      return 50 + ((p - 5000) / 45000) * 50;
+    }
+  };
+
+  const positionToPrice = (position) => {
+    const pos = Number(position);
+    if (pos <= 50) {
+      return Math.round((pos / 50) * 5000);
+    } else {
+      return Math.round(5000 + ((pos - 50) / 50) * 45000);
+    }
+  };
+
+  const sliderMin = minPrice === "" ? 0 : Number(minPrice);
+  const sliderMax = maxPrice === "" ? maxLimit : Number(maxPrice);
+
+  const handleSliderMinChange = (e) => {
+    const pos = Number(e.target.value);
+    const val = positionToPrice(pos);
+    const currentMaxVal = maxPrice === "" ? maxLimit : Number(maxPrice);
+    if (val >= currentMaxVal) return;
+    
+    setMinPrice(val.toString());
+    setSearchParams((prev) => ({ ...prev, minPrice: val.toString() }));
+  };
+
+  const handleSliderMaxChange = (e) => {
+    const pos = Number(e.target.value);
+    const val = positionToPrice(pos);
+    const currentMinVal = minPrice === "" ? 0 : Number(minPrice);
+    if (val <= currentMinVal) return;
+    
+    setMaxPrice(val.toString());
+    setSearchParams((prev) => ({ ...prev, maxPrice: val.toString() }));
   };
 
   return (
@@ -114,14 +173,53 @@ const SearchProduct = ({ setSearchParams }) => {
         </div>
       </div>
 
-      {/* Price Range */}
-      <div className="flex flex-col">
-        <label className="text-slate-700 font-normal uppercase text-xs md:text-sm tracking-wide mb-2.5 ml-1">Price Range (Rs.)</label>
-        <div className="flex items-center gap-2">
+      {/* Price Filter Slider & Inputs */}
+      <div className="flex flex-col gap-2">
+        <label className="text-slate-700 font-normal uppercase text-xs md:text-sm tracking-wide mb-1 ml-1">Price Filter</label>
+        
+        {/* Double Range Slider Track */}
+        <div className="relative w-full px-1.5 my-4">
+          <div className="relative w-full h-1.5 bg-slate-100 rounded-full border border-slate-200">
+            {/* Highlighted Selected Range */}
+            <div
+              className="absolute h-full bg-gold rounded-full transition-all"
+              style={{
+                left: `${priceToPosition(sliderMin)}%`,
+                right: `${100 - priceToPosition(sliderMax)}%`
+              }}
+            ></div>
+            
+            {/* Min Input range */}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={priceToPosition(sliderMin)}
+              onChange={handleSliderMinChange}
+              className="absolute inset-0 pointer-events-none appearance-none z-20 w-full h-full bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-gold [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-gold [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-moz-range-track]:bg-transparent"
+            />
+
+            {/* Max Input range */}
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={priceToPosition(sliderMax)}
+              onChange={handleSliderMaxChange}
+              className="absolute inset-0 pointer-events-none appearance-none z-20 w-full h-full bg-transparent [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-gold [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:shadow-md [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-gold [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:shadow-md [&::-webkit-slider-runnable-track]:bg-transparent [&::-moz-range-track]:bg-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Min/Max Manual Input Row */}
+        <div className="flex items-center gap-2 mt-1">
           <input
             type="number"
             value={minPrice}
             onChange={handleMinPriceChange}
+            onKeyDown={handleKeyDown}
             onWheel={(e) => e.target.blur()}
             placeholder="Min"
             min="0"
@@ -132,6 +230,7 @@ const SearchProduct = ({ setSearchParams }) => {
             type="number"
             value={maxPrice}
             onChange={handleMaxPriceChange}
+            onKeyDown={handleKeyDown}
             onWheel={(e) => e.target.blur()}
             placeholder="Max"
             min="0"

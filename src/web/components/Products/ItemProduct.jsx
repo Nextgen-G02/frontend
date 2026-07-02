@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, Info, X, CreditCard } from "lucide-react";
 import { useCart } from "../../../shared/context/CartContext";
+import { useAuth } from "../../../shared/context/AuthContext";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const ItemProduct = ({ searchParams }) => {
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const generateSlug = (name, id) => {
@@ -15,6 +17,117 @@ const ItemProduct = ({ searchParams }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  const handleBuyNow = async (product) => {
+    if (!user) {
+      toast.error("Please login to place an order");
+      navigate('/login');
+      return;
+    }
+
+    const orderData = {
+      customerName: `${user.firstName} ${user.lastName}`,
+      phone: user.phone || "0000000000",
+      address: user.address || "Web Order",
+      type: 'Order',
+      items: [{
+        pName: product.pName,
+        category: product.pCategory,
+        quantity: 1,
+        price: product.price
+      }],
+      totalAmount: product.price,
+      paymentStatus: 'Unpaid',
+      orderStatus: 'Pending'
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      toast.loading("Initiating payment gateway...", { id: "buyNow" });
+
+      // 1. Save the order as Pending
+      const orderResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      if (!orderResponse.ok) {
+        const error = await orderResponse.json();
+        toast.error(error.message || "Failed to create order", { id: "buyNow" });
+        return;
+      }
+
+      const createdOrder = await orderResponse.json();
+
+      // 2. Request PayHere Hash
+      const hashResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/hash`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          order_id: createdOrder._id,
+          amount: product.price,
+          currency: "LKR"
+        })
+      });
+
+      if (!hashResponse.ok) {
+        toast.error("Failed to securely initiate payment", { id: "buyNow" });
+        return;
+      }
+
+      const { hash, amount, currency } = await hashResponse.json();
+      toast.dismiss("buyNow");
+
+      // 3. Define PayHere configuration
+      window.payhere.onCompleted = function onCompleted(orderId) {
+        toast.success("Payment completed successfully!");
+        navigate('/products');
+      };
+
+      window.payhere.onDismissed = function onDismissed() {
+        toast.error("Payment dismissed");
+      };
+
+      window.payhere.onError = function onError(error) {
+        console.error("PayHere error:", error);
+        toast.error("An error occurred during payment");
+      };
+
+      const payment = {
+        sandbox: import.meta.env.VITE_PAYHERE_ENV === "sandbox",
+        merchant_id: import.meta.env.VITE_PAYHERE_MERCHANT_ID,
+        return_url: `${window.location.origin}/products`,
+        cancel_url: `${window.location.origin}/products`,
+        notify_url: `${import.meta.env.VITE_BACKEND_URL}/api/payment/notify`,
+        order_id: createdOrder._id,
+        items: `Nirosha Sweet House - ${product.pName}`,
+        amount: amount,
+        currency: currency,
+        hash: hash,
+        first_name: user.firstName,
+        last_name: user.lastName,
+        email: user.email || "customer@example.com",
+        phone: user.phone || "0000000000",
+        address: user.address || "Web Order",
+        city: "Colombo",
+        country: "Sri Lanka"
+      };
+
+      // 4. Start PayHere
+      window.payhere.startPayment(payment);
+
+    } catch (err) {
+      console.error("Buy Now error:", err);
+      toast.error("An error occurred while placing your order", { id: "buyNow" });
+    }
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -150,11 +263,7 @@ const ItemProduct = ({ searchParams }) => {
                 </button>
                 <button
                   disabled={product.stockStatus === "Out of Stock"}
-                  onClick={() => {
-                    addToCart(product);
-                    toast.success(`${product.pName} added to cart!`);
-                    navigate('/cart');
-                  }}
+                  onClick={() => handleBuyNow(product)}
                   className={`flex-1 rounded-lg py-2 text-[9px] font-bold uppercase tracking-wide flex items-center justify-center gap-1 px-1 transition-all active:bg-slate-950 ${product.stockStatus === "Out of Stock"
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
                       : "bg-gold text-slate-900 hover:bg-slate-900 hover:text-white shadow-lg shadow-gold/10"

@@ -220,20 +220,27 @@ const Cart = () => {
                       </div>
 
                       <div className="flex-grow">
-                        <h3 className="font-black text-slate-900 text-sm md:text-lg uppercase tracking-tight leading-none mb-2">{item.pName}</h3>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <h3 className="font-black text-slate-900 text-sm md:text-lg uppercase tracking-tight leading-none">{item.pName}</h3>
+                          {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
+                            <span className="px-2 py-0.5 bg-[#F3EAD3] text-[#84632A] border border-[#DFCE9F] text-[8px] md:text-[9px] font-black uppercase tracking-wider rounded-md shadow-sm">
+                              Customized
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">{item.pCategory}</p>
                         
                         {/* Customization Details */}
                         {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
-                          <div className="text-[11px] text-slate-500 space-y-0.5 mb-3 bg-slate-50/50 p-2.5 rounded-xl border border-slate-100 max-w-xs md:max-w-sm">
+                          <div className="text-[11px] text-[#84632A] space-y-0.5 mb-3 bg-[#FAF6F0]/80 p-2.5 rounded-xl border border-[#EADFC9]/60 max-w-xs md:max-w-sm">
                             {item.selectedWeight && (
-                              <div><span className="font-semibold text-slate-700">Weight:</span> {item.selectedWeight.weight}</div>
+                              <div><span className="font-semibold text-[#84632A]/80">Weight:</span> {item.selectedWeight.weight}</div>
                             )}
                             {item.selectedFlavor && (
-                              <div><span className="font-semibold text-slate-700">Flavor:</span> {item.selectedFlavor}</div>
+                              <div><span className="font-semibold text-[#84632A]/80">Flavor:</span> {item.selectedFlavor}</div>
                             )}
                             {item.cakeMessage && (
-                              <div><span className="font-semibold text-slate-700">Message:</span> "{item.cakeMessage}"</div>
+                              <div><span className="font-semibold text-[#84632A]/80">Message:</span> "{item.cakeMessage}"</div>
                             )}
                           </div>
                         )}
