@@ -11,18 +11,20 @@
   --accent-gold: 38 45% 55%;
   
   --canvas-bg: 30 30% 98%; /* Soft Cream */
+
   --surface-cream: 30 30% 98%;
-  
+
   --text-main: 240 10% 15%;
   --text-muted: 240 5% 45%;
-  
+
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Outfit', sans-serif;
-  
+
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
   --shadow-active: 0 20px 40px -12px hsla(38, 45%, 55%, 0.1);
 
-  --sidebar-bg: 240 10% 15%; /* Deep Charcoal */
+  --sidebar-bg: 240 10% 15%;
+  /* Deep Charcoal */
 }
 
 @theme {
@@ -103,8 +105,10 @@ body {
 
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
 
@@ -126,13 +130,16 @@ body {
 ::-webkit-scrollbar {
   width: 5px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--primary-accent) / 0.1);
   border-radius: 20px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary-accent) / 0.3);
 }
