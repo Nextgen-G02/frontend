@@ -121,21 +121,6 @@ export default function ProductDetails() {
 
   // Add to cart handler
   const handleAddToCart = () => {
-<<<<<<< HEAD
-    const cartItem = {
-      ...product,
-      price: basePrice * weightMultiplier,
-      quantity,
-      images,
-      customization: {
-        weight: selectedWeight ? selectedWeight.weight : null,
-        flavor: selectedFlavor,
-        message: cakeMessage
-      }
-    };
-    
-    addToCart(cartItem);
-=======
     const customProps = {
       price: basePrice * weightMultiplier,
       selectedFlavor: selectedFlavor || null,
@@ -144,7 +129,6 @@ export default function ProductDetails() {
     };
 
     addToCart(product, quantity, customProps);
->>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
     toast.success(`${product.pName} added to cart!`);
   };
 
