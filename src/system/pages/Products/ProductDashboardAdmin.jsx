@@ -116,6 +116,11 @@ export default function ProductDashboardAdmin() {
       return;
     }
 
+    if (['kg', 'g', 'ml', 'l'].includes(editForm.unit) && (editForm.weight === undefined || editForm.weight === null || editForm.weight === "" || Number(editForm.weight) <= 0)) {
+      toast.error("Weight/Volume is required and must be greater than 0");
+      return;
+    }
+
     const p = Number(editForm.price);
     const cp = Number(editForm.costPrice);
     const dp = Number(editForm.discountPercentage) || 0;
@@ -129,7 +134,12 @@ export default function ProductDashboardAdmin() {
       const formData = new FormData();
       Object.keys(editForm).forEach(key => {
         if (key !== 'images' && key !== 'recipe' && typeof editForm[key] !== 'object') {
-          formData.append(key, editForm[key]);
+          if (key === 'weight') {
+            const wVal = ['kg', 'g', 'ml', 'l'].includes(editForm.unit) ? editForm.weight : "";
+            formData.append('weight', wVal ?? "");
+          } else {
+            formData.append(key, editForm[key]);
+          }
         }
       });
 
@@ -402,7 +412,7 @@ export default function ProductDashboardAdmin() {
             onClick={() => setViewProduct(null)}
           ></div>
 
-          <div className="relative w-full max-w-[800px] bg-white rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300">
+          <div className="relative w-full max-w-[950px] bg-white rounded-[32px] md:rounded-[48px] shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 md:p-12 max-h-[90vh] overflow-y-auto no-scrollbar">
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center gap-4">
@@ -410,8 +420,9 @@ export default function ProductDashboardAdmin() {
                     <Package size={24} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Product Details</h2>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Detailed information from catalog</p>
+                    <h2 className="heading-premium text-2xl md:text-3xl text-slate-900 leading-tight">
+                      Product <span className="italic font-normal text-slate-400">Details</span>
+                    </h2>
                   </div>
                 </div>
                 <button
@@ -422,9 +433,9 @@ export default function ProductDashboardAdmin() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
                 {/* Image Section */}
-                <div className="space-y-6">
+                <div className="space-y-6 md:col-span-7">
                   <div className="aspect-square rounded-[32px] overflow-hidden border border-slate-100 shadow-inner bg-slate-50">
                     <img
                       src={viewProduct.images?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729"}
@@ -432,23 +443,29 @@ export default function ProductDashboardAdmin() {
                       alt={viewProduct.pName}
                     />
                   </div>
-
-                  <div className="p-6 bg-slate-50 rounded-[24px] border border-slate-100 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Product ID</span>
-                      <span className="px-3 py-1 bg-white rounded-lg text-[10px] font-black text-slate-900 border border-slate-100 uppercase">{viewProduct.productId}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Category</span>
-                      <span className="px-3 py-1 bg-[#F3EAD3] text-[#84632A] border border-[#DFCE9F] rounded-lg text-[10px] font-black uppercase">{viewProduct.pCategory}</span>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Details Section */}
-                <div className="space-y-8">
+                <div className="space-y-6 md:col-span-5">
+                  <div className="space-y-3 pb-4 border-b border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[12px] font-semibold text-slate-400 uppercase tracking-widest">Product Name</span>
+                      <span className="px-4.5 py-2 bg-[#F3EAD3] text-[#84632A] border border-[#DFCE9F] rounded-xl text-sm font-bold uppercase tracking-wider shadow-sm">
+                        {viewProduct.pName}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-500 font-medium">
+                      <div>
+                        Product ID: <span className="text-slate-700 font-semibold uppercase ml-1">{viewProduct.productId}</span>
+                      </div>
+                      <div className="w-1.5 h-1.5 bg-slate-300 rounded-full hidden md:block"></div>
+                      <div>
+                        Category: <span className="text-slate-700 font-semibold uppercase ml-1">{viewProduct.pCategory}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
-                    <h3 className="text-3xl font-black text-slate-900 leading-tight mb-2">{viewProduct.pName}</h3>
                     <p className="text-sm font-medium text-slate-500 leading-relaxed italic">{viewProduct.description || "No description available for this product."}</p>
                   </div>
 
@@ -465,25 +482,25 @@ export default function ProductDashboardAdmin() {
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border-b border-slate-50">
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Stock Level</span>
+                      <span className="text-[11px] font-medium text-slate-500 uppercase tracking-widest">Stock Level</span>
                       <div className="flex items-center gap-3">
-                        <div className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${stockStatus(viewProduct.stock).class}`}>
+                        <div className={`px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-widest border ${stockStatus(viewProduct.stock).class}`}>
                           {stockStatus(viewProduct.stock).label}
                         </div>
-                        <span className="text-base font-black text-slate-900">{viewProduct.stock} Units</span>
+                        <span className="text-sm font-semibold text-slate-600">{viewProduct.stock} Units</span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 border-b border-slate-50">
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Measurement</span>
-                      <span className="text-base font-black text-slate-900 uppercase">
+                      <span className="text-[11px] font-medium text-slate-500 uppercase tracking-widest">Measurement</span>
+                      <span className="text-sm font-semibold text-slate-600 uppercase">
                         {viewProduct.weight ? `${viewProduct.weight} ${viewProduct.unit}` : `1 ${viewProduct.unit}`}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between p-4">
-                      <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Expiry Date</span>
-                      <span className="text-sm font-black text-slate-900">
+                      <span className="text-[11px] font-medium text-slate-500 uppercase tracking-widest">Expiry Date</span>
+                      <span className="text-sm font-semibold text-slate-600">
                         {viewProduct.expiryDate ? new Date(viewProduct.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : "N/A"}
                       </span>
                     </div>
@@ -503,7 +520,9 @@ export default function ProductDashboardAdmin() {
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gold/10 text-gold rounded-2xl"><Edit3 size={24} /></div>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Edit Product</h2>
+                  <h2 className="heading-premium text-2xl md:text-3xl text-slate-900 leading-tight">
+                    Edit <span className="italic font-normal text-slate-400">Product</span>
+                  </h2>
                 </div>
               </div>
               <button onClick={() => setEditProduct(null)} className="p-4 hover:bg-slate-50 rounded-2xl transition-colors text-slate-400">
@@ -511,8 +530,79 @@ export default function ProductDashboardAdmin() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 md:p-10 space-y-10 no-scrollbar">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="flex-1 overflow-y-auto p-8 md:p-10 space-y-6 no-scrollbar">
+              <div className="flex flex-col gap-6">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Category</label>
+                  <div id="editCategory" className="flex flex-wrap gap-2.5 p-4 bg-[#FAF6F0]/50 rounded-2xl border border-[#EADFC9]/60 min-h-[60px]">
+                    {categories.length === 0 ? (
+                      <p className="text-slate-300 text-xs italic">Loading categories...</p>
+                    ) : (
+                      categories
+                        .filter(cat => cat.status !== "Inactive" || cat.name === editForm.pCategory)
+                        .map((cat) => {
+                          const isSelected = editForm.pCategory === cat.name;
+                          return (
+                            <button
+                              key={cat._id}
+                              type="button"
+                              onClick={() => {
+                                if (cat.name === editProduct.pCategory) {
+                                  setEditForm({
+                                    ...editForm,
+                                    pCategory: editProduct.pCategory,
+                                    productId: editProduct.productId
+                                  });
+                                } else {
+                                  const selectedCat = categories.find(c => c.name === cat.name);
+                                  if (selectedCat) {
+                                    const prefix = (selectedCat.prefix || cat.name.substring(0, 3)).toUpperCase();
+                                    const relatedIds = products
+                                      .map(p => p.productId)
+                                      .filter(id => id && id.startsWith(`${prefix}-`));
+                                    let nextNum = 1;
+                                    if (relatedIds.length > 0) {
+                                      const nums = relatedIds.map(id => {
+                                        const parts = id.split('-');
+                                        const numStr = parts[parts.length - 1];
+                                        const num = parseInt(numStr);
+                                        return isNaN(num) ? 0 : num;
+                                      });
+                                      nextNum = Math.max(...nums) + 1;
+                                    }
+                                    const nextId = `${prefix}-${nextNum.toString().padStart(3, '0')}`;
+                                    setEditForm({
+                                      ...editForm,
+                                      pCategory: cat.name,
+                                      productId: nextId
+                                    });
+                                  } else {
+                                    setEditForm({ ...editForm, pCategory: cat.name });
+                                  }
+                                }
+                              }}
+                              className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 border ${isSelected
+                                ? "bg-[#F3EAD3] text-[#84632A] border-[#DFCE9F] shadow-md -translate-y-0.5"
+                                : "bg-white text-slate-500 border-slate-200 hover:border-[#DFCE9F] hover:text-[#84632A]"
+                                }`}
+                            >
+                              {cat.name}
+                            </button>
+                          );
+                        })
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product ID</label>
+                  <input
+                    readOnly
+                    className="w-full px-5 py-3.5 bg-slate-100 border border-slate-200 rounded-xl outline-none transition-all font-semibold text-slate-500 text-sm cursor-not-allowed"
+                    value={editForm.productId || ""}
+                  />
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Name</label>
                   <input
@@ -521,22 +611,8 @@ export default function ProductDashboardAdmin() {
                     onChange={(e) => setEditForm({ ...editForm, pName: e.target.value })}
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Category</label>
-                  <select
-                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm appearance-none cursor-pointer"
-                    value={editForm.pCategory}
-                    onChange={(e) => setEditForm({ ...editForm, pCategory: e.target.value })}
-                  >
-                    <option value="">Select Category</option>
-                    {categories
-                      .filter(cat => cat.status !== "Inactive" || cat.name === editForm.pCategory)
-                      .map(cat => (
-                        <option key={cat._id} value={cat.name}>{cat.name}</option>
-                      ))}
-                  </select>
-                </div>
-                <div className="space-y-2 md:col-span-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Description</label>
                   <textarea
                     className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm min-h-[100px] resize-none"
@@ -545,36 +621,41 @@ export default function ProductDashboardAdmin() {
                     placeholder="Describe this product..."
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Selling Price Rs.</label>
-                  <input
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    onWheel={(e) => e.target.blur()}
-                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
-                    value={editForm.price}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, price: val });
-                    }}
-                  />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Selling Price Rs.</label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      onWheel={(e) => e.target.blur()}
+                      className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
+                      value={editForm.price}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, price: val });
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Cost Price Rs.</label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      onWheel={(e) => e.target.blur()}
+                      className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
+                      value={editForm.costPrice}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, costPrice: val });
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Cost Price Rs.</label>
-                  <input
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    onWheel={(e) => e.target.blur()}
-                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
-                    value={editForm.costPrice}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, costPrice: val });
-                    }}
-                  />
-                </div>
+
                 <div className="space-y-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Discount %</label>
                   <input
@@ -584,13 +665,74 @@ export default function ProductDashboardAdmin() {
                     step="0.1"
                     onWheel={(e) => e.target.blur()}
                     className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
-                    value={editForm.discountPercentage || 0}
+                    value={editForm.discountPercentage ?? ""}
                     onChange={(e) => {
                       const val = e.target.value;
                       if (val === "" || (Number(val) >= 0 && Number(val) <= 100)) setEditForm({ ...editForm, discountPercentage: val });
                     }}
                   />
                 </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock Quantity</label>
+                  <input
+                    type="number"
+                    min="0"
+                    onWheel={(e) => e.target.blur()}
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
+                    value={editForm.stock}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, stock: val });
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={`space-y-2 ${!['kg', 'g', 'ml', 'l'].includes(editForm.unit) ? 'md:col-span-2' : ''}`}>
+                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Measurement Unit</label>
+                    <select
+                      className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm appearance-none cursor-pointer"
+                      value={editForm.unit}
+                      onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
+                    >
+                      <option value="pcs">pcs</option>
+                      <option value="kg">kg</option>
+                      <option value="g">g</option>
+                      <option value="ml">ml</option>
+                      <option value="l">l</option>
+                    </select>
+                  </div>
+
+                  {
+                    ['kg', 'g', 'ml', 'l'].includes(editForm.unit) && (
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">weight(kg/g) / volume (l/ml)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          onWheel={(e) => e.target.blur()}
+                          className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
+                          value={editForm.weight ?? ""}
+                          onChange={(e) => setEditForm({ ...editForm, weight: e.target.value })}
+                          placeholder={`Enter weight in ${editForm.unit}`}
+                        />
+                      </div>
+                    )
+                  }
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Expiry Date</label>
+                  <input
+                    type="date"
+                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
+                    value={editForm.expiryDate ? new Date(editForm.expiryDate).toISOString().split('T')[0] : ""}
+                    onChange={(e) => setEditForm({ ...editForm, expiryDate: e.target.value })}
+                  />
+                </div>
+
                 <div className="space-y-4">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                     <Image size={12} />
@@ -638,44 +780,6 @@ export default function ProductDashboardAdmin() {
                       onChange={handleFileChange}
                     />
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Stock Quantity</label>
-                  <input
-                    type="number"
-                    min="0"
-                    onWheel={(e) => e.target.blur()}
-                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
-                    value={editForm.stock}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, stock: val });
-                    }}
-                  />
-                </div>
-                <div className="space-y-4">
-                  <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Expiry Date</label>
-                  <input
-                    type="date"
-                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm"
-                    value={editForm.expiryDate ? new Date(editForm.expiryDate).toISOString().split('T')[0] : ""}
-                    onChange={(e) => setEditForm({ ...editForm, expiryDate: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Measurement Unit</label>
-                  <select
-                    className="w-full px-5 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-sm appearance-none cursor-pointer"
-                    value={editForm.unit}
-                    onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
-                  >
-                    <option value="pcs">pcs</option>
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="ml">ml</option>
-                    <option value="l">l</option>
-                  </select>
                 </div>
               </div>
             </div>
