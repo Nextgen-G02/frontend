@@ -226,7 +226,7 @@ const Cart = () => {
       };
 
       // 4. Start PayHere
-      payhere.startPayment(payment);
+      payhere.startPayment(payhereConfig);
 
     } catch (err) {
       console.error("Order error:", err);
