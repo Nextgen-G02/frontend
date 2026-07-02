@@ -36,6 +36,7 @@ export default function Home() {
         title="Popular Cakes"
         category="cakes"
         bgColor="#fbf9f4"
+        homepageSection="Popular Cakes"
       />
 
 
@@ -44,6 +45,7 @@ export default function Home() {
         title="Popular Sweets"
         category="sweet"
         bgColor="white"
+        homepageSection="Popular Sweets"
       />
 
       {/* 7. PROMO BANNER */}

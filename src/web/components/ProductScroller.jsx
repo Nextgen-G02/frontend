@@ -2,31 +2,36 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Eye, ShoppingCart, Sparkles, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../../shared/context/CartContext";
-import { toast } from "react-hot-toast";
+import ProductCard from "./Products/ProductCard";
 
 export default function ProductScroller({
   title = "Design Cakes",
   category = "cakes",
   bgColor = "transparent",
+  homepageSection = null,
 }) {
   const [products, setProducts] = useState([]);
   const [activeDot, setActiveDot] = useState(0);
   const scrollRef = React.useRef(null);
   const itemsPerPage = 4;
   const navigate = useNavigate();
-  const { addToCart } = useCart();
 
   const generateSlug = (name, id) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + id;
   };
 
   useEffect(() => {
+    let url;
+    if (homepageSection) {
+      url = `${import.meta.env.VITE_BACKEND_URL}/api/products/homepage-section/${encodeURIComponent(homepageSection)}`;
+    } else {
+      url = `${import.meta.env.VITE_BACKEND_URL}/api/products/category/${category}`;
+    }
     axios
-      .get(`${import.meta.env.VITE_BACKEND_URL}/api/products/category/${category}`)
+      .get(url)
       .then((res) => setProducts(res.data))
       .catch((err) => console.log(err));
-  }, [category]);
+  }, [category, homepageSection]);
 
   // Handle scroll tracking for dots
   const handleScroll = () => {
@@ -111,71 +116,7 @@ export default function ProductScroller({
               className="flex-shrink-0 w-[220px] sm:w-[260px] md:w-[calc(33.333%-22px)] lg:w-[calc(25%-24px)] snap-center first:ml-4 last:mr-4 cursor-pointer"
               onClick={() => navigate(`/product/${generateSlug(p.pName, p._id)}`)}
             >
-              <div className="group flex flex-col h-full bg-white rounded-2xl md:rounded-[2rem] overflow-hidden border border-slate-100/50 shadow-sm hover:shadow-xl transition-all duration-700">
-                
-                {/* Product Image Wrapper - Compact Square */}
-                <div className="relative aspect-square overflow-hidden bg-[#F9F6F2] flex-shrink-0">
-                  <img
-                    src={(p.images && p.images[0]) || (p.pImg && p.pImg[0]) || '/placeholder.png'}
-                    alt={p.pName}
-                    className="w-full h-full object-cover transition-transform duration-[3s] group-hover:scale-110"
-                  />
-                  
-                  <div className="absolute top-3 left-3 z-10">
-                    <span className="bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest text-slate-900 shadow-sm border border-white/10">
-                      {category}
-                    </span>
-                  </div>
-
-                  <div className="absolute inset-0 bg-slate-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                    <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-slate-900 shadow-xl hover:bg-[#C29D59] hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-500">
-                      <Eye size={16} strokeWidth={1.5} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Content - Compact top spacing */}
-                <div className="pt-3 px-4 pb-4 md:pt-4 md:px-5 md:pb-5 lg:pt-5 lg:px-6 lg:pb-6 flex flex-col flex-grow bg-white">
-                  <div className="mb-2">
-                    <div className="flex items-center gap-0.5 mb-1.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={8} className="fill-[#C29D59] text-[#C29D59] md:w-[10px]" />
-                      ))}
-                    </div>
-                    {/* Compact fixed height for title */}
-                    <div className="min-h-[2.2rem] md:min-h-[2.8rem] flex items-start">
-                      <h3 className="font-serif text-base md:text-lg lg:text-xl text-slate-900 leading-tight group-hover:text-[#C29D59] transition-colors line-clamp-2">
-                        {p.pName}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-base md:text-xl font-bold text-slate-900 tracking-tighter">
-                        <span className="text-[10px] md:text-sm font-medium mr-0.5 text-slate-500">Rs.</span>
-                        {p.price.toLocaleString()}
-                      </p>
-                    </div>
-                    
-                    <button 
-                      disabled={p.stockStatus === "Out of Stock"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart(p);
-                        toast.success(`${p.pName} added to cart!`);
-                      }}
-                      className={`p-2.5 md:p-3 rounded-xl md:rounded-2xl transition-all duration-500 flex-shrink-0 ${
-                        p.stockStatus === "Out of Stock"
-                          ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
-                          : "bg-slate-900 text-white hover:bg-gold shadow-lg shadow-slate-100 hover:-translate-y-1 active:scale-95"
-                      }`}
-                    >
-                      <ShoppingCart size={16} strokeWidth={1.5} />
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <ProductCard product={p} hideDescription={true} isHomepageTheme={true} />
             </div>
           ))}
         </div>
