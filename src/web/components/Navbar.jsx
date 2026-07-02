@@ -46,14 +46,15 @@ export default function Navbar() {
   ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
-        scrolled
-          ? "bg-white/90 backdrop-blur-xl border-b border-stone-200 py-2 md:py-3"
-          : "bg-transparent py-3 md:py-4"
-      }`}
-    >
-      <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex items-center justify-between h-full">
+    <>
+      <nav
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
+          scrolled
+            ? "bg-white/90 backdrop-blur-xl border-b border-stone-200 py-2 md:py-3"
+            : "bg-transparent py-3 md:py-4"
+        }`}
+      >
+        <div className="max-w-[1440px] mx-auto px-6 md:px-12 flex items-center justify-between h-full">
 
         {/* LOGO - VERTICALLY CENTERED */}
         <Link
@@ -94,13 +95,6 @@ export default function Navbar() {
               <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[1px] bg-slate-900 transition-all duration-500 ${location.pathname === link.path ? "w-full" : "w-0 group-hover/link:w-full"}`}></span>
             </Link>
           ))}
-          <Link
-            to="/contact"
-            className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-900 relative group/link ml-4 flex items-center h-full whitespace-nowrap"
-          >
-            GET IN TOUCH
-            <span className="absolute bottom-0 left-0 w-full h-[1px] bg-slate-900/30 group-hover:bg-slate-900 transition-colors"></span>
-          </Link>
         </div>
 
         {/* RIGHT ACTIONS */}
@@ -136,9 +130,15 @@ export default function Navbar() {
                     <LayoutDashboard size={20} strokeWidth={1.5} />
                   </Link>
                 )}
+                <Link
+                  to="/my-orders"
+                  className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 border border-slate-200 hover:border-slate-900 hover:text-slate-900 transition-all duration-300 rounded-full shadow-sm"
+                >
+                  My Orders
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-[10px] font-medium uppercase tracking-widest text-slate-500 hover:text-rose-600 transition-colors"
+                  className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-[#C29D59] border border-[#C29D59]/30 hover:border-[#C29D59] hover:bg-[#C29D59] hover:text-white transition-all duration-300 rounded-full shadow-sm"
                 >
                   Logout
                 </button>
@@ -146,8 +146,9 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-900"
+                className="px-5 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-white bg-slate-900 hover:bg-[#C29D59] transition-all duration-300 rounded-full shadow-md hover:shadow-lg flex items-center gap-2"
               >
+                <User size={12} />
                 Log In
               </Link>
             )}
@@ -162,7 +163,7 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-
+    </nav>
 
       {/* MOBILE MENU */}
       {mobileMenuOpen && (
@@ -191,15 +192,23 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="text-[11px] font-black uppercase tracking-[0.3em] text-gold"
                 >
-                  Access Registry
+                  Dashboard
                 </Link>
               )}
+
+              <Link
+                to="/my-orders"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-300 hover:text-white"
+              >
+                My Orders
+              </Link>
 
               <button
                 onClick={handleLogout}
                 className="text-left text-[11px] font-black uppercase tracking-[0.3em] text-rose-500"
               >
-                Terminate Session
+                Logout
               </button>
             </div>
           ) : (
@@ -208,11 +217,11 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="text-[11px] font-black uppercase tracking-[0.3em] text-gold"
             >
-              Authenticate
+              Log In
             </Link>
           )}
         </div>
       )}
-    </nav>
+    </>
   );
 }

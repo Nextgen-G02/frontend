@@ -26,17 +26,27 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
+  const isSameCustomization = (c1, c2) => {
+    if (!c1 && !c2) return true;
+    if (!c1 || !c2) return false;
+    return c1.message === c2.message && c1.flavor === c2.flavor && c1.weight === c2.weight;
+  };
+
   const addToCart = (product) => {
     if (!product || !product._id) return;
     setCart((prevCart) => {
       const currentCart = Array.isArray(prevCart) ? prevCart : [];
-      const existingItem = currentCart.find((item) => item._id === product._id);
+      const existingItem = currentCart.find((item) => 
+        item._id === product._id && isSameCustomization(item.customization, product.customization)
+      );
       if (existingItem) {
         return currentCart.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+          (item._id === product._id && isSameCustomization(item.customization, product.customization))
+            ? { ...item, quantity: item.quantity + (product.quantity || 1) } 
+            : item
         );
       }
-      return [...currentCart, { ...product, quantity: 1 }];
+      return [...currentCart, { ...product, quantity: product.quantity || 1 }];
     });
   };
 

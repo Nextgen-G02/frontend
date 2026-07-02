@@ -18,7 +18,8 @@ import {
   Bell,
   Menu,
   Receipt,
-  Vault
+  Vault,
+  Cake
 } from "lucide-react";
 import { useAuth } from "../../shared/context/AuthContext";
 

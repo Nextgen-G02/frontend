@@ -3,9 +3,9 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import ProductScroller from '../components/ProductScroller'
 import HeroSection from '../components/HeroSection'
+import ShopByOccasion from '../components/ShopByOccasion'
 import CustomizeCake from '../components/CustomizeCake'
 import CategoryShowcase from '../components/CategoryShowcase'
-import BrandStory from '../components/BrandStory'
 import AboutSection from '../components/AboutSection'
 import PromoBanner from '../components/PromoBanner'
 import Testimonials from '../components/Testimonials'
@@ -25,11 +25,11 @@ export default function Home() {
       {/* 1. HERO SECTION */}
       <HeroSection />
 
-      {/* 2. CATEGORY SHOWCASE */}
-      <CategoryShowcase />
-
       {/* 3. CUSTOMIZE CAKE SECTION */}
       <CustomizeCake />
+
+      {/* 1.5. SHOP BY OCCASION */}
+      <ShopByOccasion />
 
       {/* 4. POPULAR CAKES */}
       <ProductScroller
@@ -38,8 +38,6 @@ export default function Home() {
         bgColor="#fbf9f4"
       />
 
-      {/* 5. BRAND STORY */}
-      <BrandStory />
 
       {/* 6. POPULAR SWEETS */}
       <ProductScroller
@@ -51,10 +49,13 @@ export default function Home() {
       {/* 7. PROMO BANNER */}
       <PromoBanner />
 
-      {/* 8. BEVERAGES */}
+      {/* 8. SHOP BY CATEGORY */}
+      <CategoryShowcase />
+
+      {/* 9. GIFT HAMPERS & FESTIVE */}
       <ProductScroller
-        title="Beverages"
-        category="beverages"
+        title="Gift Hampers"
+        category="hampers"
         bgColor="#fbf9f4"
       />
 
