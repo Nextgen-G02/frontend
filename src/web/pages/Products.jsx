@@ -27,7 +27,7 @@ const Products = () => {
         <div className="bg-white p-6 md:p-10 rounded-[32px] md:rounded-[48px] shadow-xl shadow-black/5 max-w-[1600px] mx-auto border border-slate-50 animate-in fade-in duration-1000">
           <header className="flex flex-col items-center mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-1 bg-primary rounded-full"></div>
+              <div className="w-8 h-1 bg-gold rounded-full"></div>
             </div>
             <h3 className="text-3xl md:text-4xl font-normal text-slate-900 tracking-tighter uppercase text-center">
               Our Collections

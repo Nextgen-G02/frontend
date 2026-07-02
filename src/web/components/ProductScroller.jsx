@@ -159,12 +159,17 @@ export default function ProductScroller({
                     </div>
                     
                     <button 
+                      disabled={p.stockStatus === "Out of Stock"}
                       onClick={(e) => {
                         e.stopPropagation();
                         addToCart(p);
                         toast.success(`${p.pName} added to cart!`);
                       }}
-                      className="bg-slate-900 text-white p-2.5 md:p-3 rounded-xl md:rounded-2xl hover:bg-[#C29D59] transition-all duration-500 shadow-lg shadow-slate-100 hover:-translate-y-1 active:scale-95 flex-shrink-0"
+                      className={`p-2.5 md:p-3 rounded-xl md:rounded-2xl transition-all duration-500 flex-shrink-0 ${
+                        p.stockStatus === "Out of Stock"
+                          ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
+                          : "bg-slate-900 text-white hover:bg-gold shadow-lg shadow-slate-100 hover:-translate-y-1 active:scale-95"
+                      }`}
                     >
                       <ShoppingCart size={16} strokeWidth={1.5} />
                     </button>
