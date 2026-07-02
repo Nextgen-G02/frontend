@@ -155,13 +155,13 @@ export default function ProductDashboardAdmin() {
                           src={p.pImg[0]}
                           alt={p.pName}
                           className="w-12 h-12 rounded-lg object-cover"
-                          style={{ border: "1.5px solid #f0c0e0" }}
+                          style={{ border: "1px solid #f0c0e0" }}
                           onError={(e) => {
-                             e.target.style.display = "none";           // ✅ hide broken image
-                             e.target.nextSibling.style.display = "flex"; // ✅ show fallback div
+                             e.target.style.display = "none";
+                             e.target.nextSibling.style.display = "flex";
                             }}
                         />
-                      ) :  null}
+                      ) : null}
                         <div
                           className="w-12 h-12 rounded-lg flex items-center justify-center"
                           style={{ 
@@ -262,18 +262,19 @@ export default function ProductDashboardAdmin() {
       </div>
 
       {/* Floating Add Button */}
-      <button onClick={() => navigate("/addproduct")}
-      className="fixed bottom-8 right-8 w-14 h-14 text-white text-3xl rounded-full flex items-center justify-center active:scale-95 transition-all"
-      style={{
-        background: "#ff14c0",
-        boxShadow: "0 4px 20px #ff14c055",
-      }}
-  onMouseEnter={(e) => (e.currentTarget.style.background = "#cc0099")}
-  onMouseLeave={(e) => (e.currentTarget.style.background = "#ff14c0")}
-  title="Add Product"
->
-  +
-</button>
+      <button
+        onClick={() => navigate("/addproduct")}
+        className="fixed bottom-8 right-8 w-14 h-14 text-white text-3xl rounded-full flex items-center justify-center active:scale-95 transition-all"
+        style={{
+          background: "#ff14c0",
+          boxShadow: "0 4px 20px #ff14c055",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "#cc0099")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "#ff14c0")}
+        title="Add Product"
+      >
+        +
+      </button>
       {/* Delete Confirm Modal */}
       {deleteId && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ background: "rgba(0,0,0,0.45)" }}>
