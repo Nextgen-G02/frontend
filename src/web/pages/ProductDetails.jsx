@@ -121,6 +121,7 @@ export default function ProductDetails() {
 
   // Add to cart handler
   const handleAddToCart = () => {
+<<<<<<< HEAD
     const cartItem = {
       ...product,
       price: basePrice * weightMultiplier,
@@ -134,6 +135,16 @@ export default function ProductDetails() {
     };
     
     addToCart(cartItem);
+=======
+    const customProps = {
+      price: basePrice * weightMultiplier,
+      selectedFlavor: selectedFlavor || null,
+      cakeMessage: cakeMessage || null,
+      selectedWeight: selectedWeight || null
+    };
+
+    addToCart(product, quantity, customProps);
+>>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
     toast.success(`${product.pName} added to cart!`);
   };
 

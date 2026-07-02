@@ -15,7 +15,8 @@ import {
     ShoppingBag,
     ChevronRight,
     TrendingUp,
-    Package
+    Package,
+    Globe
 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -379,11 +380,15 @@ const OrderList = () => {
                                                         className={`p-2.5 rounded-xl ${
                                                             order.type === 'DirectSale'
                                                                 ? 'bg-slate-900 text-gold'
-                                                                : 'bg-primary/10 text-primary'
+                                                                : order.source === 'Website'
+                                                                    ? 'bg-blue-500/10 text-blue-600'
+                                                                    : 'bg-primary/10 text-primary'
                                                         }`}
                                                     >
                                                         {order.type === 'DirectSale' ? (
                                                             <Store size={14} />
+                                                        ) : order.source === 'Website' ? (
+                                                            <Globe size={14} />
                                                         ) : (
                                                             <Calendar size={14} />
                                                         )}
@@ -397,7 +402,9 @@ const OrderList = () => {
                                                         <p className="font-black text-slate-900 uppercase tracking-tight text-xs">
                                                             {order.type === 'DirectSale'
                                                                 ? 'In-Store POS'
-                                                                : 'Scheduled'}
+                                                                : order.source === 'Website'
+                                                                    ? 'Website Order'
+                                                                    : 'Scheduled'}
                                                         </p>
                                                     </div>
                                                 </div>

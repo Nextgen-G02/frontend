@@ -2,25 +2,38 @@
 @import "tailwindcss";
 
 :root {
-  /* Boutique Elegant Palette */
-  --primary-accent: 240 10% 15%; /* Deep Charcoal */
-  --secondary-accent: 38 45% 55%; /* Elegant Gold */
+  /* Premium Heritage Palette */
+  --primary-accent: 0 72% 27%;
+  --primary-accent-dark: 0 72% 20%;
+  --primary-accent-soft: 0 72% 95%;
+  --primary-rgb: 0, 72%, 27%;
+  --secondary-accent: 38 45% 55%;
   --accent-gold: 38 45% 55%;
   
   --canvas-bg: 30 30% 98%; /* Soft Cream */
+
   --surface-cream: 30 30% 98%;
-  
+
   --text-main: 240 10% 15%;
   --text-muted: 240 5% 45%;
-  
+
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Outfit', sans-serif;
-  
+
   --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
   --shadow-active: 0 20px 40px -12px hsla(38, 45%, 55%, 0.1);
 
-  --sidebar-bg: 240 10% 15%; /* Deep Charcoal */
+  --sidebar-bg: 240 10% 15%;
+  /* Deep Charcoal */
 }
+
+@theme {
+  --color-primary: hsl(var(--primary-accent));
+  --color-primary-dark: hsl(var(--primary-accent-dark));
+  --color-primary-soft: hsl(var(--primary-accent-soft));
+  --color-gold: hsl(var(--secondary-accent));
+}
+
 
 body {
   font-family: var(--font-sans);
@@ -92,8 +105,10 @@ body {
 
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
 
@@ -115,13 +130,16 @@ body {
 ::-webkit-scrollbar {
   width: 5px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--primary-accent) / 0.1);
   border-radius: 20px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary-accent) / 0.3);
 }
