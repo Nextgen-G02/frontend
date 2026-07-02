@@ -173,8 +173,6 @@ const Cart = () => {
       // 3. Define PayHere configuration
       payhere.onCompleted = async function onCompleted(orderId) {
         toast.success("Payment completed successfully!");
-<<<<<<< HEAD
-        
         try {
           // Fallback for localhost: Tell backend payment is complete since webhook cannot reach localhost
           await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${createdOrder._id}/payment`, {
@@ -189,10 +187,7 @@ const Cart = () => {
           console.error("Local status update failed:", error);
         }
 
-        itemsToOrder.forEach(item => removeFromCart(item._id));
-=======
         itemsToOrder.forEach(item => removeFromCart(item.cartItemId || item._id));
->>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
         setSelectedItems(new Set());
         setIsOrdering(false);
         setIsCheckoutMode(false);
@@ -231,7 +226,7 @@ const Cart = () => {
       };
 
       // 4. Start PayHere
-      payhere.startPayment(payment);
+      payhere.startPayment(payhereConfig);
 
     } catch (err) {
       console.error("Order error:", err);
@@ -274,7 +269,6 @@ const Cart = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content Area (Items or Checkout Form) */}
               <div className="lg:col-span-2 space-y-4">
-<<<<<<< HEAD
                 {isCheckoutMode ? (
                   <div className="bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-50 animate-in fade-in slide-in-from-right-4 duration-500">
                     <div className="flex items-center justify-between mb-8">
@@ -282,88 +276,9 @@ const Cart = () => {
                       <button 
                         onClick={() => setIsCheckoutMode(false)}
                         className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors"
-=======
-                {cart.map((item) => {
-                  const itemId = item.cartItemId || item._id;
-                  const isSelected = selectedItems.has(itemId);
-                  return (
-                    <div
-                      key={itemId}
-                      className={`bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] shadow-sm border transition-all flex items-center gap-4 md:gap-6 group hover:shadow-xl hover:shadow-black/5 ${isSelected ? 'border-primary/20 bg-white' : 'border-slate-50 opacity-70'}`}
-                    >
-                      {/* Selection Radio/Toggle */}
-                      <button
-                        onClick={() => toggleSelection(itemId)}
-                        className={`p-1 transition-all duration-300 ${isSelected ? 'text-primary' : 'text-slate-200 hover:text-slate-300'}`}
->>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
                       >
                         Back to Cart
                       </button>
-<<<<<<< HEAD
-=======
-
-                      <div
-                        onDoubleClick={() => setDetailProduct(item)}
-                        className="w-20 h-20 md:w-28 md:h-28 rounded-2xl overflow-hidden shrink-0 border border-slate-50 cursor-pointer"
-                      >
-                        <img src={item.images?.[0] || "/images/cake_main.png"} alt={item.pName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" title="Double click for details" />
-                      </div>
-
-                      <div className="flex-grow">
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="font-black text-slate-900 text-sm md:text-lg uppercase tracking-tight leading-none">{item.pName}</h3>
-                          {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
-                            <span className="px-2 py-0.5 bg-[#F3EAD3] text-[#84632A] border border-[#DFCE9F] text-[8px] md:text-[9px] font-black uppercase tracking-wider rounded-md shadow-sm">
-                              Customized
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">{item.pCategory}</p>
-                        
-                        {/* Customization Details */}
-                        {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
-                          <div className="text-[11px] text-[#84632A] space-y-0.5 mb-3 bg-[#FAF6F0]/80 p-2.5 rounded-xl border border-[#EADFC9]/60 max-w-xs md:max-w-sm">
-                            {item.selectedWeight && (
-                              <div><span className="font-semibold text-[#84632A]/80">Weight:</span> {item.selectedWeight.weight}</div>
-                            )}
-                            {item.selectedFlavor && (
-                              <div><span className="font-semibold text-[#84632A]/80">Flavor:</span> {item.selectedFlavor}</div>
-                            )}
-                            {item.cakeMessage && (
-                              <div><span className="font-semibold text-[#84632A]/80">Message:</span> "{item.cakeMessage}"</div>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => updateQuantity(itemId, item.quantity - 1)}
-                            className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
-                          >
-                            <Minus size={14} />
-                          </button>
-                          <span className="font-black text-slate-900 w-8 text-center text-sm">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(itemId, item.quantity + 1)}
-                            className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
-                          >
-                            <Plus size={14} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="text-right flex flex-col justify-between items-end h-20 md:h-28">
-                        <button
-                          onClick={() => removeFromCart(itemId)}
-                          className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                        <div className="font-black text-slate-900 text-sm md:text-base">
-                          Rs.{(item.price * item.quantity).toLocaleString()}
-                        </div>
-                      </div>
->>>>>>> 8b2c7745873dc8609006c939a6c4f709ff45b814
                     </div>
 
                     <form className="space-y-6">
@@ -476,15 +391,16 @@ const Cart = () => {
                 ) : (
                   <>
                     {cart.map((item) => {
-                      const isSelected = selectedItems.has(item._id);
+                      const itemId = item.cartItemId || item._id;
+                      const isSelected = selectedItems.has(itemId);
                       return (
                         <div
-                          key={item._id}
+                          key={itemId}
                           className={`bg-white p-4 md:p-6 rounded-[24px] md:rounded-[32px] shadow-sm border transition-all flex items-center gap-4 md:gap-6 group hover:shadow-xl hover:shadow-black/5 ${isSelected ? 'border-primary/20 bg-white' : 'border-slate-50 opacity-70'}`}
                         >
                           {/* Selection Radio/Toggle */}
                           <button
-                            onClick={() => toggleSelection(item._id)}
+                            onClick={() => toggleSelection(itemId)}
                             className={`p-1 transition-all duration-300 ${isSelected ? 'text-primary' : 'text-slate-200 hover:text-slate-300'}`}
                           >
                             {isSelected ? <CheckCircle2 size={24} className="fill-primary/10" /> : <Circle size={24} />}
@@ -498,31 +414,41 @@ const Cart = () => {
                           </div>
 
                           <div className="flex-grow">
-                            <h3 className="font-black text-slate-900 text-sm md:text-lg uppercase tracking-tight leading-none mb-2">{item.pName}</h3>
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <h3 className="font-black text-slate-900 text-sm md:text-lg uppercase tracking-tight leading-none">{item.pName}</h3>
+                              {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
+                                <span className="px-2 py-0.5 bg-[#F3EAD3] text-[#84632A] border border-[#DFCE9F] text-[8px] md:text-[9px] font-black uppercase tracking-wider rounded-md shadow-sm">
+                                  Customized
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">{item.pCategory}</p>
-                            {item.customization && (
-                              <div className="space-y-1 mb-4 text-[11px] font-medium text-slate-500">
-                                {item.customization.weight && (
-                                  <div><span className="font-bold text-slate-700">Weight:</span> {item.customization.weight} kg</div>
+                            
+                            {/* Customization Details */}
+                            {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
+                              <div className="text-[11px] text-[#84632A] space-y-0.5 mb-3 bg-[#FAF6F0]/80 p-2.5 rounded-xl border border-[#EADFC9]/60 max-w-xs md:max-w-sm">
+                                {item.selectedWeight && (
+                                  <div><span className="font-semibold text-[#84632A]/80">Weight:</span> {item.selectedWeight.weight}</div>
                                 )}
-                                {item.customization.flavor && (
-                                  <div><span className="font-bold text-slate-700">Flavor:</span> {item.customization.flavor}</div>
+                                {item.selectedFlavor && (
+                                  <div><span className="font-semibold text-[#84632A]/80">Flavor:</span> {item.selectedFlavor}</div>
                                 )}
-                                {item.customization.message && (
-                                  <div><span className="font-bold text-slate-700">Message:</span> "{item.customization.message}"</div>
+                                {item.cakeMessage && (
+                                  <div><span className="font-semibold text-[#84632A]/80">Message:</span> "{item.cakeMessage}"</div>
                                 )}
                               </div>
                             )}
+
                             <div className="flex items-center gap-3">
                               <button
-                                onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                onClick={() => updateQuantity(itemId, item.quantity - 1)}
                                 className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
                               >
                                 <Minus size={14} />
                               </button>
                               <span className="font-black text-slate-900 w-8 text-center text-sm">{item.quantity}</span>
                               <button
-                                onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                onClick={() => updateQuantity(itemId, item.quantity + 1)}
                                 className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
                               >
                                 <Plus size={14} />
@@ -532,7 +458,7 @@ const Cart = () => {
 
                           <div className="text-right flex flex-col justify-between items-end h-20 md:h-28">
                             <button
-                              onClick={() => removeFromCart(item._id)}
+                              onClick={() => removeFromCart(itemId)}
                               className="p-2 text-slate-300 hover:text-rose-500 transition-colors"
                             >
                               <Trash2 size={20} />
