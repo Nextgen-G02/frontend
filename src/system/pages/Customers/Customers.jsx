@@ -13,7 +13,11 @@ import {
   Mail,
   Pencil,
   X,
-  CheckCircle2
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  ArrowUp
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -21,6 +25,11 @@ export default function AdminCustomerManagement() {
   const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedCustomerId, setExpandedCustomerId] = useState(null);
+  
+  // Search & Scroll to Top states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showScrollTop, setShowScrollTop] = useState(false);
   
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -32,8 +41,22 @@ export default function AdminCustomerManagement() {
   });
   const [updating, setUpdating] = useState(false);
 
+  const toggleExpand = (id) => {
+    setExpandedCustomerId(prev => prev === id ? null : id);
+  };
+
   useEffect(() => {
     fetchCustomers();
+    
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   
 //get to the customer list
@@ -53,7 +76,7 @@ export default function AdminCustomerManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Purge this customer record from the registry?")) return;
+    if (!window.confirm("Delete this customer record from the registry?")) return;
 
     try {
       const token = localStorage.getItem("token");
@@ -95,6 +118,14 @@ export default function AdminCustomerManagement() {
     }
   };
 
+  const filteredCustomers = customers.filter(customer =>
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="space-y-10 max-w-[1500px] mx-auto">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-100">
@@ -110,97 +141,194 @@ export default function AdminCustomerManagement() {
         </div>
       </header>
 
-      {/* Grid Display */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+      {/* Search bar & statistics info */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-6xl mx-auto">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-450" size={18} />
+          <input
+            type="text"
+            placeholder="Search customer by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-10 py-3.5 bg-white border border-slate-100 rounded-2xl text-slate-800 placeholder-slate-400 font-bold text-sm outline-none focus:border-slate-200 shadow-sm focus:shadow-md transition-all duration-300"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+        {!loading && (
+          <p className="text-[10px] font-black text-slate-450 uppercase tracking-widest sm:text-right">
+            Showing {filteredCustomers.length} of {customers.length} registered accounts
+          </p>
+        )}
+      </div>
+
+      {/* Expandable Name List */}
+      <div className="space-y-5 max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
         {loading ? (
-          <div className="col-span-full h-96 flex flex-col items-center justify-center gap-6">
+          <div className="h-96 flex flex-col items-center justify-center gap-6">
             <Loader2 className="animate-spin text-primary" size={56} />
             <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400 italic">Accessing Personnel Files...</p>
           </div>
         ) : customers.length === 0 ? (
-          <div className="col-span-full h-96 flex flex-col items-center justify-center text-center">
+          <div className="h-96 flex flex-col items-center justify-center text-center">
             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
               <Users size={48} className="text-slate-200" />
             </div>
             <p className="font-black uppercase tracking-widest text-slate-400">Registry is currently void.</p>
           </div>
+        ) : filteredCustomers.length === 0 ? (
+          <div className="h-96 flex flex-col items-center justify-center text-center">
+            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+              <Search size={48} className="text-slate-200" />
+            </div>
+            <p className="font-black uppercase tracking-widest text-slate-450">No customer matches search query.</p>
+          </div>
         ) : (
-          customers.map((customer) => (
-            <div key={customer._id} className="glass-card group relative p-7 md:p-8 rounded-[32px] md:rounded-[48px] bg-white border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-700 overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-slate-100 group-hover:bg-primary transition-colors"></div>
-              
-              <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                <button 
-                  onClick={() => openEditModal(customer)}
-                  className="p-2.5 rounded-xl bg-slate-50 text-slate-300 hover:text-primary hover:bg-primary/5 transition-all border border-slate-100"
+          filteredCustomers.map((customer) => {
+            const isExpanded = expandedCustomerId === customer._id;
+            const isTopCustomer = customers.length > 0 && customers[0]._id === customer._id && customer.totalSpent > 0;
+            return (
+              <div 
+                key={customer._id} 
+                className={`group rounded-[32px] border transition-all duration-500 overflow-hidden ${
+                  isExpanded 
+                    ? 'bg-white border-slate-200 shadow-xl shadow-slate-100' 
+                    : 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200/80'
+                }`}
+              >
+                {/* Main Name Row */}
+                <div 
+                  onClick={() => toggleExpand(customer._id)}
+                  className="flex items-center justify-between p-8 cursor-pointer hover:bg-slate-50/30 transition-all duration-350 select-none"
                 >
-                  <Pencil size={16} />
-                </button>
-                <button 
-                  onClick={() => handleDelete(customer._id)}
-                  className="p-2.5 rounded-xl bg-slate-50 text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all border border-slate-100"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-[18px] md:rounded-[24px] bg-slate-900 flex items-center justify-center text-gold font-black text-2xl shadow-inner group-hover:rotate-6 transition-transform duration-500">
-                  {customer.name[0]}
-                </div>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">{customer.name}</h2>
-                  {customer.isRegistered ? (
-                    <div className="flex flex-col gap-1.5 mt-1.5">
-                      <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md w-fit">
-                        <CheckCircle2 size={10} className="text-emerald-600" />
-                        <span className="text-[9px] font-black uppercase tracking-widest leading-none">Registered Member</span>
+                  <div className="flex items-center gap-5">
+                    {/* Premium initials avatar matching screenshot */}
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-500 via-slate-400 to-slate-600 flex items-center justify-center text-[#E5C158] font-black text-xl uppercase shadow-md shrink-0">
+                      {customer.name[0]}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <span className="font-extrabold text-slate-900 tracking-tight text-lg uppercase leading-none">{customer.name}</span>
+                        {customer.isRegistered && (
+                          <span className="w-3 h-3 rounded-full bg-[#52D3A2] shrink-0"></span>
+                        )}
+                        {isTopCustomer && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-[#C19A27] border border-amber-200/60 text-[9px] font-black uppercase tracking-wider rounded-lg shadow-sm">
+                            👑 Top Customer
+                          </span>
+                        )}
                       </div>
-                      {customer.email && customer.email !== 'N/A' && (
-                        <div className="flex items-center gap-1 text-slate-400 ml-1">
-                          <Mail size={10} />
-                          <span className="text-[10px] font-semibold select-all">{customer.email}</span>
-                        </div>
-                      )}
+                      <p className="text-[11px] font-extrabold text-[#7E8B9B] uppercase tracking-wider mt-2 leading-none">
+                        {customer.isRegistered ? 'REGISTERED MEMBER' : 'WALK-IN GUEST'}
+                      </p>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 mt-1.5 px-2 py-0.5 bg-slate-50 text-slate-500 rounded-md w-fit">
-                      <span className="text-[9px] font-black uppercase tracking-widest leading-none">Walk-in Guest</span>
-                    </div>
-                  )}
+                  </div>
+                  <div className="p-3.5 rounded-full hover:bg-slate-100 text-[#8E9AAB] transition-all border border-slate-100/50">
+                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3 mb-10">
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 group-hover:border-primary/20 transition-all">
-                  <div className="p-2 bg-white rounded-lg shadow-sm text-primary"><Phone size={14} /></div>
-                  <p className="text-xs font-black text-slate-900 tracking-tight">{customer.phone}</p>
-                </div>
-                
-                {customer.address && (
-                  <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 group-hover:border-primary/20 transition-all">
-                    <div className="p-2 bg-white rounded-lg shadow-sm text-primary mt-0.5"><MapPin size={14} /></div>
-                    <p className="text-[11px] font-medium text-slate-400 leading-relaxed italic line-clamp-2">"{customer.address}"</p>
+                {/* Expanded Details Panel */}
+                {isExpanded && (
+                  <div className="px-8 pb-8 pt-6 border-t border-slate-50 bg-gradient-to-b from-white to-slate-50/30 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+                      
+                      {/* Phone */}
+                      <div className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Phone Number</p>
+                        <div className="flex items-center gap-2.5 text-slate-850 font-bold text-base">
+                          <Phone size={16} className="text-primary" />
+                          <span>{customer.phone}</span>
+                        </div>
+                      </div>
+
+                      {/* Status */}
+                      <div className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Registration Status</p>
+                        <div className="pt-1">
+                          {customer.isRegistered ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider rounded-md border border-emerald-100">
+                              <CheckCircle2 size={10} className="text-emerald-600" /> Registered
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-wider rounded-md border border-slate-200/50">
+                              Walk-in
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Total Spent */}
+                      <div className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Total Purchases</p>
+                        <div className="text-slate-900 font-black text-lg">
+                          Rs.{customer.totalSpent?.toLocaleString()}
+                        </div>
+                      </div>
+
+                      {/* Email */}
+                      <div className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Address</p>
+                        <div className="flex items-center gap-2.5 text-slate-850 font-bold text-base">
+                          <Mail size={16} className="text-primary" />
+                          <span className="select-all truncate max-w-[240px]" title={customer.email}>{customer.email || 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      {/* Address */}
+                      <div className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Delivery Address</p>
+                        <div className="flex items-center gap-2.5 text-slate-850 font-bold text-base">
+                          <MapPin size={16} className="text-primary" />
+                          <span className="truncate max-w-[240px]" title={customer.address}>{customer.address ? `"${customer.address}"` : 'N/A'}</span>
+                        </div>
+                      </div>
+
+                      {/* Orders Count & Last Order */}
+                      <div className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Purchase History</p>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-2 text-slate-850 font-bold text-base">
+                            <ShoppingBag size={16} className="text-primary" />
+                            <span>{customer.totalOrders} Orders</span>
+                          </div>
+                          {customer.lastOrderDate && (
+                            <span className="text-[10px] font-bold text-slate-400 uppercase">
+                              ({new Date(customer.lastOrderDate).toLocaleDateString()})
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Actions bar inside expansion */}
+                    <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+                      <button 
+                        onClick={() => openEditModal(customer)}
+                        className="px-5 py-3 rounded-xl bg-slate-50 text-slate-600 hover:text-primary hover:bg-primary/5 transition-all border border-slate-100 flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider"
+                      >
+                        <Pencil size={14} /> Update Profile
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(customer._id)}
+                        className="px-5 py-3 rounded-xl bg-slate-50 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all border border-slate-100 flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider"
+                      >
+                        <Trash2 size={14} /> Delete Record
+                      </button>
+                    </div>
+
                   </div>
                 )}
-
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-900 border border-slate-800">
-                  <div className="p-2 bg-slate-800 rounded-lg text-gold"><ShoppingBag size={14} /></div>
-                  <p className="text-[9px] font-black text-white uppercase tracking-[0.2em]">{customer.totalOrders} Transmissions</p>
-                </div>
               </div>
-
-              <div className="pt-6 border-t border-slate-50 flex justify-between items-end">
-                <div className="space-y-0.5">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Total Purchases</p>
-                  <p className="text-2xl md:text-3xl font-black text-slate-900 leading-none tracking-tighter mt-1">Rs.{customer.totalSpent?.toLocaleString()}</p>
-                </div>
-                <button className="p-3.5 rounded-xl bg-slate-50 text-slate-400 hover:text-primary transition-all border border-slate-100">
-                  <CreditCard size={18} md:size={20} />
-                </button>
-              </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -276,6 +404,17 @@ export default function AdminCustomerManagement() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Floating Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 p-4 bg-slate-900 hover:bg-slate-800 text-gold hover:text-white rounded-full shadow-2xl transition-all duration-300 hover:-translate-y-1 z-50 flex items-center justify-center animate-in fade-in zoom-in duration-300"
+          title="Scroll to Top"
+        >
+          <ArrowUp size={20} />
+        </button>
       )}
     </div>
   );
