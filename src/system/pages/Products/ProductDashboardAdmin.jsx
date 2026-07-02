@@ -87,6 +87,28 @@ export default function ProductDashboardAdmin() {
     }
   };
 
+  const handleSectionChange = async (productId, newSection) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE}/update-section/${productId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ homepageSection: newSection })
+      });
+      if (res.ok) {
+        toast.success("Homepage section updated");
+        setProducts(prev => prev.map(p => p._id === productId ? { ...p, homepageSection: newSection } : p));
+      } else {
+        toast.error("Failed to update section");
+      }
+    } catch {
+      toast.error("Update error");
+    }
+  };
+
   const handleEditOpen = (product) => {
     setEditProduct(product);
     setEditImageFile(null);
@@ -304,11 +326,12 @@ export default function ProductDashboardAdmin() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-100 text-xs md:text-sm border-b border-slate-200">
-                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Product Name</th>
-                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Category</th>
-                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Unit Value</th>
-                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Stock Availability</th>
-                  <th className="px-6 md:px-10 py-4.5 font-bold text-slate-700 uppercase tracking-wider text-right">Actions</th>
+                  <th className="px-4 md:px-6 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Product Name</th>
+                  <th className="px-4 md:px-6 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Category</th>
+                  <th className="px-4 md:px-6 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Unit Value</th>
+                  <th className="px-4 md:px-6 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Stock Availability</th>
+                  <th className="px-4 md:px-6 py-4.5 font-bold text-slate-700 uppercase tracking-wider">Homepage Section</th>
+                  <th className="px-4 md:px-6 py-4.5 font-bold text-slate-700 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
 
@@ -317,7 +340,7 @@ export default function ProductDashboardAdmin() {
                   const status = stockStatus(p.stock);
                   return (
                     <tr key={p._id} className="hover:bg-white transition-all duration-300 group">
-                      <td className="px-6 md:px-10 py-4 md:py-6">
+                      <td className="px-4 md:px-6 py-4 md:py-6">
                         <div className="flex items-center gap-4 md:gap-5">
                           <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl md:rounded-[24px] overflow-hidden shadow-sm group-hover:shadow-2xl transition-all duration-700 bg-slate-100 border border-slate-50 shrink-0">
                             <img
@@ -335,7 +358,7 @@ export default function ProductDashboardAdmin() {
                         </div>
                       </td>
 
-                      <td className="px-6 md:px-10 py-4 md:py-6 text-left">
+                      <td className="px-4 md:px-6 py-4 md:py-6 text-left">
                         <div className="flex flex-wrap justify-start gap-1.5">
                           {Array.isArray(p.pCategory) ? (
                             p.pCategory.map((cat, idx) => (
@@ -351,12 +374,12 @@ export default function ProductDashboardAdmin() {
                         </div>
                       </td>
 
-                      <td className="px-6 md:px-10 py-4 md:py-6 font-bold text-slate-900 text-base md:text-lg tracking-tighter">
+                      <td className="px-4 md:px-6 py-4 md:py-6 font-bold text-slate-900 text-base md:text-lg tracking-tighter">
                         <span className="text-slate-900 text-[10px] mr-1 font-bold">Rs.</span>
                         {p.price.toLocaleString()}
                       </td>
 
-                      <td className="px-6 md:px-10 py-4 md:py-6">
+                      <td className="px-4 md:px-6 py-4 md:py-6">
                         <div className="space-y-2 md:space-y-2.5 min-w-[120px] md:min-w-[140px]">
                           <div className="flex items-center justify-between">
                             <div className={`px-2.5 md:px-3 py-1 rounded-full text-[8px] md:text-[9px] font-black uppercase tracking-widest border ${status.class}`}>
@@ -373,7 +396,25 @@ export default function ProductDashboardAdmin() {
                         </div>
                       </td>
 
-                      <td className="px-6 md:px-12 py-6 md:py-8 text-right">
+                      <td className="px-4 md:px-6 py-4 md:py-6">
+                        <select
+                          value={p.homepageSection || 'None'}
+                          onChange={(e) => handleSectionChange(p._id, e.target.value)}
+                          className={`px-3 py-1.5 text-[10px] font-bold rounded-lg uppercase tracking-wider outline-none border cursor-pointer ${
+                            p.homepageSection === 'Popular Cakes' ? 'bg-[#FDF4FF] text-[#C026D3] border-[#F0ABFC]' :
+                            p.homepageSection === 'Popular Sweets' ? 'bg-[#ECFEFF] text-[#0891B2] border-[#67E8F9]' :
+                            p.homepageSection === 'Gift Hampers' ? 'bg-[#FEFCE8] text-[#CA8A04] border-[#FDE047]' :
+                            'bg-slate-50 text-slate-400 border-slate-200'
+                          }`}
+                        >
+                          <option value="None" className="bg-white text-slate-700">None</option>
+                          <option value="Popular Cakes" className="bg-white text-slate-700">Popular Cakes</option>
+                          <option value="Popular Sweets" className="bg-white text-slate-700">Popular Sweets</option>
+                          <option value="Gift Hampers" className="bg-white text-slate-700">Gift Hampers</option>
+                        </select>
+                      </td>
+
+                      <td className="px-4 md:px-6 py-6 md:py-8 text-right">
                         <div className="flex justify-end gap-2 md:gap-3 transition-all duration-300">
                           <button
                             onClick={() => setViewProduct(p)}
