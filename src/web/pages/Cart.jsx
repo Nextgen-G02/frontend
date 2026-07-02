@@ -448,7 +448,13 @@ const Cart = () => {
                               </button>
                               <span className="font-black text-slate-900 w-8 text-center text-sm">{item.quantity}</span>
                               <button
-                                onClick={() => updateQuantity(itemId, item.quantity + 1)}
+                                onClick={() => {
+                                  if (item.quantity < (item.stock || 0)) {
+                                    updateQuantity(itemId, item.quantity + 1);
+                                  } else {
+                                    toast.error(`Only ${item.stock || 0} items available in stock!`);
+                                  }
+                                }}
                                 className="p-1.5 hover:bg-slate-50 rounded-lg text-slate-400 hover:text-slate-900 transition-colors border border-slate-100"
                               >
                                 <Plus size={14} />

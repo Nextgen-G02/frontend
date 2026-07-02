@@ -121,6 +121,11 @@ export default function ProductDetails() {
 
   // Add to cart handler
   const handleAddToCart = () => {
+    if (quantity > (product.stock || 0)) {
+      toast.error(`Only ${product.stock || 0} items available in stock!`);
+      return;
+    }
+
     const customProps = {
       price: basePrice * weightMultiplier,
       selectedFlavor: selectedFlavor || null,
@@ -330,7 +335,16 @@ export default function ProductDetails() {
                       <Minus size={16} />
                     </button>
                     <span className="font-bold text-slate-900 w-8 text-center">{quantity}</span>
-                    <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all">
+                    <button 
+                      onClick={() => {
+                        if (quantity < (product.stock || 0)) {
+                          setQuantity(quantity + 1);
+                        } else {
+                          toast.error(`Only ${product.stock || 0} items available in stock!`);
+                        }
+                      }} 
+                      className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all"
+                    >
                       <Plus size={16} />
                     </button>
                   </div>

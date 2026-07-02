@@ -83,6 +83,8 @@ export default function MyOrders() {
             axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/custom-cakes/${request._id}/pay`, {
                 amountPaid: amountToPay,
                 isHalfPayment: false
+            }, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             }).then(() => {
                 fetchOrders();
             }).catch(err => {
@@ -103,6 +105,8 @@ export default function MyOrders() {
             order_id: payhereConfig.order_id,
             amount: payhereConfig.amount,
             currency: payhereConfig.currency
+        }, {
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }).then(response => {
             payhereConfig.hash = response.data.hash;
             payhere.startPayment(payhereConfig);
