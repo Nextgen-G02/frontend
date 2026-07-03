@@ -19,7 +19,8 @@ import {
   Menu,
   Receipt,
   Vault,
-  Cake
+  Cake,
+  Mail
 } from "lucide-react";
 import { useAuth } from "../../shared/context/AuthContext";
 
@@ -62,6 +63,7 @@ export default function AdminLayout({ children }) {
       { label: "Expenses", path: "/admin/expenses", icon: Receipt },
       { label: "Cash Drawer", path: "/admin/cash-drawer", icon: Vault },
       { label: "Staff", path: "/staff", icon: UserCog },
+      { label: "Newsletter", path: "/admin/newsletter", icon: Mail },
     ] : []),
   ];
 
