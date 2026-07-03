@@ -402,15 +402,15 @@ export default function ProductDashboardAdmin() {
                           onChange={(e) => handleSectionChange(p._id, e.target.value)}
                           className={`px-3 py-1.5 text-[10px] font-bold rounded-lg uppercase tracking-wider outline-none border cursor-pointer ${
                             p.homepageSection === 'Popular Cakes' ? 'bg-[#FDF4FF] text-[#C026D3] border-[#F0ABFC]' :
-                            p.homepageSection === 'Artisan Sweets' ? 'bg-[#ECFEFF] text-[#0891B2] border-[#67E8F9]' :
-                            p.homepageSection === 'The Gifting Collection' ? 'bg-[#FEFCE8] text-[#CA8A04] border-[#FDE047]' :
+                            p.homepageSection === 'Popular Sweets' ? 'bg-[#ECFEFF] text-[#0891B2] border-[#67E8F9]' :
+                            p.homepageSection === 'Gift Hampers' ? 'bg-[#FEFCE8] text-[#CA8A04] border-[#FDE047]' :
                             'bg-slate-50 text-slate-400 border-slate-200'
                           }`}
                         >
                           <option value="None" className="bg-white text-slate-700">None</option>
                           <option value="Popular Cakes" className="bg-white text-slate-700">Popular Cakes</option>
-                          <option value="Artisan Sweets" className="bg-white text-slate-700">Artisan Sweets</option>
-                          <option value="The Gifting Collection" className="bg-white text-slate-700">The Gifting Collection</option>
+                          <option value="Popular Sweets" className="bg-white text-slate-700">Popular Sweets</option>
+                          <option value="Gift Hampers" className="bg-white text-slate-700">Gift Hampers</option>
                         </select>
                       </td>
 
@@ -738,6 +738,7 @@ export default function ProductDashboardAdmin() {
                       onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
                     >
                       <option value="pcs">pcs</option>
+                      <option value="box">box</option>
                       <option value="kg">kg</option>
                       <option value="g">g</option>
                       <option value="ml">ml</option>

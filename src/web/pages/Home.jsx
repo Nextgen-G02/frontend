@@ -45,7 +45,7 @@ export default function Home() {
         title="Artisan Sweets"
         category="sweet"
         bgColor="white"
-        homepageSection="Artisan Sweets"
+        homepageSection="Popular Sweets"
       />
 
       {/* 7. PROMO BANNER */}
