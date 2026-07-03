@@ -36,14 +36,16 @@ export default function Home() {
         title="Popular Cakes"
         category="cakes"
         bgColor="#fbf9f4"
+        homepageSection="Popular Cakes"
       />
 
 
-      {/* 6. POPULAR SWEETS */}
+      {/* 6. ARTISAN SWEETS */}
       <ProductScroller
-        title="Popular Sweets"
+        title="Artisan Sweets"
         category="sweet"
         bgColor="white"
+        homepageSection="Popular Sweets"
       />
 
       {/* 7. PROMO BANNER */}
@@ -52,11 +54,12 @@ export default function Home() {
       {/* 8. SHOP BY CATEGORY */}
       <CategoryShowcase />
 
-      {/* 9. GIFT HAMPERS & FESTIVE */}
+      {/* 9. THE GIFTING COLLECTION */}
       <ProductScroller
-        title="Gift Hampers"
+        title="The Gifting Collection"
         category="hampers"
         bgColor="#fbf9f4"
+        homepageSection="The Gifting Collection"
       />
 
       {/* 9. ABOUT SECTION */}
