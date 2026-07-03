@@ -284,12 +284,7 @@ const ProductionSummary = () => {
 
                     <div className="flex flex-wrap items-center justify-center gap-5">
                         {/* Time Windows */}
-                        <button 
-                            onClick={() => setShowOnlyOverdue(!showOnlyOverdue)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${showOnlyOverdue ? 'bg-rose-600 text-white shadow-rose-600/20' : 'bg-white border border-rose-200 text-rose-500 hover:bg-rose-50'}`}
-                        >
-                            <AlertCircle size={14} /> {showOnlyOverdue ? 'Showing Overdue' : 'Overdue Only'}
-                        </button>
+
                         
                         <div className="flex items-center gap-3 bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200">
                             <div className="flex items-center gap-2 px-3">
