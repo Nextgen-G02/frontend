@@ -23,6 +23,7 @@ export default function AdminStaffManagement() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -76,6 +77,9 @@ export default function AdminStaffManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("token");
       if (isEditing) {
@@ -93,6 +97,8 @@ export default function AdminStaffManagement() {
       fetchStaff();
     } catch (error) {
       toast.error(error.response?.data?.message || "Operation failed");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -234,8 +240,12 @@ export default function AdminStaffManagement() {
             </div>
 
             <div className="flex gap-3">
-              <button className={`flex-1 py-4.5 md:py-5 ${isEditing ? 'bg-emerald-600' : 'bg-slate-900'} text-white rounded-xl md:rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl transition-all duration-500 hover:-translate-y-0.5`}>
-                {isEditing ? 'Update Member' : 'Add Staff Member'}
+              <button 
+                disabled={isSubmitting}
+                className={`flex-1 flex items-center justify-center gap-2 py-4.5 md:py-5 ${isEditing ? 'bg-emerald-600' : 'bg-slate-900'} ${isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-0.5'} text-white rounded-xl md:rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-2xl transition-all duration-500`}
+              >
+                {isSubmitting && <Loader2 size={14} className="animate-spin" />}
+                {isSubmitting ? 'Saving...' : (isEditing ? 'Update Member' : 'Add Staff Member')}
               </button>
               {isEditing && (
                 <button
