@@ -1,5 +1,6 @@
-import React from "react";
-import { ShoppingCart, CreditCard } from "lucide-react";
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import { ShoppingCart, CreditCard, X } from "lucide-react";
 import { useCart } from "../../../shared/context/CartContext";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { toast } from "react-hot-toast";
@@ -10,21 +11,28 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [deliveryDetails, setDeliveryDetails] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    address: "",
+    city: "Colombo",
+    scheduleDate: "",
+    scheduleTime: ""
+  });
+
   const generateSlug = (name, id) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + id;
   };
 
-  const handleBuyNow = async (product) => {
-    if (!user) {
-      toast.error("Please login to place an order");
-      navigate('/login');
-      return;
-    }
-
+  const handleBuyNow = async (product, details) => {
     const orderData = {
-      customerName: `${user.firstName} ${user.lastName}`,
-      phone: user.phone || "0000000000",
-      address: user.address || "Web Order",
+      customerName: `${details.firstName} ${details.lastName}`,
+      phone: details.phone,
+      address: `${details.address}, ${details.city}`,
+      scheduleDate: details.scheduleDate,
+      scheduleTime: details.scheduleTime,
       type: 'Order',
       items: [{
         pName: product.pName,
@@ -107,12 +115,12 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
         amount: amount,
         currency: currency,
         hash: hash,
-        first_name: user.firstName,
-        last_name: user.lastName,
+        first_name: details.firstName,
+        last_name: details.lastName,
         email: user.email || "customer@example.com",
-        phone: user.phone || "0000000000",
-        address: user.address || "Web Order",
-        city: "Colombo",
+        phone: details.phone,
+        address: `${details.address}, ${details.city}`,
+        city: details.city,
         country: "Sri Lanka"
       };
 
@@ -123,6 +131,16 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
       console.error("Buy Now error:", err);
       toast.error("An error occurred while placing your order", { id: "buyNow" });
     }
+  };
+
+  const handleConfirmOrder = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!deliveryDetails.firstName || !deliveryDetails.phone || !deliveryDetails.address || !deliveryDetails.scheduleDate || !deliveryDetails.scheduleTime) {
+      toast.error("Please fill in all required delivery details");
+      return;
+    }
+    setShowDeliveryModal(false);
+    handleBuyNow(product, deliveryDetails);
   };
 
   return (
@@ -204,7 +222,21 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
             disabled={product.stockStatus === "Out of Stock" || product.stock === 0}
             onClick={(e) => {
               e.stopPropagation();
-              handleBuyNow(product);
+              if (!user) {
+                toast.error("Please login to place an order");
+                navigate('/login');
+                return;
+              }
+              setDeliveryDetails({
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
+                phone: user.phone || "",
+                address: user.address || "",
+                city: "Colombo",
+                scheduleDate: "",
+                scheduleTime: ""
+              });
+              setShowDeliveryModal(true);
             }}
             className={`flex-1 rounded-lg py-2 text-[9px] font-bold uppercase tracking-wide flex items-center justify-center gap-1 px-1 transition-all active:bg-slate-950 ${(product.stockStatus === "Out of Stock" || product.stock === 0)
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
@@ -216,6 +248,139 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
           </button>
         </div>
       </div>
+
+      {showDeliveryModal && createPortal(
+        <div 
+          onClick={(e) => e.stopPropagation()} 
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative border border-slate-100 flex flex-col"
+          >
+            <div className="h-2 w-full bg-gold"></div>
+
+            <button
+              onClick={() => setShowDeliveryModal(false)}
+              className="absolute top-6 right-6 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-400 hover:text-slate-700 transition-all cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="p-8 md:p-10 space-y-5">
+              <div>
+                <h3 className="text-xl font-serif text-slate-800 tracking-tight font-bold">
+                  Delivery <span className="text-gold italic font-normal">Details</span>
+                </h3>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-1 font-bold">Please confirm your receiving coordinates</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">First Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={deliveryDetails.firstName}
+                      onChange={(e) => setDeliveryDetails({ ...deliveryDetails, firstName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Last Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={deliveryDetails.lastName}
+                      onChange={(e) => setDeliveryDetails({ ...deliveryDetails, lastName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Phone Number</label>
+                  <input
+                    type="tel"
+                    required
+                    value={deliveryDetails.phone}
+                    onChange={(e) => setDeliveryDetails({ ...deliveryDetails, phone: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-xs"
+                    placeholder="e.g. 0771234567"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Delivery Address</label>
+                  <input
+                    type="text"
+                    required
+                    value={deliveryDetails.address}
+                    onChange={(e) => setDeliveryDetails({ ...deliveryDetails, address: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-xs"
+                    placeholder="Street No, Building, Area"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">City</label>
+                  <input
+                    type="text"
+                    required
+                    value={deliveryDetails.city}
+                    onChange={(e) => setDeliveryDetails({ ...deliveryDetails, city: e.target.value })}
+                    className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-xs"
+                    placeholder="e.g. Colombo, Kandy"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Delivery Date</label>
+                    <input
+                      type="date"
+                      required
+                      min={new Date().toISOString().split('T')[0]}
+                      value={deliveryDetails.scheduleDate}
+                      onChange={(e) => setDeliveryDetails({ ...deliveryDetails, scheduleDate: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-1">Delivery Time</label>
+                    <input
+                      type="time"
+                      required
+                      value={deliveryDetails.scheduleTime}
+                      onChange={(e) => setDeliveryDetails({ ...deliveryDetails, scheduleTime: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-gold/15 focus:border-gold transition-all font-semibold text-slate-800 text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDeliveryModal(false)}
+                  className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-200 hover:text-slate-900 transition-all border border-slate-200/50 shadow-sm cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmOrder}
+                  className="flex-[2] py-3 bg-slate-900 text-gold rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-xl shadow-slate-900/10 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Confirm & Pay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
