@@ -29,7 +29,16 @@ export default function ProductScroller({
     }
     axios
       .get(url)
-      .then((res) => setProducts(res.data))
+      .then((res) => {
+        if (Array.isArray(res.data)) {
+          setProducts(res.data);
+        } else if (res.data && Array.isArray(res.data.data)) {
+          setProducts(res.data.data);
+        } else {
+          console.warn("Expected array from API but got:", res.data);
+          setProducts([]);
+        }
+      })
       .catch((err) => console.log(err));
   }, [category, homepageSection]);
 
@@ -110,7 +119,7 @@ export default function ProductScroller({
           className="flex items-stretch overflow-x-auto snap-x snap-mandatory gap-4 md:gap-8 no-scrollbar pb-6 md:pb-8 scroll-smooth px-2"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {products.map((p) => (
+          {Array.isArray(products) && products.map((p) => (
             <div 
               key={p._id} 
               className="flex-shrink-0 w-[220px] sm:w-[260px] md:w-[calc(33.333%-22px)] lg:w-[calc(25%-24px)] snap-center first:ml-4 last:mr-4 cursor-pointer"

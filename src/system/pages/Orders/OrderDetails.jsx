@@ -193,7 +193,7 @@ const OrderDetails = () => {
                     <div className="flex items-center gap-5">
                         <button onClick={() => navigate('/orders')} className="p-2.5 bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-600 rounded-xl transition-all shadow-inner"><ChevronLeft size={20} /></button>
                         <div className="flex items-center gap-4">
-                            <h1 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Order Command</h1>
+                            <h1 className="text-xl font-black text-slate-900 uppercase tracking-tighter">Order Details</h1>
                             <span className="bg-slate-900 text-gold px-3 py-1 rounded-lg text-xs font-mono font-black">#{order._id.slice(-6).toUpperCase()}</span>
                         </div>
                     </div>
@@ -206,8 +206,8 @@ const OrderDetails = () => {
                             </>
                         ) : (
                             <>
-                                <button onClick={handleSaveChanges} disabled={updating} className="px-8 py-3 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-2 shadow-xl shadow-primary/20"><Save size={16} /> {updating ? 'Syncing...' : 'Sync Registry'}</button>
-                                <button onClick={() => { setIsEditing(false); setFormData(order); }} className="px-5 py-3 bg-white border border-slate-200 text-slate-400 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">Abort</button>
+                                <button onClick={handleSaveChanges} disabled={updating} className="px-8 py-3 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-2 shadow-xl shadow-primary/20"><Save size={16} /> {updating ? 'Saving...' : 'Save Changes'}</button>
+                                <button onClick={() => { setIsEditing(false); setFormData(order); }} className="px-5 py-3 bg-white border border-slate-200 text-slate-400 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">Cancel</button>
                             </>
                         )}
                     </div>
@@ -222,17 +222,17 @@ const OrderDetails = () => {
                         <div className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm flex items-center justify-between gap-4">
                             <div className="flex items-center gap-8">
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Lifecycle Protocol</span>
+                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Order Status</span>
                                     <div className={`px-4 py-1.5 rounded-lg font-black text-xs uppercase tracking-tight ${getStatusStyle(order.orderStatus)} shadow-sm`}>{order.orderStatus}</div>
                                 </div>
                                 <div className="flex flex-col border-l border-slate-100 pl-8">
-                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Financial Vector</span>
+                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Payment Status</span>
                                     <div className={`px-4 py-1.5 rounded-lg font-black text-xs uppercase tracking-tight shadow-sm ${order.paymentStatus === 'Paid' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}>{order.paymentStatus}</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-1">Registry Timestamp</span>
+                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-1">Order Date</span>
                                     <p className="text-sm font-black text-slate-900 uppercase">{new Date(order.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</p>
                                 </div>
                                 <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-primary border border-slate-100"><Calendar size={20} /></div>
@@ -242,28 +242,28 @@ const OrderDetails = () => {
                         {/* Client Identity Grid */}
                         <div className="bg-white p-6 rounded-[32px] border border-slate-200/60 shadow-sm">
                             <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] mb-6 flex items-center gap-3">
-                                <div className="w-2 h-4 bg-slate-900 rounded-full"></div> Client Identification
+                                <div className="w-2 h-4 bg-slate-900 rounded-full"></div> Customer Details
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="md:col-span-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-100">
                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm"><User size={20} /></div>
                                     <div>
                                         <span className="font-black text-slate-900 text-base uppercase tracking-tighter block truncate max-w-[150px]">{order.customerName}</span>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase">Authorized Guest</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase">Customer Name</span>
                                     </div>
                                 </div>
                                 <div className="md:col-span-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-100">
                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm"><CreditCard size={20} /></div>
                                     <div>
                                         <span className="font-black text-slate-900 text-base tracking-tighter block">{order.phone || 'GUEST_NODE'}</span>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase">Contact Link</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase">Phone Number</span>
                                     </div>
                                 </div>
                                 <div className="md:col-span-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-100">
                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 shadow-sm shrink-0"><MapPin size={20} /></div>
                                     <div className="truncate">
                                         <p className="font-medium text-slate-600 italic text-[13px] truncate">"{order.address || 'Default Hub'}"</p>
-                                        <span className="text-[10px] font-black text-slate-400 uppercase">Deployment Coord</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase">Address</span>
                                     </div>
                                 </div>
                             </div>
@@ -273,7 +273,7 @@ const OrderDetails = () => {
                         <div className="bg-white rounded-[32px] border border-slate-200/60 shadow-sm overflow-hidden">
                             <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/30">
                                 <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] flex items-center gap-3">
-                                    <div className="w-2 h-4 bg-primary rounded-full"></div> Payload Manifest
+                                    <div className="w-2 h-4 bg-primary rounded-full"></div> Order Items
                                 </h2>
                                 {isEditing && (
                                     <button onClick={() => setFormData(prev => ({ ...prev, items: [...prev.items, { pName: '', category: 'General', quantity: 1, unit: 'pcs', price: 0, isCustom: true }] }))} className="px-4 py-2 bg-slate-900 text-gold rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary transition-all flex items-center gap-2"><Plus size={14} /> Add Entry</button>
@@ -282,9 +282,9 @@ const OrderDetails = () => {
                             <table className="w-full text-left border-collapse">
                                 <thead className="bg-slate-50/20">
                                     <tr className="border-b border-slate-100">
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Asset Details</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center">Batch Size</th>
-                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Net val</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Product Name</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-center">Quantity</th>
+                                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Line Total</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
@@ -311,10 +311,10 @@ const OrderDetails = () => {
                                 </tbody>
                                 <tfoot className="bg-slate-900">
                                     <tr>
-                                        <td colSpan="2" className="px-6 py-6 text-right font-black text-slate-400 uppercase tracking-[0.4em] text-[10px]">Registry Aggregate Val</td>
+                                        <td colSpan="2" className="px-6 py-6 text-right font-black text-slate-400 uppercase tracking-[0.4em] text-[10px]">Subtotal</td>
                                         <td className="px-6 py-6 text-right">
                                             <p className="text-3xl font-black text-white tracking-tighter leading-none mb-1.5">Rs.{calculateCurrentTotal().toLocaleString()}</p>
-                                            <span className="text-[9px] font-black text-gold uppercase tracking-[0.2em] border border-gold/40 px-3 py-1 rounded-full bg-gold/5 shadow-[0_0_10px_rgba(212,175,55,0.1)]">Master Settlement Lock</span>
+                                            <span className="text-[9px] font-black text-gold uppercase tracking-[0.2em] border border-gold/40 px-3 py-1 rounded-full bg-gold/5 shadow-[0_0_10px_rgba(212,175,55,0.1)]">Total Amount</span>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -326,7 +326,7 @@ const OrderDetails = () => {
                     <div className="xl:col-span-4 space-y-6">
                         {/* State Controller Grid */}
                         <div className="bg-white p-6 rounded-[32px] border border-slate-200/60 shadow-sm">
-                            <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] mb-5 flex items-center gap-3"><div className="w-2 h-4 bg-primary rounded-full"></div> Lifecycle Protocol</h2>
+                            <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] mb-5 flex items-center gap-3"><div className="w-2 h-4 bg-primary rounded-full"></div> Order Status</h2>
                             <div className="grid grid-cols-2 gap-3">
                                 {['Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled'].map(status => (
                                     <button key={status} disabled={updating || order.orderStatus === status || isEditing} onClick={() => handleStatusUpdate(status)} className={`text-left p-4 rounded-2xl border-2 transition-all flex flex-col justify-between h-20 relative overflow-hidden active:scale-95 ${order.orderStatus === status ? `${getStatusStyle(status)} border-transparent shadow-lg shadow-primary/10` : 'bg-slate-50/50 border-slate-100 text-slate-600 hover:border-primary/40'}`}>
@@ -343,22 +343,24 @@ const OrderDetails = () => {
                         {/* Financial & Logistics Matrix */}
                         <div className="bg-slate-900 rounded-[32px] shadow-xl relative overflow-hidden flex flex-col">
                             <div className="p-8 space-y-6 relative z-10">
-                                <h2 className="font-black text-white uppercase text-[11px] tracking-[0.4em] flex items-center gap-3"><div className="w-2 h-3 bg-primary rounded-full animate-pulse"></div> Economic Manifest</h2>
+                                <h2 className="font-black text-white uppercase text-[11px] tracking-[0.4em] flex items-center gap-3"><div className="w-2 h-3 bg-primary rounded-full animate-pulse"></div> Payment Summary</h2>
                                 <div className="space-y-3">
-                                    <div className="flex justify-between items-center bg-white/5 px-6 py-4 rounded-xl border border-white/5 group hover:bg-white/10 transition-all"><span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Gross Inventory</span><span className="text-sm font-black text-white">Rs.{order.totalAmount.toLocaleString()}</span></div>
-                                    <div className="flex justify-between items-center bg-white/5 px-6 py-4 rounded-xl border border-white/5 group hover:bg-white/10 transition-all"><span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Registry Deposit</span><span className="text-sm font-black text-emerald-400">Rs.{order.advanceAmount?.toLocaleString() || 0}</span></div>
+                                    <div className="flex justify-between items-center bg-white/5 px-6 py-4 rounded-xl border border-white/5 group hover:bg-white/10 transition-all"><span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Total Amount</span><span className="text-sm font-black text-white">Rs.{order.totalAmount.toLocaleString()}</span></div>
+                                    <div className="flex justify-between items-center bg-white/5 px-6 py-4 rounded-xl border border-white/5 group hover:bg-white/10 transition-all"><span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Advance Paid</span><span className="text-sm font-black text-emerald-400">Rs.{order.advanceAmount?.toLocaleString() || 0}</span></div>
                                     <div className="bg-white/10 px-6 py-6 rounded-2xl border border-primary/50 mt-6 flex justify-between items-center shadow-2xl shadow-primary/20 transition-all group hover:bg-white/15">
-                                        <span className="text-xs font-black text-primary uppercase tracking-[0.2em]">Net Liability</span>
-                                        <span className="text-2xl font-black text-gold italic tracking-tighter drop-shadow-md">Rs.{(order.totalAmount - (order.advanceAmount || 0)).toLocaleString()}</span>
+                                        <div className="flex flex-col">
+                                            <span className="text-[11px] font-black text-primary uppercase tracking-[0.2em] mb-1">Balance Due</span>
+                                            <span className="text-3xl font-black text-white tracking-tighter leading-none">Rs.{Math.max(0, order.totalAmount - (order.advanceAmount || 0)).toLocaleString()}</span>
+                                        </div>
                                     </div>
                                     {order.paymentStatus !== 'Paid' && !isEditing && (
-                                        <button onClick={async () => { if (window.confirm('Execute Lock?')) { try { const token = localStorage.getItem('token'); await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${order._id}`, { advanceAmount: order.totalAmount, paymentStatus: 'Paid' }, { headers: { Authorization: `Bearer ${token}` } }); toast.success('Locked'); fetchOrder(); } catch (error) { toast.error('Fail'); } } }} className="w-full py-4 bg-primary text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-all shadow-lg mt-4 active:scale-95">Lock Master Registry</button>
+                                        <button onClick={async () => { if (window.confirm('Execute Lock?')) { try { const token = localStorage.getItem('token'); await axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/orders/${order._id}`, { advanceAmount: order.totalAmount, paymentStatus: 'Paid' }, { headers: { Authorization: `Bearer ${token}` } }); toast.success('Locked'); fetchOrder(); } catch (error) { toast.error('Fail'); } } }} className="w-full py-4 bg-primary text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-all shadow-lg mt-4 active:scale-95">Update Payment Status</button>
                                     )}
                                 </div>
                             </div>
                             <div className="bg-white/5 p-8 border-t border-white/10 grid grid-cols-2 gap-6 relative z-10">
-                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Calendar size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Date Locked</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleDate || 'ONDEMAND'}</p></div>
-                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Clock size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Window lock</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleTime || 'ASAP_VECTOR'}</p></div>
+                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Calendar size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Date</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleDate || 'ONDEMAND'}</p></div>
+                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Clock size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Time</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleTime || 'ASAP_VECTOR'}</p></div>
                             </div>
                         </div>
                     </div>

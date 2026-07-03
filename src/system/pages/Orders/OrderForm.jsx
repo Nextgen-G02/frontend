@@ -24,6 +24,20 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+const getFutureDateTime = (hoursAhead) => {
+    const d = new Date();
+    d.setHours(d.getHours() + hoursAhead);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return {
+        date: `${year}-${month}-${day}`,
+        time: `${hours}:${minutes}`
+    };
+};
+
 const OrderForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -35,6 +49,8 @@ const OrderForm = () => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [expandedItems, setExpandedItems] = useState({});
     
+    const defaultSchedule = getFutureDateTime(6);
+
     const [formData, setFormData] = useState({
         customerName: '',
         clientId: 'WALK-IN',
@@ -42,9 +58,10 @@ const OrderForm = () => {
         address: '',
         type: 'Order',
         items: [],
-        scheduleDate: new Date().toISOString().split('T')[0],
-        scheduleTime: '12:00',
-        advanceAmount: 0
+        scheduleDate: defaultSchedule.date,
+        scheduleTime: defaultSchedule.time,
+        advanceAmount: 0,
+        orderStatus: 'Pending'
     });
 
     useEffect(() => {
@@ -216,9 +233,9 @@ const OrderForm = () => {
                         <button onClick={() => navigate(-1)} className="p-2.5 bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-600 rounded-xl transition-all shadow-inner"><ArrowLeft size={20} /></button>
                         <div className="flex flex-col">
                             <h1 className="text-xl font-black text-slate-900 uppercase tracking-tighter leading-none">
-                                {id ? 'Synchronize' : 'Authorize'} <span className="text-primary italic">Sequence</span>
+                                {id ? 'Edit' : 'New'} <span className="text-primary italic">Order</span>
                             </h1>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Registry Provisioning Portal</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1">Order Creation Portal</p>
                         </div>
                     </div>
                     
@@ -229,7 +246,7 @@ const OrderForm = () => {
                             disabled={loading || formData.items.length === 0}
                             className="px-8 py-3 bg-slate-900 text-gold rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary hover:text-white transition-all flex items-center gap-3 shadow-xl shadow-slate-900/10"
                         >
-                            {loading ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={16} /> {id ? 'Update Registry' : 'Commit Entry'}</>}
+                            {loading ? <Loader2 size={16} className="animate-spin" /> : <><CheckCircle2 size={16} /> {id ? 'Update Order' : 'Save Order'}</>}
                         </button>
                     </div>
                 </div>
@@ -242,12 +259,12 @@ const OrderForm = () => {
                         {/* Customer Profile Card */}
                         <div className="bg-white p-6 md:p-8 rounded-[32px] border border-slate-200/60 shadow-sm relative overflow-hidden">
                             <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] mb-6 flex items-center gap-3">
-                                <div className="w-2 h-4 bg-slate-900 rounded-full"></div> Client Identification
+                                <div className="w-2 h-4 bg-slate-900 rounded-full"></div> Customer Details
                             </h2>
                             
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Entity Name</label>
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Customer Name</label>
                                     <div className="relative group">
                                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors" size={16} />
                                         <input 
@@ -258,7 +275,7 @@ const OrderForm = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Registry ID</label>
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Customer ID</label>
                                     <input 
                                         type="text" name="clientId" value={formData.clientId || ''} onChange={handleChange}
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-xs text-slate-900 uppercase"
@@ -266,7 +283,7 @@ const OrderForm = () => {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Contact Vector</label>
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Phone Number</label>
                                     <input 
                                         type="text" name="phone" value={formData.phone} onChange={handleChange}
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-black text-xs text-slate-900"
@@ -274,11 +291,11 @@ const OrderForm = () => {
                                     />
                                 </div>
                                 <div className="md:col-span-3 space-y-2">
-                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Deployment Coordinate (Address)</label>
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Delivery Address</label>
                                     <textarea 
                                         name="address" value={formData.address} onChange={handleChange} rows="2"
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all font-medium text-xs text-slate-900 resize-none italic"
-                                        placeholder="Enter secure delivery coordinates..."
+                                        placeholder="Enter delivery address..."
                                     />
                                 </div>
                             </div>
@@ -288,7 +305,7 @@ const OrderForm = () => {
                         <div className="bg-white rounded-[32px] border border-slate-200/60 shadow-sm overflow-hidden">
                             <div className="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row items-center justify-between bg-slate-50/30 gap-4">
                                 <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] flex items-center gap-3">
-                                    <div className="w-2 h-4 bg-primary rounded-full"></div> Payload Manifest
+                                    <div className="w-2 h-4 bg-primary rounded-full"></div> Order Items
                                 </h2>
 
                                 <div className="flex items-center gap-3 w-full md:w-auto">
@@ -324,7 +341,7 @@ const OrderForm = () => {
                                         type="button" onClick={addCustomCake}
                                         className="px-5 py-2.5 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all flex items-center gap-2"
                                     >
-                                        <Plus size={14} /> Custom Asset
+                                        <Plus size={14} /> Custom Item
                                     </button>
                                 </div>
                             </div>
@@ -426,7 +443,7 @@ const OrderForm = () => {
                                         {expandedItems[index] && (
                                             <div className="mt-6 pt-6 border-t border-slate-200/60 grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-2 duration-300">
                                                 <div className="space-y-2">
-                                                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Asset Specifications</p>
+                                                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Item Notes</p>
                                                     <textarea 
                                                         value={item.description || ''}
                                                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
@@ -435,7 +452,7 @@ const OrderForm = () => {
                                                     />
                                                 </div>
                                                 <div className="space-y-4">
-                                                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Design Parameters</p>
+                                                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Customization</p>
                                                     <div className="grid grid-cols-1 gap-4">
                                                         <div className="space-y-1.5">
                                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Inscription</label>
@@ -447,7 +464,7 @@ const OrderForm = () => {
                                                             />
                                                         </div>
                                                         <div className="space-y-1.5">
-                                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Flavor Vector</label>
+                                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Flavor</label>
                                                             <input 
                                                                 type="text" value={item.customization?.flavor || ''}
                                                                 onChange={(e) => handleItemChange(index, 'customization', { ...item.customization, flavor: e.target.value })}
@@ -468,8 +485,8 @@ const OrderForm = () => {
                                             <ChefHat size={32} />
                                         </div>
                                         <div>
-                                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Payload manifest is empty</p>
-                                            <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-1 italic">Initiate sequence by selecting assets above</p>
+                                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Cart is empty</p>
+                                            <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-1 italic">Search and add items to your order</p>
                                         </div>
                                     </div>
                                 )}
@@ -482,23 +499,36 @@ const OrderForm = () => {
                         {/* Timeline Card */}
                         <div className="bg-white rounded-[32px] border border-slate-200/60 shadow-sm p-6 md:p-8">
                             <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] mb-6 flex items-center gap-3">
-                                <div className="w-2 h-4 bg-slate-900 rounded-full"></div> Lifecycle Parameters
+                                <div className="w-2 h-4 bg-slate-900 rounded-full"></div> Order Details
                             </h2>
 
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Acquisition Pipeline</label>
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Order Type</label>
                                     <select 
                                         name="type" value={formData.type} onChange={handleChange}
                                         className="w-full px-5 py-3.5 bg-slate-900 text-gold rounded-2xl outline-none shadow-lg font-black text-[11px] uppercase tracking-widest cursor-pointer hover:bg-primary hover:text-white transition-all"
                                     >
-                                        <option value="Order">Standard Pipeline (Scheduled)</option>
-                                        <option value="DirectSale">Direct Acquisition (POS)</option>
+                                        <option value="Order">Standard Order</option>
+                                        <option value="DirectSale">Direct Sale (POS)</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Order Status</label>
+                                    <select 
+                                        name="orderStatus" value={formData.orderStatus || 'Pending'} onChange={handleChange}
+                                        className="w-full px-5 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-primary font-black text-[11px] uppercase tracking-widest cursor-pointer transition-all text-slate-700"
+                                    >
+                                        <option value="Pending">Pending</option>
+                                        <option value="Confirmed">Confirmed</option>
+                                        <option value="Preparing">Preparing</option>
+                                        <option value="Ready">Ready</option>
+                                        <option value="Delivered">Delivered</option>
                                     </select>
                                 </div>
                                 <div className="grid grid-cols-1 gap-5">
                                     <div className="space-y-2">
-                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Fulfillment Date</label>
+                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Due Date</label>
                                         <div className="relative">
                                             <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                             <input 
@@ -508,7 +538,7 @@ const OrderForm = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Window Lock</label>
+                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest block ml-1">Due Time</label>
                                         <div className="relative">
                                             <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                             <input 
@@ -526,18 +556,18 @@ const OrderForm = () => {
                             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] -mr-24 -mt-24 group-hover:scale-150 transition-transform duration-1000"></div>
                             
                             <h2 className="font-black text-white uppercase text-[11px] tracking-[0.4em] mb-10 flex items-center gap-3">
-                                <div className="w-2 h-4 bg-primary rounded-full animate-pulse"></div> Financial Settlement
+                                <div className="w-2 h-4 bg-primary rounded-full animate-pulse"></div> Payment Details
                             </h2>
 
                             <div className="space-y-8 relative z-10">
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center text-slate-500 font-black uppercase text-[11px] tracking-widest border-b border-white/5 pb-3">
-                                        <span>Gross Valuation</span>
+                                        <span>Total Amount</span>
                                         <span className="text-white text-base font-black tracking-tighter">Rs.{calculateTotal().toLocaleString()}</span>
                                     </div>
 
                                     <div className="space-y-2.5">
-                                        <label className="text-[11px] font-black text-primary uppercase tracking-widest block ml-1">Advance Commitment</label>
+                                        <label className="text-[11px] font-black text-primary uppercase tracking-widest block ml-1">Advance Paid</label>
                                         <div className="relative">
                                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[11px] font-black text-slate-500 italic">Rs.</span>
                                             <input 
@@ -552,8 +582,8 @@ const OrderForm = () => {
 
                                 <div className="p-6 bg-white/5 rounded-3xl border border-white/5 flex justify-between items-center shadow-inner group-hover:bg-white/10 transition-all duration-500">
                                     <div className="space-y-1">
-                                        <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block leading-none">Net Liability</span>
-                                        <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Residual Balance</span>
+                                        <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest block leading-none">Remaining Balance</span>
+                                        <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">To be paid</span>
                                     </div>
                                     <span className="text-3xl font-black text-gold italic tracking-tighter drop-shadow-lg animate-in zoom-in-50">
                                         Rs.{(calculateTotal() - (Number(formData.advanceAmount) || 0)).toLocaleString()}
@@ -565,7 +595,7 @@ const OrderForm = () => {
                                     className="w-full py-5 bg-primary text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 hover:bg-white hover:text-slate-900 transition-all duration-500 disabled:opacity-30 flex items-center justify-center gap-4 active:scale-95"
                                 >
                                     {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                                        <>{id ? 'Authorize Update' : 'Authorize Commitment'} <Plus size={20} /></>
+                                        <>{id ? 'Update Order' : 'Save Order'} <Plus size={20} /></>
                                     )}
                                 </button>
                             </div>
@@ -577,8 +607,8 @@ const OrderForm = () => {
                                 <CheckCircle2 size={20} />
                             </div>
                             <div className="flex-1">
-                                <p className="text-[11px] font-black text-emerald-700 uppercase tracking-widest leading-none mb-1.5">Integrity Seal</p>
-                                <p className="text-[9px] font-black text-emerald-600/60 uppercase tracking-widest italic leading-relaxed">Registry entry will be encrypted upon commitment.</p>
+                                <p className="text-[11px] font-black text-emerald-700 uppercase tracking-widest leading-none mb-1.5">Data Security</p>
+                                <p className="text-[9px] font-black text-emerald-600/60 uppercase tracking-widest italic leading-relaxed">Order details are securely saved.</p>
                             </div>
                         </div>
                     </div>
