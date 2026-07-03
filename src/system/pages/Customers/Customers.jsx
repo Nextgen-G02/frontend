@@ -41,6 +41,30 @@ export default function AdminCustomerManagement() {
   });
   const [updating, setUpdating] = useState(false);
 
+  // Purchase History Modal State
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [historyCustomer, setHistoryCustomer] = useState(null);
+  const [customerOrders, setCustomerOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  const openHistoryModal = async (customer) => {
+    setHistoryCustomer(customer);
+    setIsHistoryModalOpen(true);
+    try {
+      setLoadingOrders(true);
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/orders?phone=${encodeURIComponent(customer.phone)}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setCustomerOrders(response.data || []);
+    } catch (error) {
+      toast.error("Failed to load purchase history");
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
   const toggleExpand = (id) => {
     setExpandedCustomerId(prev => prev === id ? null : id);
   };
@@ -291,12 +315,15 @@ export default function AdminCustomerManagement() {
                       </div>
 
                       {/* Orders Count & Last Order */}
-                      <div className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/20 hover:shadow-sm transition-all duration-300">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Purchase History</p>
+                      <div 
+                        onClick={() => openHistoryModal(customer)}
+                        className="p-6 bg-white rounded-[24px] border border-slate-100 hover:border-primary/30 hover:shadow-md hover:bg-slate-50/50 transition-all duration-300 cursor-pointer active:scale-[0.98] select-none group/history"
+                      >
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 group-hover/history:text-primary transition-colors">Purchase History</p>
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2 text-slate-850 font-bold text-base">
-                            <ShoppingBag size={16} className="text-primary" />
-                            <span>{customer.totalOrders} Orders</span>
+                            <ShoppingBag size={16} className="text-primary group-hover/history:scale-110 transition-transform" />
+                            <span className="group-hover/history:text-primary transition-colors">{customer.totalOrders} Orders</span>
                           </div>
                           {customer.lastOrderDate && (
                             <span className="text-[10px] font-bold text-slate-400 uppercase">
@@ -402,6 +429,111 @@ export default function AdminCustomerManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Purchase History Modal */}
+      {isHistoryModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-2xl rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[85vh]">
+            <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-slate-900 text-gold rounded-2xl">
+                  <ShoppingBag size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Purchase History</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Audit Log for {historyCustomer?.name}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsHistoryModalOpen(false)} 
+                className="p-3 hover:bg-slate-50 rounded-xl transition-colors text-slate-400"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 md:p-10 space-y-6 no-scrollbar">
+              {loadingOrders ? (
+                <div className="h-48 flex flex-col items-center justify-center gap-4">
+                  <Loader2 className="animate-spin text-primary" size={40} />
+                  <p className="font-black uppercase tracking-widest text-[9px] text-slate-450 italic">Retrieving order files...</p>
+                </div>
+              ) : customerOrders.length === 0 ? (
+                <div className="h-48 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                    <ShoppingBag size={28} className="text-slate-200" />
+                  </div>
+                  <p className="font-black text-xs uppercase tracking-widest text-slate-400">No past orders recorded for this client.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {customerOrders.map((order) => (
+                    <div 
+                      key={order._id}
+                      className="p-6 bg-slate-50/50 hover:bg-white rounded-3xl border border-slate-100 hover:border-slate-200 transition-all duration-350"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100/60 mb-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-sm text-slate-900 uppercase">
+                              Order #{order._id.slice(-6).toUpperCase()}
+                            </span>
+                            <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-md border ${
+                              order.source === 'Website'
+                                ? 'bg-[#EEF2FF] text-[#4338CA] border-[#D8B4FE]'
+                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                            }`}>
+                              {order.source || 'POS Terminal'}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-450 font-bold uppercase">
+                            Placed on {new Date(order.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 sm:text-right">
+                          <span className="font-black text-slate-900 text-base">
+                            Rs.{order.totalAmount?.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        {order.items.map((item, idx) => (
+                          <div key={idx} className="flex justify-between items-start text-xs font-bold text-slate-700">
+                            <div>
+                              <span>{item.quantity}x {item.pName}</span>
+                              {item.customization && (item.customization.flavor || item.customization.message) && (
+                                <p className="text-[9px] text-slate-400 font-semibold uppercase italic ml-4 mt-0.5">
+                                  {item.customization.flavor && `Flavor: ${item.customization.flavor}`}
+                                  {item.customization.message && ` | Msg: "${item.customization.message}"`}
+                                </p>
+                              )}
+                            </div>
+                            <span className="text-slate-450">
+                              Rs.{(item.price * item.quantity).toLocaleString()}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end shrink-0">
+              <button 
+                onClick={() => setIsHistoryModalOpen(false)}
+                className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-gold hover:text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95"
+              >
+                Close Logs
+              </button>
+            </div>
           </div>
         </div>
       )}
