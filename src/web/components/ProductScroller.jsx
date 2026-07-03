@@ -28,20 +28,7 @@ export default function ProductScroller({
       url = `${import.meta.env.VITE_BACKEND_URL}/api/products/category/${category}`;
     }
     axios
-      .get(url)
-      .then((res) => {
-        if (Array.isArray(res.data)) {
-          setProducts(res.data);
-        } else {
-          console.error("Expected array from API but got:", res.data);
-          setProducts([]);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        setProducts([]);
-      });
-  }, [category, homepageSection]);
+
 
   // Handle scroll tracking for dots
   const handleScroll = () => {
