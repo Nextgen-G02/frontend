@@ -6,17 +6,42 @@ export default function Newsletter() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) {
       toast.error("Please enter a valid email address.");
       return;
     }
     
-    // Simulate API call
-    toast.success("Subscribed successfully! Welcome to the Nirosha Sweet House family.");
-    setSubscribed(true);
-    setEmail("");
+    setLoading(true);
+    const toastId = toast.loading("Subscribing...");
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/newsletter/subscribe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Subscribed successfully!", { id: toastId });
+        setSubscribed(true);
+        setEmail("");
+      } else {
+        toast.error(data.message || "Failed to subscribe. Please try again.", { id: toastId });
+      }
+    } catch (error) {
+      console.error("Subscription Error:", error);
+      toast.error("Network error. Please try again later.", { id: toastId });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,10 +82,11 @@ export default function Newsletter() {
             </div>
             <button
               type="submit"
-              className="bg-[#C29D59] hover:bg-[#b08e50] text-slate-950 font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 active:scale-95 flex-shrink-0"
+              disabled={loading}
+              className={`bg-[#C29D59] hover:bg-[#b08e50] text-slate-950 font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 flex-shrink-0 ${loading ? 'opacity-70 cursor-not-allowed' : 'active:scale-95'}`}
             >
-              Subscribe
-              <Send size={12} />
+              {loading ? 'Subscribing...' : 'Subscribe'}
+              {!loading && <Send size={12} />}
             </button>
           </form>
         ) : (
