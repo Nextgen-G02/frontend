@@ -133,7 +133,7 @@ export default function AdminCategoryManagement() {
             }}
             className={`flex items-center gap-2.5 px-6 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all duration-500 shadow-xl ${isFormOpen && !editingId
               ? 'bg-white border border-slate-200 text-slate-400 hover:bg-slate-50'
-              : 'bg-gold text-white hover:bg-gold/90 shadow-gold/10 hover:shadow-gold/20'
+              : 'bg-slate-900 text-gold hover:bg-primary hover:text-white shadow-slate-900/10 hover:shadow-primary/20'
               }`}
           >
             {isFormOpen && !editingId ? <X size={18} /> : <Plus size={18} />}
@@ -411,7 +411,7 @@ export default function AdminCategoryManagement() {
                   </button>
                   <button
                     type="submit"
-                    className="flex-[2] py-3.5 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-gold transition-all duration-500 flex items-center justify-center gap-2"
+                    className="flex-[2] py-3.5 bg-slate-900 text-gold rounded-xl font-bold text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-2"
                   >
                     {editingId ? <Save size={14} /> : <Plus size={14} />}
                     {editingId ? 'Update Category' : 'Create Category'}
