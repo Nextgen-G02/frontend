@@ -35,11 +35,7 @@ const PAYMENT_CONFIG = {
     'Partially Paid':{ bg: 'bg-amber-50',  text: 'text-amber-600',   label: 'PARTIAL' },
 };
 
-const SOURCE_TABS = [
-    { key: 'all',     label: 'All Orders',    icon: LayoutList },
-    { key: 'Website', label: 'Website',        icon: Globe      },
-    { key: 'In-Store',label: 'In-Store',       icon: Store      },
-];
+
 
 const StatusBadge = ({ status }) => {
     const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.Pending;
@@ -70,8 +66,14 @@ const OrderList = () => {
     const [loading, setLoading]         = useState(true);
     const [search, setSearch]           = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [sourceTab, setSourceTab]     = useState('all');
     const [activeTab, setActiveTab]     = useState('Standard');
+    const [showOnlyOverdue, setShowOnlyOverdue] = useState(false);
+    
+    // Modal state for overdue status change
+    const [overdueOrderToUpdate, setOverdueOrderToUpdate] = useState(null);
+    const [newStatusForOverdue, setNewStatusForOverdue] = useState('');
+    const [newScheduleDate, setNewScheduleDate] = useState('');
+    const [newScheduleTime, setNewScheduleTime] = useState('');
 
     useEffect(() => { fetchOrders(); }, [statusFilter]);
 
@@ -101,7 +103,6 @@ const OrderList = () => {
         }
     };
 
-    /* ── status update ── */
     const handleStatusUpdate = async (id, newStatus) => {
         try {
             const token = localStorage.getItem('token');
@@ -117,29 +118,75 @@ const OrderList = () => {
         }
     };
 
+    const handleStatusChangeRequest = (order, newStatus) => {
+        if (checkIsOverdue(order.scheduleDate, order.scheduleTime, order.orderStatus)) {
+            setOverdueOrderToUpdate(order);
+            setNewStatusForOverdue(newStatus);
+            setNewScheduleDate(order.scheduleDate ? order.scheduleDate.split('T')[0] : getLocalDateString());
+            setNewScheduleTime(order.scheduleTime || "12:00");
+        } else {
+            handleStatusUpdate(order._id, newStatus);
+        }
+    };
+
+    const submitOverdueStatusUpdate = async () => {
+        // Validation: Must provide a future date/time
+        if (checkIsOverdue(newScheduleDate, newScheduleTime, newStatusForOverdue)) {
+            toast.error("Please select a future date and time for the next due date");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            
+            if (newScheduleDate || newScheduleTime) {
+                await axios.put(
+                    `${import.meta.env.VITE_BACKEND_URL}/api/orders/${overdueOrderToUpdate._id}`,
+                    { 
+                        scheduleDate: newScheduleDate || overdueOrderToUpdate.scheduleDate, 
+                        scheduleTime: newScheduleTime || overdueOrderToUpdate.scheduleTime 
+                    },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+            }
+            
+            await axios.patch(
+                `${import.meta.env.VITE_BACKEND_URL}/api/orders/${overdueOrderToUpdate._id}/status`,
+                { orderStatus: newStatusForOverdue },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            
+            toast.success("Order status and schedule updated");
+            setOverdueOrderToUpdate(null);
+            fetchOrders();
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to update order");
+        }
+    };
+
+    const checkIsOverdue = (date, time, status) => {
+        if (!date || ['Ready', 'Delivered', 'Cancelled'].includes(status)) return false;
+        const todayStr = getLocalDateString();
+        const now = new Date();
+        const timeStr = now.toTimeString().slice(0, 5);
+        return date < todayStr || (date === todayStr && (time || "00:00") < timeStr);
+    };
+
     /* ── derived data ── */
     const filteredOrders = orders.filter(o => {
-        const matchSource = sourceTab === 'all' || o.source === sourceTab ||
-            (sourceTab === 'In-Store' && !o.source);
+        const matchSource = activeTab === 'Website' ? o.source === 'Website' : (activeTab === 'Standard' ? o.source !== 'Website' : true);
         const matchSearch = !search ||
             o.customerName?.toLowerCase().includes(search.toLowerCase()) ||
             o.phone?.includes(search);
-        return matchSource && matchSearch;
+        const matchOverdue = !showOnlyOverdue || checkIsOverdue(o.scheduleDate, o.scheduleTime, o.orderStatus);
+        return matchSource && matchSearch && matchOverdue;
     });
 
     const metrics = {
-        total:   orders.length,
-        pending: orders.filter(o => o.orderStatus === 'Pending').length,
-        ready:   orders.filter(o => o.orderStatus === 'Ready').length,
-        revenue: orders.reduce((s, o) => s + (o.totalAmount || 0), 0),
-        website: orders.filter(o => o.source === 'Website').length,
-    };
-
-    /* ── source counts for tab badges ── */
-    const sourceCounts = {
-        all:       orders.length,
-        Website:   orders.filter(o => o.source === 'Website').length,
-        'In-Store':orders.filter(o => o.source !== 'Website').length,
+        total:   filteredOrders.length,
+        pending: filteredOrders.filter(o => o.orderStatus === 'Pending').length,
+        ready:   filteredOrders.filter(o => o.orderStatus === 'Ready').length,
+        revenue: filteredOrders.reduce((s, o) => s + (o.totalAmount || 0), 0),
     };
 
     return (
@@ -175,18 +222,18 @@ const OrderList = () => {
                 </header>
 
                 {/* ── Page Tabs ── */}
-                <div className="flex gap-4 border-b border-slate-200">
-                    {['Standard', 'Custom'].map(tab => (
+                <div className="flex gap-4 border-b border-slate-200 overflow-x-auto no-scrollbar">
+                    {['Standard', 'Website', 'Custom'].map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all ${
+                            className={`pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all whitespace-nowrap ${
                                 activeTab === tab
                                     ? 'border-b-2 border-primary text-primary'
                                     : 'border-b-2 border-transparent text-slate-400 hover:text-slate-600'
                             }`}
                         >
-                            {tab === 'Standard' ? 'Standard Orders' : 'Custom Requests'}
+                            {tab === 'Standard' ? 'Standard Orders' : tab === 'Website' ? 'Website Orders' : 'Custom Requests'}
                         </button>
                     ))}
                 </div>
@@ -198,16 +245,15 @@ const OrderList = () => {
                     </div>
                 )}
 
-                {/* ══════════ STANDARD ORDERS TAB ══════════ */}
-                {activeTab === 'Standard' && (
+                {/* ══════════ STANDARD / WEBSITE ORDERS TAB ══════════ */}
+                {(activeTab === 'Standard' || activeTab === 'Website') && (
                     <>
                         {/* ── Metrics Strip ── */}
-                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             {[
-                                { label: 'Total Orders',    val: metrics.total,                              sub: 'All orders',         icon: ShoppingBag,  color: 'text-slate-500', bg: 'bg-slate-50' },
+                                { label: 'Total Orders',    val: metrics.total,                              sub: activeTab === 'Website' ? 'Online orders' : 'In-Store orders',         icon: ShoppingBag,  color: 'text-slate-500', bg: 'bg-slate-50' },
                                 { label: 'Pending',         val: metrics.pending,                            sub: 'Needs attention',    icon: Clock,        color: 'text-amber-500', bg: 'bg-amber-50' },
                                 { label: 'Ready',           val: metrics.ready,                              sub: 'Ready for pickup',   icon: Package,      color: 'text-indigo-500',bg: 'bg-indigo-50'},
-                                { label: 'Website Orders',  val: metrics.website,                            sub: 'Online orders',      icon: Globe,        color: 'text-blue-500',  bg: 'bg-blue-50'  },
                                 { label: 'Total Revenue',   val: `Rs.${metrics.revenue.toLocaleString()}`,   sub: 'Total sales',        icon: TrendingUp,   color: 'text-emerald-500',bg:'bg-emerald-50'},
                             ].map((m, i) => {
                                 const Icon = m.icon;
@@ -227,35 +273,10 @@ const OrderList = () => {
                         {/* ── Orders Panel ── */}
                         <div className="bg-white rounded-[32px] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
 
-                            {/* ── Top Bar: Source Tabs + Search ── */}
+                            {/* ── Top Bar: Search ── */}
                             <div className="border-b border-slate-100">
-
-                                {/* Source filter tabs */}
+                                
                                 <div className="flex items-center gap-1 px-6 md:px-8 pt-6 pb-0">
-                                    {SOURCE_TABS.map(({ key, label, icon: Icon }) => {
-                                        const count = sourceCounts[key] ?? 0;
-                                        const active = sourceTab === key;
-                                        return (
-                                            <button
-                                                key={key}
-                                                onClick={() => setSourceTab(key)}
-                                                className={`flex items-center gap-2 px-5 py-2.5 rounded-t-xl text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${
-                                                    active
-                                                        ? 'bg-slate-900 text-gold border-slate-900 shadow-lg shadow-slate-900/10'
-                                                        : 'bg-transparent text-slate-400 border-transparent hover:text-slate-700 hover:bg-slate-50'
-                                                }`}
-                                            >
-                                                <Icon size={12} />
-                                                {label}
-                                                <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[8px] font-black ${
-                                                    active ? 'bg-white/20 text-gold' : 'bg-slate-100 text-slate-500'
-                                                }`}>
-                                                    {count}
-                                                </span>
-                                            </button>
-                                        );
-                                    })}
-
                                     <div className="ml-auto flex items-center gap-2 pb-0 mb-0">
                                         <button
                                             onClick={fetchOrders}
@@ -296,6 +317,15 @@ const OrderList = () => {
                                             ))}
                                         </select>
                                     </div>
+
+                                    {/* Overdue button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowOnlyOverdue(!showOnlyOverdue)}
+                                        className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${showOnlyOverdue ? 'bg-rose-600 text-white shadow-rose-600/20' : 'bg-white border border-rose-200 text-rose-500 hover:bg-rose-50'}`}
+                                    >
+                                        <AlertCircle size={14} /> {showOnlyOverdue ? 'Showing Overdue' : 'Overdue Only'}
+                                    </button>
 
                                     {/* Apply button */}
                                     <button
@@ -340,7 +370,7 @@ const OrderList = () => {
                                                         No orders found
                                                     </p>
                                                     <p className="text-slate-300 text-[9px] font-medium">
-                                                        {search || statusFilter || sourceTab !== 'all'
+                                                        {search || statusFilter
                                                             ? 'Try adjusting your filters'
                                                             : 'Orders placed from the website or in-store will appear here'}
                                                     </p>
@@ -450,7 +480,7 @@ const OrderList = () => {
                                                         <td className="px-6 py-4">
                                                             <select
                                                                 value={order.orderStatus}
-                                                                onChange={e => handleStatusUpdate(order._id, e.target.value)}
+                                                                onChange={e => handleStatusChangeRequest(order, e.target.value)}
                                                                 className={`px-3 py-2 rounded-xl text-[8px] font-black tracking-widest border-none cursor-pointer outline-none transition-all appearance-none text-center shadow-md hover:opacity-90 ${
                                                                     STATUS_CONFIG[order.orderStatus]
                                                                         ? `${STATUS_CONFIG[order.orderStatus].color} ${STATUS_CONFIG[order.orderStatus].text} ${STATUS_CONFIG[order.orderStatus].glow}`
@@ -508,14 +538,7 @@ const OrderList = () => {
                                         Showing {filteredOrders.length} of {orders.length} records
                                     </p>
                                     <div className="flex items-center gap-3">
-                                        {sourceTab !== 'all' && (
-                                            <button
-                                                onClick={() => setSourceTab('all')}
-                                                className="text-[9px] font-black text-primary uppercase tracking-widest hover:underline"
-                                            >
-                                                Show All
-                                            </button>
-                                        )}
+
                                         {statusFilter && (
                                             <button
                                                 onClick={() => setStatusFilter('')}
@@ -531,6 +554,74 @@ const OrderList = () => {
                     </>
                 )}
             </div>
+            
+            {/* ── Overdue Reschedule Modal ── */}
+            {overdueOrderToUpdate && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+                        <div className="p-6 md:p-8 bg-slate-50 border-b border-slate-200">
+                            <div className="flex items-center gap-4 mb-2">
+                                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center flex-shrink-0">
+                                    <AlertCircle size={24} />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Reschedule Order</h2>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Order is currently overdue</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="p-6 md:p-8 space-y-6">
+                            <p className="text-sm font-medium text-slate-600">
+                                You are changing the status to <span className="font-black text-slate-900 uppercase">{newStatusForOverdue}</span>. 
+                                Please provide a new needed date and time for this order, or cancel to keep it unchanged.
+                            </p>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-700 block uppercase tracking-widest">New Date</label>
+                                    <div className="relative">
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                        <input 
+                                            type="date"
+                                            value={newScheduleDate}
+                                            onChange={e => setNewScheduleDate(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary/50 outline-none text-xs font-bold text-slate-900 transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-700 block uppercase tracking-widest">New Time</label>
+                                    <div className="relative">
+                                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                                        <input 
+                                            type="time"
+                                            value={newScheduleTime}
+                                            onChange={e => setNewScheduleTime(e.target.value)}
+                                            className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary/10 focus:border-primary/50 outline-none text-xs font-bold text-slate-900 transition-all"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex gap-3 pt-4">
+                                <button 
+                                    onClick={() => setOverdueOrderToUpdate(null)}
+                                    className="flex-1 bg-white border border-slate-200 text-slate-500 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={submitOverdueStatusUpdate}
+                                    className="flex-1 bg-slate-900 text-gold py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
+                                >
+                                    <CheckCircle2 size={14} /> Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
