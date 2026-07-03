@@ -391,6 +391,7 @@ export default function AddProduct() {
                 <label className="text-[15px] font-medium text-slate-500 uppercase tracking-widest ml-1">Measurement Unit</label>
                 <select name="unit" value={form.unit} onChange={handleChange} className={inputClass("unit")}>
                   <option value="pcs">pcs</option>
+                  <option value="box">box</option>
                   <option value="kg">kg</option>
                   <option value="g">g</option>
                   <option value="ml">ml</option>
