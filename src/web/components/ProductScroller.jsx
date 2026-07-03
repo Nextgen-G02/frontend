@@ -24,8 +24,14 @@ export default function ProductScroller({
   useEffect(() => {
     axios
       .get(`${import.meta.env.VITE_BACKEND_URL}/api/products/category/${category}`)
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.log(err));
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        setProducts(data);
+      })
+      .catch((err) => {
+        console.error("Failed to load products by category:", err);
+        setProducts([]);
+      });
   }, [category]);
 
   // Handle scroll tracking for dots

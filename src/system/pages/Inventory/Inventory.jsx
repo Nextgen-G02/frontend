@@ -17,10 +17,11 @@ import {
   X,
   CheckCircle2
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const InventoryDashboard = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [inventory, setInventory] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ const InventoryDashboard = () => {
     const [activeTab, setActiveTab] = useState("Stock"); // "Stock" or "Usage"
     
     // Filters
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(searchParams.get("search") || "");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [stockStatus, setStockStatus] = useState("All");
     
@@ -45,6 +46,13 @@ const InventoryDashboard = () => {
         fetchCategories();
         fetchHistory();
     }, []);
+
+    useEffect(() => {
+        const querySearch = searchParams.get("search");
+        if (querySearch !== null) {
+            setSearch(querySearch);
+        }
+    }, [searchParams]);
 //list of product categories getting  the database 
     const fetchCategories = async () => {
         try {

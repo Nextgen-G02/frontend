@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import { 
   LayoutDashboard, 
   Package, 
@@ -41,10 +42,77 @@ export default function AdminLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  
+  // System alerts / notifications states
+  const [alerts, setAlerts] = useState([]);
+  const [alertMenuOpen, setAlertMenuOpen] = useState(false);
+  const [authError, setAuthError] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const fetchAlerts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setAuthError(true);
+        return;
+      }
+      
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/alerts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAlerts(response.data.data || []);
+      setAuthError(false);
+    } catch (error) {
+      console.error("Failed to fetch system alerts:", error);
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        setAuthError(true);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchAlerts();
+    // Poll every 30 seconds for real-time dashboard notifications
+    const interval = setInterval(fetchAlerts, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/alerts/${id}/read`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAlerts(prev => prev.filter(alert => alert._id !== id));
+    } catch (error) {
+      console.error("Failed to dismiss alert:", error);
+    }
+  };
+
+  const handleAlertClick = async (alert) => {
+    try {
+      await handleMarkAsRead(alert._id);
+      setAlertMenuOpen(false);
+      navigate(`/inventory?search=${encodeURIComponent(alert.productName)}`);
+    } catch (error) {
+      console.error("Failed to handle alert click:", error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.patch(`${import.meta.env.VITE_BACKEND_URL}/api/alerts/read-all`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAlerts([]);
+    } catch (error) {
+      console.error("Failed to clear all alerts:", error);
+    }
   };
 
   const menuItems = [
@@ -134,10 +202,87 @@ export default function AdminLayout({ children }) {
 
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-4">
-                <button className="relative p-1.5 text-slate-400 hover:text-slate-900 transition-colors">
-                  <Bell size={18} md:size={20} />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 border-2 border-white rounded-full"></span>
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={() => setAlertMenuOpen(!alertMenuOpen)}
+                    className="relative p-2 rounded-xl border border-slate-100 bg-slate-50 hover:bg-slate-100/80 text-slate-500 hover:text-slate-900 transition-all active:scale-95"
+                  >
+                    <Bell size={18} />
+                    {alerts.length > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border border-white animate-pulse">
+                        {alerts.length}
+                      </span>
+                    )}
+                  </button>
+                  
+                  {/* Notification Dropdown Menu */}
+                  {alertMenuOpen && (
+                    <div className="absolute right-0 mt-3 w-80 md:w-96 bg-white rounded-[24px] border border-slate-100 shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="p-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                        <div>
+                          <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">System Notifications</h4>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Critical Inventory Diagnostics</p>
+                        </div>
+                        {alerts.length > 0 && (
+                          <button 
+                            onClick={handleMarkAllAsRead}
+                            className="text-[9px] font-black text-primary hover:text-slate-900 uppercase tracking-widest transition-colors"
+                          >
+                            Clear All
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="max-h-[300px] overflow-y-auto divide-y divide-slate-50 no-scrollbar">
+                        {authError ? (
+                          <div className="p-8 text-center">
+                            <p className="text-xs font-bold text-rose-500 uppercase tracking-wider">Session Expired</p>
+                            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Please log out and log in again to sync alerts</p>
+                          </div>
+                        ) : alerts.length === 0 ? (
+                          <div className="p-8 text-center">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">System status nominal.</p>
+                            <p className="text-[9px] font-semibold text-slate-300 uppercase tracking-widest mt-1">No low-stock alerts reported</p>
+                          </div>
+                        ) : (
+                          alerts.map((alert) => (
+                            <div 
+                              key={alert._id}
+                              className="p-4 hover:bg-slate-50/50 transition-all flex items-start justify-between gap-3 group/item cursor-pointer"
+                              onClick={() => handleAlertClick(alert)}
+                            >
+                              <div className="space-y-1 text-left flex-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${
+                                    alert.type === "Out of Stock" ? "bg-rose-500 animate-ping" : "bg-amber-500 animate-pulse"
+                                  }`}></span>
+                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                    {alert.type}
+                                  </span>
+                                </div>
+                                <p className="text-xs font-bold text-slate-800 leading-normal">
+                                  {alert.message}
+                                </p>
+                                <p className="text-[9px] text-slate-400 font-semibold uppercase">
+                                  {new Date(alert.createdAt).toLocaleTimeString()}
+                                </p>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkAsRead(alert._id);
+                                }}
+                                className="text-[10px] font-black text-slate-300 hover:text-rose-500 transition-colors uppercase tracking-wider opacity-0 group-hover/item:opacity-100 shrink-0"
+                              >
+                                Dismiss
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 
                 <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
                   <div className="text-right hidden lg:block">
