@@ -197,6 +197,11 @@ const OrderForm = () => {
         e.preventDefault();
         if (formData.items.length === 0) return toast.error("Transaction requires at least one item.");
 
+        const emptyItems = formData.items.filter(item => !item.pName || item.pName.trim() === '');
+        if (emptyItems.length > 0) {
+            return toast.error("Please provide a name for all custom items.");
+        }
+
         const submissionData = {
             ...formData,
             customerName: formData.customerName.trim() || 'Walk-in Customer'
