@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Premium Heritage Palette */
+  --primary-accent: 0 72% 27%;
+  --primary-accent-dark: 0 72% 20%;
+  --primary-accent-soft: 0 72% 95%;
+  --primary-rgb: 0, 72%, 27%;
+  --secondary-accent: 38 45% 55%;
+  --accent-gold: 38 45% 55%;
+  
+  --canvas-bg: 30 30% 98%; /* Soft Cream */
+
+  --surface-cream: 30 30% 98%;
+
+  --text-main: 240 10% 15%;
+  --text-muted: 240 5% 45%;
+
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Outfit', sans-serif;
+
+  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  --shadow-active: 0 20px 40px -12px hsla(38, 45%, 55%, 0.1);
+
+  --sidebar-bg: 240 10% 15%;
+  /* Deep Charcoal */
+}
+
+@theme {
+  --color-primary: hsl(var(--primary-accent));
+  --color-primary-dark: hsl(var(--primary-accent-dark));
+  --color-primary-soft: hsl(var(--primary-accent-soft));
+  --color-gold: hsl(var(--secondary-accent));
+}
+
+
+body {
+  font-family: var(--font-sans);
+  background-color: hsl(var(--canvas-bg));
+  color: hsl(var(--text-main));
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .glass-card {
+    background: hsla(var(--surface-white));
+    border: 1px solid hsl(var(--border-subtle));
+    box-shadow: var(--shadow-premium);
+    transition: all 0.4s cubic-bezier(var(--transition-cubic));
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-active);
+  }
+
+  /* Heritage Sidebar */
+  .sidebar-premium {
+    background: hsl(var(--sidebar-bg));
+    box-shadow: 10px 0 40px -15px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Premium Buttons */
+  .btn-berry {
+    @apply px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm;
+    background: hsl(var(--primary-accent));
+    color: white;
+    box-shadow: 0 8px 16px -4px hsla(var(--primary-accent) / 0.3);
+  }
+
+  .btn-berry:hover {
+    background: hsl(var(--primary-accent-dark));
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px -4px hsla(var(--primary-accent) / 0.4);
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-300 text-white/50 font-medium text-[13px];
+  }
+
+  .nav-link:hover {
+    @apply text-white bg-white/5 translate-x-1;
+  }
+
+  .nav-link-active {
+    @apply text-white bg-[hsl(var(--primary-accent))] shadow-lg;
+  }
+
+  .nav-icon-container {
+    @apply p-2 rounded-lg bg-white/5 transition-all duration-300 flex items-center justify-center;
+  }
+
+  /* Status Badges */
+  .badge-status {
+    @apply px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+}
+
+/* Typography Utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.heading-premium {
+  @apply text-2xl md:text-4xl font-bold tracking-tight text-slate-900;
+  font-family: var(--font-serif);
+}
+
+.text-gold {
+  color: hsl(var(--secondary-accent));
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary-accent) / 0.1);
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary-accent) / 0.3);
+}
+
+/* Hide number input spinners */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
