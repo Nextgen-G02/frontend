@@ -316,15 +316,15 @@ export default function AdminLayout({ children }) {
 
       {/* Mobile Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-80 sidebar-premium z-[70] transition-transform duration-500 md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`fixed top-0 left-0 h-full flex flex-col w-80 sidebar-premium z-[70] transition-transform duration-500 md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="p-10 flex items-center justify-between">
+        <div className="p-8 flex items-center justify-between shrink-0">
           <h2 className="text-white text-3xl font-black">POS System</h2>
           <button onClick={() => setMobileOpen(false)} className="text-white/40 hover:text-white">
             <ChevronLeft size={24} />
           </button>
         </div>
-        <nav className="px-6 py-4 space-y-4">
+        <nav className="flex-1 px-6 py-4 space-y-4 overflow-y-auto no-scrollbar pb-10">
           {menuItems.map((item) => (
             <SidebarItem
               key={item.path}

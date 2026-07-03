@@ -164,10 +164,16 @@ export default function NewsletterAdmin() {
         setSubject("");
         setMessage("");
         
-        // Instantly add the new history item to the top of the list
+        // Instantly add the new history item to the top of the list (shows 0 initially)
         if (data.newHistory) {
           setHistory(prev => [data.newHistory, ...prev]);
         }
+        
+        // Quietly refresh the history a few times in the background 
+        // so the sent count updates dynamically as the server finishes sending
+        setTimeout(() => fetchHistory(), 2500);
+        setTimeout(() => fetchHistory(), 5000);
+        setTimeout(() => fetchHistory(), 10000);
       } else {
         toast.error(data.message, { id: toastId });
       }
