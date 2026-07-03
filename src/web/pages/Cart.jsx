@@ -89,7 +89,7 @@ const Cart = () => {
     
     const itemsToOrder = selectedItems.size === 0
       ? cart
-      : cart.filter(item => selectedItems.has(item._id));
+      : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
 
     if (itemsToOrder.length === 0) {
       toast.error("Your cart is empty");
