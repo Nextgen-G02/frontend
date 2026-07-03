@@ -323,7 +323,7 @@ export default function POSTerminal() {
                     onClick={fetchProducts}
                     disabled={loading}
                     className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-primary rounded-xl transition-all shadow-sm active:rotate-180 duration-500 disabled:opacity-50"
-                    title="Force Registry Sync"
+                    title="Force Sync"
                   >
                     <Package size={18} />
                   </button>
@@ -338,7 +338,7 @@ export default function POSTerminal() {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search assets or registry ID..."
+                  placeholder="Search products..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-14 pr-6 py-3.5 bg-white border border-slate-200 outline-none focus:ring-8 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 font-black shadow-sm rounded-xl text-[11px] uppercase tracking-wider"
@@ -497,13 +497,13 @@ export default function POSTerminal() {
              <div className="flex items-center justify-between mb-8 pr-4">
                 <div>
                    <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Recent Sale History</h2>
-                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Management of in-store transmissions</p>
+                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Manage your in-store sales</p>
                 </div>
                 <button 
                   onClick={() => setView('catalog')}
                   className="px-6 py-3.5 bg-slate-900 text-gold rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 hover:bg-primary hover:text-white transition-all active:scale-95"
                 >
-                  <Plus size={18} /> New Transmission
+                  <Plus size={18} /> New Sale
                 </button>
              </div>
 
@@ -512,18 +512,18 @@ export default function POSTerminal() {
                   <table className="w-full text-left">
                     <thead className="bg-slate-50/50 border-b border-slate-100">
                       <tr>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Registry Entry</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Customer Entity</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Net Val</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Protocol</th>
-                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Operations</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Order ID</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Customer Name</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Total Amount</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {historyLoading ? (
-                        <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em] animate-pulse">Retrieving master records...</td></tr>
+                        <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em] animate-pulse">Loading records...</td></tr>
                       ) : history.length === 0 ? (
-                        <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em]">No transmissions found</td></tr>
+                        <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em]">No sales found</td></tr>
                       ) : (
                         history.map(order => (
                           <tr key={order._id} className="hover:bg-slate-50/50 transition-all group">
@@ -585,12 +585,12 @@ export default function POSTerminal() {
                   <ShoppingCart size={24} />
                 </div>
                 <div className="space-y-1">
-                   <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">Boutique Cart</h2>
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Transmission Mode</p>
+                   <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">Cart</h2>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Sale Items</p>
                 </div>
               </div>
               <div className="flex flex-col items-end">
-                <span className="px-4 py-1.5 bg-slate-900 text-white rounded-xl text-[10px] font-black border border-slate-900 shadow-lg uppercase tracking-widest">{cart.length} Assets</span>
+                <span className="px-4 py-1.5 bg-slate-900 text-white rounded-xl text-[10px] font-black border border-slate-900 shadow-lg uppercase tracking-widest">{cart.length} Items</span>
               </div>
             </div>
           </div>
@@ -603,8 +603,8 @@ export default function POSTerminal() {
                   <ShoppingCart size={48} className="text-slate-200" />
                 </div>
                 <div>
-                  <p className="font-black text-slate-900 uppercase tracking-[0.2em] text-[11px]">Empty Cart Registry</p>
-                  <p className="text-[10px] text-slate-400 mt-2 font-bold italic px-8">Select assets from the active catalog to begin a transaction.</p>
+                  <p className="font-black text-slate-900 uppercase tracking-[0.2em] text-[11px]">Empty Cart</p>
+                  <p className="text-[10px] text-slate-400 mt-2 font-bold italic px-8">Select items to begin a sale.</p>
                 </div>
               </div>
             ) : (
@@ -625,7 +625,7 @@ export default function POSTerminal() {
                             }}
                             className="bg-transparent border-none outline-none font-black text-slate-900 text-[11px] uppercase tracking-wider w-full focus:ring-0 p-0 h-4 truncate hover:text-primary transition-colors cursor-text"
                           />
-                          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Asset Node</p>
+                          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Product</p>
                         </div>
                       </div>
 
@@ -677,7 +677,7 @@ export default function POSTerminal() {
                       <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right">
                           <span className="font-black text-slate-900 text-[13px] tracking-tighter block leading-none">Rs.{(item.price * item.quantity).toLocaleString()}</span>
-                          <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Locked val</span>
+                          <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Line Total</span>
                         </div>
                         <button 
                           onClick={() => removeFromCart(item._id)}
@@ -699,7 +699,7 @@ export default function POSTerminal() {
               <div className="flex items-center gap-4 bg-white/5 px-5 py-3.5 rounded-2xl border border-white/10 group focus-within:border-primary transition-all">
                 <User size={20} className="text-primary" />
                 <div className="flex flex-col flex-1">
-                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none mb-1.5">Personnel Identification</span>
+                   <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] leading-none mb-1.5">Customer Details</span>
                    <input 
                      type="text" 
                      value={customerName} 
@@ -716,12 +716,12 @@ export default function POSTerminal() {
                      <Banknote size={20} />
                    </div>
                    <div>
-                     <p className="text-[10px] font-black text-white uppercase tracking-widest">Settlement Mode</p>
-                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">Physical Cash Protocol</p>
+                     <p className="text-[10px] font-black text-white uppercase tracking-widest">Payment Method</p>
+                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">Cash Payment</p>
                    </div>
                 </div>
                 <div className="text-right">
-                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Payable Net</p>
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Due</p>
                    <span className="text-3xl font-black text-gold tracking-tighter drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">Rs.{calculateTotal().toLocaleString()}</span>
                 </div>
               </div>
@@ -733,7 +733,7 @@ export default function POSTerminal() {
                 disabled={loading || cart.length === 0}
                 className="flex-1 py-5 bg-primary text-white rounded-2xl font-black text-[12px] uppercase tracking-[0.3em] shadow-2xl shadow-primary/30 hover:bg-white hover:text-slate-900 transition-all duration-500 flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50 disabled:grayscale"
               >
-                {loading ? "Synchronizing Data..." : "Finalize Transmission"}
+                {loading ? "Processing..." : "Complete Sale"}
                 {!loading && <CheckCircle2 size={20} />}
               </button>
             </div>

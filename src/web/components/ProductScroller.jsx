@@ -32,15 +32,14 @@ export default function ProductScroller({
       .then((res) => {
         if (Array.isArray(res.data)) {
           setProducts(res.data);
+        } else if (res.data && Array.isArray(res.data.data)) {
+          setProducts(res.data.data);
         } else {
-          console.error("Expected array from API but got:", res.data);
+          console.warn("Expected array from API but got:", res.data);
           setProducts([]);
         }
       })
-      .catch((err) => {
-        console.error(err);
-        setProducts([]);
-      });
+      .catch((err) => console.log(err));
   }, [category, homepageSection]);
 
   // Handle scroll tracking for dots
