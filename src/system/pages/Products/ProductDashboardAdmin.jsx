@@ -133,7 +133,11 @@ export default function ProductDashboardAdmin() {
       toast.error("Price must be greater than 0");
       return;
     }
-    if (editForm.stock < 0) {
+    if (editForm.stock === "" || editForm.stock === undefined || editForm.stock === null) {
+      toast.error("Stock quantity is required");
+      return;
+    }
+    if (Number(editForm.stock) < 0) {
       toast.error("Stock cannot be negative");
       return;
     }
@@ -145,7 +149,15 @@ export default function ProductDashboardAdmin() {
 
     const p = Number(editForm.price);
     const cp = Number(editForm.costPrice);
+    if (cp <= 0) {
+      toast.error("Cost price must be greater than 0");
+      return;
+    }
     const dp = Number(editForm.discountPercentage) || 0;
+    if (dp < 0 || dp > 100) {
+      toast.error("Discount percentage must be between 0 and 100");
+      return;
+    }
     const da = p * (dp / 100);
 
     if ((p - da) <= cp) {
@@ -675,7 +687,7 @@ export default function ProductDashboardAdmin() {
                       value={editForm.price}
                       onChange={(e) => {
                         const val = e.target.value;
-                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, price: val });
+                        setEditForm({ ...editForm, price: val });
                       }}
                     />
                   </div>
@@ -691,7 +703,7 @@ export default function ProductDashboardAdmin() {
                       value={editForm.costPrice}
                       onChange={(e) => {
                         const val = e.target.value;
-                        if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, costPrice: val });
+                        setEditForm({ ...editForm, costPrice: val });
                       }}
                     />
                   </div>
@@ -709,7 +721,7 @@ export default function ProductDashboardAdmin() {
                     value={editForm.discountPercentage ?? ""}
                     onChange={(e) => {
                       const val = e.target.value;
-                      if (val === "" || (Number(val) >= 0 && Number(val) <= 100)) setEditForm({ ...editForm, discountPercentage: val });
+                      setEditForm({ ...editForm, discountPercentage: val });
                     }}
                   />
                 </div>
@@ -724,7 +736,7 @@ export default function ProductDashboardAdmin() {
                     value={editForm.stock}
                     onChange={(e) => {
                       const val = e.target.value;
-                      if (val === "" || Number(val) >= 0) setEditForm({ ...editForm, stock: val });
+                      setEditForm({ ...editForm, stock: val });
                     }}
                   />
                 </div>

@@ -94,11 +94,6 @@ export default function AddProduct() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Prevent negative values for specific numeric fields
-    if (["price", "costPrice", "stock"].includes(name) && value < 0) {
-      return;
-    }
-
     setForm(prev => {
       let updatedForm = { ...prev, [name]: value };
 
