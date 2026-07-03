@@ -428,15 +428,15 @@ export default function AddProduct() {
                 onChange={handleChange} 
                 className={`w-full px-5 py-3.5 border rounded-xl outline-none focus:ring-4 transition-all font-semibold text-sm appearance-none cursor-pointer ${
                   form.homepageSection === 'Popular Cakes' ? 'bg-[#FDF4FF] text-[#C026D3] border-[#F0ABFC] focus:ring-[#F0ABFC]/30' :
-                  form.homepageSection === 'Popular Sweets' ? 'bg-[#ECFEFF] text-[#0891B2] border-[#67E8F9] focus:ring-[#67E8F9]/30' :
-                  form.homepageSection === 'Gift Hampers' ? 'bg-[#FEFCE8] text-[#CA8A04] border-[#FDE047] focus:ring-[#FDE047]/30' :
+                  form.homepageSection === 'Artisan Sweets' ? 'bg-[#ECFEFF] text-[#0891B2] border-[#67E8F9] focus:ring-[#67E8F9]/30' :
+                  form.homepageSection === 'The Gifting Collection' ? 'bg-[#FEFCE8] text-[#CA8A04] border-[#FDE047] focus:ring-[#FDE047]/30' :
                   'bg-slate-50/50 text-slate-800 border-slate-200 focus:border-gold focus:ring-gold/15'
                 }`}
               >
                 <option value="None" className="bg-white text-slate-700">None</option>
                 <option value="Popular Cakes" className="bg-white text-slate-700">Popular Cakes</option>
-                <option value="Popular Sweets" className="bg-white text-slate-700">Popular Sweets</option>
-                <option value="Gift Hampers" className="bg-white text-slate-700">Gift Hampers</option>
+                <option value="Artisan Sweets" className="bg-white text-slate-700">Artisan Sweets</option>
+                <option value="The Gifting Collection" className="bg-white text-slate-700">The Gifting Collection</option>
               </select>
             </div>
           </div>
