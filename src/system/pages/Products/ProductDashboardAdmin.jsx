@@ -273,7 +273,7 @@ export default function ProductDashboardAdmin() {
           </div>
           <button
             onClick={() => navigate("/addproduct")}
-            className="py-3 px-6 md:px-8 bg-gold text-white rounded-lg md:rounded-xl font-bold text-[9px] md:text-[10px] uppercase tracking-[0.3em] shadow-lg shadow-gold/10 hover:bg-gold/90 transition-all duration-500 flex items-center justify-center gap-2.5"
+            className="py-3 px-6 md:px-8 bg-slate-900 text-gold rounded-lg md:rounded-xl font-bold text-[9px] md:text-[10px] uppercase tracking-[0.3em] shadow-lg shadow-slate-900/10 hover:bg-primary hover:text-white transition-all duration-500 flex items-center justify-center gap-2.5"
           >
             <Plus size={18} md:size={20} /> Add New Product
           </button>
@@ -285,7 +285,7 @@ export default function ProductDashboardAdmin() {
         <button
           onClick={() => toggleCategory("All")}
           className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-bold text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === "All"
-            ? "bg-gold text-white border-gold shadow-lg -translate-y-0.5 shadow-gold/10"
+            ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5 shadow-slate-900/10 hover:bg-primary hover:text-white"
             : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
             }`}
         >
@@ -298,7 +298,7 @@ export default function ProductDashboardAdmin() {
               key={cat._id}
               onClick={() => toggleCategory(cat.name)}
               className={`px-6 py-2.5 rounded-lg whitespace-nowrap font-bold text-[9px] uppercase tracking-widest transition-all duration-500 border ${selectedCategory === cat.name
-                ? "bg-gold text-white border-gold shadow-lg -translate-y-0.5 shadow-gold/10"
+                ? "bg-slate-900 text-gold border-slate-900 shadow-lg -translate-y-0.5 shadow-slate-900/10 hover:bg-primary hover:text-white"
                 : "bg-white text-slate-400 hover:bg-slate-50 border-slate-100"
                 }`}
             >
@@ -835,7 +835,7 @@ export default function ProductDashboardAdmin() {
               </button>
               <button
                 onClick={handleEditSave}
-                className="px-10 py-4 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-gold transition-all shadow-xl"
+                className="px-10 py-4 bg-slate-900 text-gold rounded-xl font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-primary hover:text-white transition-all shadow-xl shadow-slate-900/10 hover:shadow-primary/20"
               >
                 Save Changes
                 <Save size={16} />
@@ -877,7 +877,7 @@ export default function ProductDashboardAdmin() {
                 </button>
                 <button
                   onClick={() => handleDelete(deleteId)}
-                  className="flex-1 py-4.5 bg-gold text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg hover:bg-gold/90 transition-all duration-300"
+                  className="flex-1 py-4.5 bg-slate-900 text-gold rounded-2xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-lg hover:bg-primary hover:text-white transition-all duration-300 shadow-slate-900/10 hover:shadow-primary/20"
                 >
                   Delete
                 </button>

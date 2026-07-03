@@ -527,7 +527,7 @@ export default function AddProduct() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full md:w-auto flex items-center justify-center gap-3 px-8 md:px-10 py-4 bg-slate-900 text-white rounded-lg md:rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-gold transition-all duration-500 disabled:opacity-50"
+                className="w-full md:w-auto flex items-center justify-center gap-3 px-8 md:px-10 py-4 bg-slate-900 text-gold rounded-lg md:rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-primary hover:text-white transition-all duration-500 disabled:opacity-50 shadow-slate-900/10 hover:shadow-primary/20"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
