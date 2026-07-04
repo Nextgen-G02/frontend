@@ -244,7 +244,9 @@ export default function ProductDashboardAdmin() {
 
       const matchesSearch = p.pName?.toLowerCase().includes(search.toLowerCase()) ||
         p.productId?.toLowerCase().includes(search.toLowerCase()) ||
-        p.pCategory?.toLowerCase().includes(search.toLowerCase()) ||
+        (Array.isArray(p.pCategory)
+          ? p.pCategory.some(cat => cat?.toLowerCase().includes(search.toLowerCase()))
+          : p.pCategory?.toLowerCase().includes(search.toLowerCase())) ||
         (p.description || p.pDescription || p.pDesc)?.toLowerCase().includes(search.toLowerCase());
 
       return matchesCat && matchesSearch;
@@ -569,7 +571,7 @@ export default function ProductDashboardAdmin() {
       {editProduct && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
           <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col border border-slate-100">
-            <div className="p-8 md:p-10 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <div className="py-4 md:py-5 px-8 md:px-10 border-b border-slate-100 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gold/10 text-gold rounded-2xl"><Edit3 size={24} /></div>
                 <div>
@@ -583,7 +585,7 @@ export default function ProductDashboardAdmin() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-8 md:p-10 space-y-6 no-scrollbar">
+            <div className="flex-1 overflow-y-auto py-6 md:py-8 px-8 md:px-10 space-y-6 no-scrollbar">
               <div className="flex flex-col gap-6">
                 <div className="space-y-2">
                   <label className="text-[11px] font-medium text-slate-500 uppercase tracking-widest ml-1">Product Category</label>
@@ -838,7 +840,7 @@ export default function ProductDashboardAdmin() {
               </div>
             </div>
 
-            <div className="p-8 md:p-10 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-4 shrink-0">
+            <div className="py-4 md:py-5 px-8 md:px-10 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-4 shrink-0">
               <button
                 onClick={() => setEditProduct(null)}
                 className="px-8 py-4 bg-[#FCE8E6] text-[#C5221F] rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#FAD2CF] transition-all border border-[#F5C2C1] flex items-center justify-center gap-2 shadow-sm"
