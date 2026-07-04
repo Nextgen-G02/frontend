@@ -12,6 +12,7 @@ import ProductDetails from './web/pages/ProductDetails'
 import CustomizeCakeForm from './web/pages/CustomizeCakeForm'
 import MyOrders from './web/pages/MyOrders'
 import About from './web/pages/About'
+import Wishlist from './web/pages/Wishlist'
 
 // System Pages
 import AdminDashboard from './system/pages/Dashboard/Dashboard'
@@ -50,6 +51,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/customize" element={<CustomizeCakeForm />} />
         <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
 
         {/* Global Admin Wrapper */}
         <Route element={<ProtectedRoute><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} path="/admin" />

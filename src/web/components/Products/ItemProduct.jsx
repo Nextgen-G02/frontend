@@ -44,7 +44,8 @@ const ItemProduct = ({ searchParams }) => {
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.pName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchParams.search.toLowerCase());
+      product.description?.toLowerCase().includes(searchParams.search.toLowerCase()) ||
+      product.productId?.toLowerCase().includes(searchParams.search.toLowerCase());
     const matchesCategory = searchParams.category === "all" || product.pCategory === searchParams.category;
 
     // Price range validation
@@ -84,7 +85,7 @@ const ItemProduct = ({ searchParams }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 px-0 mt-2">
         {filteredProducts.map((product) => (
           <div key={product._id} className="w-full">
-            <ProductCard product={product} />
+            <ProductCard product={product} hideDescription={true} />
           </div>
         ))}
       </div>

@@ -7,6 +7,7 @@ import {
   User,
   LayoutDashboard,
   LogOut,
+  Heart,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../shared/context/AuthContext";
@@ -20,6 +21,26 @@ export default function Navbar() {
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  useEffect(() => {
+    const updateCount = () => {
+      const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      setWishlistCount(list.length);
+    };
+    updateCount();
+    window.addEventListener('wishlistUpdate', updateCount);
+    window.addEventListener('storage', updateCount);
+    return () => {
+      window.removeEventListener('wishlistUpdate', updateCount);
+      window.removeEventListener('storage', updateCount);
+    };
+  }, []);
+
+  useEffect(() => {
+    const list = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    setWishlistCount(list.length);
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -105,6 +126,21 @@ export default function Navbar() {
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           </button>
 
+          {/* WISHLIST */}
+          {user && (
+            <Link
+              to="/wishlist"
+              className="group relative p-1 text-slate-400 hover:text-slate-900 transition-colors"
+            >
+              <Heart size={18} md:size={20} strokeWidth={1.5} className="group-hover:scale-105 transition-transform" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[7px] md:text-[8px] font-bold w-3 h-3 md:w-4 md:h-4 rounded-full flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+          )}
+
           {/* CART */}
           <Link
             to="/cart"
@@ -130,12 +166,12 @@ export default function Navbar() {
                     <LayoutDashboard size={20} strokeWidth={1.5} />
                   </Link>
                 )}
-                <Link
-                  to="/my-orders"
-                  className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 border border-slate-200 hover:border-slate-900 hover:text-slate-900 transition-all duration-300 rounded-full shadow-sm"
-                >
-                  My Orders
-                </Link>
+                 <Link
+                   to="/my-orders"
+                   className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 border border-slate-200 hover:border-slate-900 hover:text-slate-900 transition-all duration-300 rounded-full shadow-sm"
+                 >
+                   My Orders
+                 </Link>
                 <button
                   onClick={handleLogout}
                   className="px-4 py-1.5 text-[9px] font-black uppercase tracking-[0.2em] text-[#C29D59] border border-[#C29D59]/30 hover:border-[#C29D59] hover:bg-[#C29D59] hover:text-white transition-all duration-300 rounded-full shadow-sm"
@@ -202,6 +238,13 @@ export default function Navbar() {
                 className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-300 hover:text-white"
               >
                 My Orders
+              </Link>
+              <Link
+                to="/wishlist"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-300 hover:text-white"
+              >
+                Wishlist
               </Link>
 
               <button

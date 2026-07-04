@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 const SearchProduct = ({ setSearchParams }) => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
-  const [minPrice, setMinPrice] = useState('');
+  const [minPrice, setMinPrice] = useState('0');
   const [maxPrice, setMaxPrice] = useState('');
   const [categories, setCategories] = useState([]);
   const maxLimit = 50000;
@@ -109,24 +109,24 @@ const SearchProduct = ({ setSearchParams }) => {
   };
 
   return (
-    <div className="bg-slate-50/70 backdrop-blur-sm p-6 md:p-8 pt-8 pb-10 md:pt-10 md:pb-14 rounded-[24px] md:rounded-[32px] shadow-lg border-2 border-gold/15 border-t-gold border-t-[6px] transition-all duration-300 min-h-[480px] md:min-h-[580px] flex flex-col gap-8 md:gap-10">
+    <div className="bg-white/95 backdrop-blur-sm p-6 md:p-8 pt-8 pb-10 md:pt-10 md:pb-14 rounded-[24px] md:rounded-[32px] shadow-lg border-2 border-gold/15 border-t-gold border-t-[6px] transition-all duration-300 min-h-[480px] md:min-h-[580px] flex flex-col gap-8 md:gap-10">
       <div className="flex items-center justify-between pb-4 border-b border-slate-200">
         <div className="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-gold"><path d="M4 21v-7" /><path d="M4 10V3" /><path d="M12 21v-9" /><path d="M12 8V3" /><path d="M20 21v-5" /><path d="M20 12V3" /><path d="M2 14h4" /><path d="M10 8h4" /><path d="M18 16h4" /></svg>
           <h2 className="text-slate-800 font-extrabold uppercase text-sm md:text-base tracking-wider">Filters</h2>
         </div>
-        {(search || category !== 'all' || minPrice || maxPrice) && (
+        {(search || category !== 'all' || (minPrice && minPrice !== '0') || maxPrice) && (
           <button
             type="button"
             onClick={() => {
               setSearch('');
               setCategory('all');
-              setMinPrice('');
+              setMinPrice('0');
               setMaxPrice('');
               setSearchParams({
                 search: '',
                 category: 'all',
-                minPrice: '',
+                minPrice: '0',
                 maxPrice: ''
               });
             }}
