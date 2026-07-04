@@ -44,7 +44,8 @@ const ItemProduct = ({ searchParams }) => {
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.pName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchParams.search.toLowerCase());
+      product.description?.toLowerCase().includes(searchParams.search.toLowerCase()) ||
+      product.productId?.toLowerCase().includes(searchParams.search.toLowerCase());
     const matchesCategory = searchParams.category === "all" || product.pCategory === searchParams.category;
 
     // Price range validation
