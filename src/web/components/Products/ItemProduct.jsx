@@ -85,7 +85,7 @@ const ItemProduct = ({ searchParams }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 px-0 mt-2">
         {filteredProducts.map((product) => (
           <div key={product._id} className="w-full">
-            <ProductCard product={product} />
+            <ProductCard product={product} hideDescription={true} />
           </div>
         ))}
       </div>

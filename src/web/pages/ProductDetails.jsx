@@ -40,6 +40,7 @@ export default function ProductDetails() {
   const [cakeMessage, setCakeMessage] = useState('');
   const [isWishlist, setIsWishlist] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -79,6 +80,11 @@ export default function ProductDetails() {
     // Reset state on ID change
     setQuantity(1);
     setCakeMessage('');
+    
+    // Check if item is in wishlist
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    setIsWishlist(wishlist.includes(id));
+
     window.scrollTo(0, 0);
   }, [id]);
 
@@ -135,6 +141,33 @@ export default function ProductDetails() {
 
     addToCart(product, quantity, customProps);
     toast.success(`${product.pName} added to cart!`);
+  };
+
+  // Wishlist toggle handler
+  const handleWishlistToggle = () => {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    let updatedWishlist;
+    if (isWishlist) {
+      updatedWishlist = wishlist.filter(item => item !== id);
+      toast.success(`${product.pName} removed from wishlist`);
+    } else {
+      updatedWishlist = [...wishlist, id];
+      toast.success(`${product.pName} added to wishlist`);
+    }
+    localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+    setIsWishlist(!isWishlist);
+    window.dispatchEvent(new Event('wishlistUpdate'));
+  };
+
+  // Share handler (copy link to clipboard)
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => {
+        toast.success("Link copied to clipboard!");
+      })
+      .catch(() => {
+        toast.error("Failed to copy link");
+      });
   };
 
   return (
@@ -232,13 +265,73 @@ export default function ProductDetails() {
                 <div className="mb-6">
                   <div className="flex justify-between items-start mb-2">
                     <p className="text-[#C29D59] text-xs font-bold tracking-widest uppercase mb-2">{product.pCategory}</p>
-                    <div className="flex gap-2">
-                      <button onClick={() => setIsWishlist(!isWishlist)} className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 hover:border-[#C29D59] hover:text-[#C29D59] transition-colors group">
+                    <div className="flex gap-2 relative">
+                      <button onClick={handleWishlistToggle} className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 hover:border-[#C29D59] hover:text-[#C29D59] transition-colors group">
                         <Heart size={18} className={isWishlist ? 'fill-rose-500 text-rose-500' : 'text-slate-400 group-hover:text-rose-500'} />
                       </button>
-                      <button className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 hover:border-[#C29D59] text-slate-400 hover:text-[#C29D59] transition-colors">
-                        <Share2 size={18} />
-                      </button>
+                      
+                      <div className="relative">
+                        <button onClick={() => setShowShareMenu(!showShareMenu)} className="p-2.5 rounded-full bg-white shadow-sm border border-slate-100 hover:border-[#C29D59] text-slate-400 hover:text-[#C29D59] transition-colors">
+                          <Share2 size={18} />
+                        </button>
+                        
+                        {showShareMenu && (
+                          <>
+                            {/* Backdrop to close popover */}
+                            <div className="fixed inset-0 z-40" onClick={() => setShowShareMenu(false)} />
+                            
+                            <div className="absolute right-0 mt-2 w-44 bg-white border border-slate-100 rounded-2xl shadow-2xl p-2 z-50 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-200">
+                              <a
+                                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out this delicious ${product.pName} at Nirosha Sweet House: ` + window.location.href)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setShowShareMenu(false)}
+                                className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl transition-all font-bold text-xs text-slate-700 hover:text-slate-900"
+                              >
+                                <svg className="w-4.5 h-4.5 text-emerald-500" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97-1.861-1.868-4.333-2.897-6.966-2.898-5.41 0-9.819 4.37-9.823 9.8.001 1.649.435 3.259 1.261 4.673l-.974 3.559 3.659-.948zm12.39-3.957c-.33-.165-1.951-.951-2.252-1.06-.3-.11-.52-.165-.74.165-.22.33-.85 1.061-1.04 1.27-.19.22-.38.242-.71.077-1.78-.888-3.085-1.636-4.305-3.708-.32-.556.32-.516.92-1.717.1-.198.05-.374-.025-.539-.075-.165-.74-1.76-.99-2.385-.245-.595-.493-.514-.675-.523-.175-.008-.375-.01-.575-.01-.2 0-.525.075-.8.375-.275.3-.1.575.2 1.225.3.65 1.472 2.505 3.567 3.41 1.684.729 3.018.918 4.015.77 1.11-.166 2.427-.99 2.77-1.93.343-.94.343-1.745.24-1.91-.1-.165-.37-.265-.7-.43"/>
+                                </svg>
+                                WhatsApp
+                              </a>
+                              <a
+                                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setShowShareMenu(false)}
+                                className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl transition-all font-bold text-xs text-slate-700 hover:text-slate-900"
+                              >
+                                <svg className="w-4.5 h-4.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                Facebook
+                              </a>
+                              <a
+                                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this delicious ${product.pName} at Nirosha Sweet House!`)}&url=${encodeURIComponent(window.location.href)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setShowShareMenu(false)}
+                                className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl transition-all font-bold text-xs text-slate-700 hover:text-slate-900"
+                              >
+                                <svg className="w-4.5 h-4.5 text-slate-900" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                                Twitter (X)
+                              </a>
+                              <hr className="border-slate-100 my-1" />
+                              <button
+                                onClick={() => {
+                                  handleShare();
+                                  setShowShareMenu(false);
+                                }}
+                                className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 rounded-xl transition-all font-bold text-xs text-slate-700 hover:text-slate-900 w-full text-left"
+                              >
+                                <Share2 size={14} className="text-slate-400" />
+                                Copy Link
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-3 md:mb-4 leading-tight">
@@ -257,8 +350,14 @@ export default function ProductDetails() {
                     </div>
                   </div>
 
+                  {product.description && (
+                    <p className="text-slate-600 text-sm leading-relaxed mb-6 font-medium">
+                      {product.description}
+                    </p>
+                  )}
+
                   {/* Price */}
-                  <div className="flex items-end gap-3 mb-4">
+                  <div className="flex items-end gap-3 mb-4 pt-4 border-t border-slate-100">
                     <span className="text-3xl font-bold text-slate-900">Rs. {totalPrice.toLocaleString()}</span>
                   </div>
                 </div>
