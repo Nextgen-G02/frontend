@@ -173,14 +173,19 @@ const OrderList = () => {
     };
 
     /* ── derived data ── */
-    const filteredOrders = orders.filter(o => {
+    const baseFilteredOrders = orders.filter(o => {
         const matchSource = activeTab === 'Website' ? o.source === 'Website' : (activeTab === 'Standard' ? o.source !== 'Website' : true);
         const matchSearch = !search ||
             o.customerName?.toLowerCase().includes(search.toLowerCase()) ||
             o.phone?.includes(search);
-        const matchOverdue = !showOnlyOverdue || checkIsOverdue(o.scheduleDate, o.scheduleTime, o.orderStatus);
-        return matchSource && matchSearch && matchOverdue;
+        return matchSource && matchSearch;
     });
+
+    const overdueCount = baseFilteredOrders.filter(o => checkIsOverdue(o.scheduleDate, o.scheduleTime, o.orderStatus)).length;
+
+    const filteredOrders = baseFilteredOrders.filter(o => 
+        !showOnlyOverdue || checkIsOverdue(o.scheduleDate, o.scheduleTime, o.orderStatus)
+    );
 
     const metrics = {
         total:   filteredOrders.length,
@@ -322,9 +327,14 @@ const OrderList = () => {
                                     <button
                                         type="button"
                                         onClick={() => setShowOnlyOverdue(!showOnlyOverdue)}
-                                        className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${showOnlyOverdue ? 'bg-rose-600 text-white shadow-rose-600/20' : 'bg-white border border-rose-200 text-rose-500 hover:bg-rose-50'}`}
+                                        className={`relative w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${showOnlyOverdue ? 'bg-rose-600 text-white shadow-rose-600/20' : 'bg-white border border-rose-200 text-rose-500 hover:bg-rose-50'}`}
                                     >
                                         <AlertCircle size={14} /> {showOnlyOverdue ? 'Showing Overdue' : 'Overdue Only'}
+                                        {overdueCount > 0 && (
+                                            <span className={`absolute -top-2 -right-2 text-white text-[9px] font-black px-2 py-0.5 rounded-full border-2 border-white shadow-sm ${showOnlyOverdue ? 'bg-rose-800' : 'bg-rose-600'}`}>
+                                                {overdueCount}
+                                            </span>
+                                        )}
                                     </button>
 
                                     {/* Apply button */}

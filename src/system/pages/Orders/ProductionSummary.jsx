@@ -42,6 +42,7 @@ const ProductionSummary = () => {
     const [showOnlyOverdue, setShowOnlyOverdue] = useState(false);
     const [summary, setSummary] = useState([]);
     const [categoryGroups, setCategoryGroups] = useState({});
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, fromStatus: '', toStatus: '', count: 0, successMsg: '' });
 
     useEffect(() => {
         fetchOrders();
@@ -211,10 +212,17 @@ const ProductionSummary = () => {
         setCategoryGroups(groups);
     };
 
-    const handleBatchUpdate = async (fromStatus, toStatus, successMsg) => {
+    const initiateBatchUpdate = (fromStatus, toStatus, successMsg) => {
         const targetOrders = orders.filter(o => o.orderStatus === fromStatus);
         if (targetOrders.length === 0) return toast.error(`No orders in ${fromStatus} state.`);
-        if (!window.confirm(`Transition ${targetOrders.length} orders to ${toStatus}?`)) return;
+        setConfirmModal({ isOpen: true, fromStatus, toStatus, count: targetOrders.length, successMsg });
+    };
+
+    const confirmBatchUpdate = async () => {
+        const { fromStatus, toStatus, successMsg } = confirmModal;
+        setConfirmModal({ isOpen: false, fromStatus: '', toStatus: '', count: 0, successMsg: '' });
+        
+        const targetOrders = orders.filter(o => o.orderStatus === fromStatus);
         try {
             const token = localStorage.getItem('token');
             await Promise.all(targetOrders.map(order => 
@@ -306,8 +314,8 @@ const ProductionSummary = () => {
 
                         {/* Batch Controls */}
                         <div className="flex items-center gap-3 border-l border-slate-200 pl-5">
-                            <button onClick={() => handleBatchUpdate('Confirmed', 'Preparing', 'Batch production started')} className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-emerald-600/10 flex items-center gap-2"><Play size={14} /> Start</button>
-                            <button onClick={() => handleBatchUpdate('Preparing', 'Ready', 'Batch marked as ready')} className="px-6 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg flex items-center gap-2"><Check size={14} /> Finish</button>
+                            <button onClick={() => initiateBatchUpdate('Confirmed', 'Preparing', 'Batch production started')} className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-emerald-600/10 flex items-center gap-2"><Play size={14} /> Start</button>
+                            <button onClick={() => initiateBatchUpdate('Preparing', 'Ready', 'Batch marked as ready')} className="px-6 py-3 bg-slate-900 text-gold rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg flex items-center gap-2"><Check size={14} /> Finish</button>
                             <button onClick={() => window.print()} className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-slate-900 rounded-xl transition-all shadow-sm"><Printer size={20} /></button>
                         </div>
                     </div>
@@ -515,6 +523,38 @@ const ProductionSummary = () => {
                     ))}
                 </div>
             </div>
+            {/* Custom Confirm Modal */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm print:hidden">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-200">
+                        <div className="p-6 md:p-8 bg-slate-50 border-b border-slate-200 text-center">
+                            <div className="w-16 h-16 bg-white border border-slate-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-primary">
+                                <AlertCircle size={32} />
+                            </div>
+                            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Confirm Action</h2>
+                        </div>
+                        <div className="p-6 md:p-8 text-center space-y-6">
+                            <p className="text-sm font-medium text-slate-600">
+                                Are you sure you want to transition <span className="font-black text-slate-900 text-base">{confirmModal.count}</span> orders to <span className="font-black text-primary uppercase">{confirmModal.toStatus}</span>?
+                            </p>
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => setConfirmModal({ isOpen: false, fromStatus: '', toStatus: '', count: 0, successMsg: '' })}
+                                    className="flex-1 bg-white border border-slate-200 text-slate-500 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={confirmBatchUpdate}
+                                    className="flex-1 bg-slate-900 text-gold py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg shadow-slate-900/10 flex items-center justify-center gap-2"
+                                >
+                                    <CheckCircle2 size={14} /> Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
