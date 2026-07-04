@@ -9,13 +9,13 @@ const Products = () => {
   const [searchParams, setSearchParams] = useState({
     search: '',
     category: 'all',
-    minPrice: '',
+    minPrice: '0',
     maxPrice: ''
   });
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   return (
-    <div className="bg-slate-50/30 min-h-screen flex flex-col">
+    <div className="bg-[#FDFBF8] min-h-screen flex flex-col">
       <SEO
         title="Our Collection"
         description="Browse our luxury collection of custom cakes, freshly baked sweets, and premium beverages."
@@ -24,7 +24,7 @@ const Products = () => {
       <Navbar />
 
       <main className="flex-grow pt-24 pb-20 px-4 md:px-8">
-        <div className="bg-white p-6 md:p-10 rounded-[32px] md:rounded-[48px] shadow-xl shadow-black/5 max-w-[1600px] mx-auto border border-slate-50 animate-in fade-in duration-1000">
+        <div className="bg-[#fbf9f4] p-6 md:p-10 rounded-[32px] md:rounded-[48px] shadow-xl shadow-black/5 max-w-[1600px] mx-auto border border-[#EADFC9]/30 animate-in fade-in duration-1000">
           <header className="flex flex-col items-center mb-8 md:mb-10">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-1 bg-gold rounded-full"></div>
