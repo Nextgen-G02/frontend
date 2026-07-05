@@ -38,6 +38,7 @@ export default function POSTerminal() {
   const [view, setView] = useState("catalog"); // "catalog" or "history"
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historySearch, setHistorySearch] = useState("");
   
   // StrictMode & Double-Execution Guard
   const isMounted = React.useRef(true);
@@ -182,6 +183,17 @@ export default function POSTerminal() {
     }
   };
 
+  const filteredHistory = React.useMemo(() => {
+    if (!historySearch.trim()) return history;
+    const normalize = (val) => String(val || "").trim().toLowerCase();
+    const query = normalize(historySearch);
+    return history.filter(order => 
+      normalize(order._id.slice(-6)).includes(query) ||
+      normalize(order.customerName).includes(query) ||
+      normalize(order.orderStatus).includes(query)
+    );
+  }, [history, historySearch]);
+
   const handleCancelSale = async (orderId) => {
     if (!window.confirm("Are you sure you want to cancel this sale? This will restore inventory.")) return;
     try {
@@ -206,7 +218,7 @@ export default function POSTerminal() {
           item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { ...product, quantity: 1, customization: { message: "", flavor: "", specialInstructions: "" } }];
+      return [...prev, { ...product, quantity: 1, discountPercentage: product.discountPercentage || 0, customization: { message: "", flavor: "", specialInstructions: "" } }];
     });
   };
 
@@ -227,7 +239,11 @@ export default function POSTerminal() {
   };
 
   const calculateTotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.reduce((sum, item) => {
+      const discount = item.discountPercentage || 0;
+      const finalPrice = item.price * (1 - discount / 100);
+      return sum + (finalPrice * item.quantity);
+    }, 0);
   };
 
   const handleCheckout = async () => {
@@ -247,6 +263,7 @@ export default function POSTerminal() {
           quantity: item.quantity,
           unit: item.unit || 'pcs',
           price: item.price,
+          discountPercentage: item.discountPercentage || 0,
           customization: item.customization
         })),
         paymentMethod: paymentMethod || "Cash",
@@ -437,6 +454,8 @@ export default function POSTerminal() {
                   const pUnit = product.unit || "pcs";
                   const pStock = typeof product.stock === 'number' ? product.stock : 0;
                   const pImage = product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729";
+                  const pDiscount = product.discountPercentage || 0;
+                  const discountedPrice = pPrice * (1 - pDiscount / 100);
 
                   return (
                     <button
@@ -450,7 +469,12 @@ export default function POSTerminal() {
                       </div>
                       
                       {/* Visual Identity */}
-                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-slate-50 p-1.5 border border-slate-100 group-hover:border-primary/30 transition-all duration-700 shadow-inner">
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-slate-50 p-1.5 border border-slate-100 group-hover:border-primary/30 transition-all duration-700 shadow-inner relative">
+                        {pDiscount > 0 && (
+                          <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md z-20">
+                            {pDiscount}% OFF
+                          </div>
+                        )}
                         <img 
                           src={pImage} 
                           alt={pName}
@@ -471,7 +495,10 @@ export default function POSTerminal() {
                         <div className="mt-auto space-y-3">
                           <div className="flex items-center justify-between px-2">
                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rate</p>
-                             <p className="text-lg font-black text-slate-900 tracking-tighter">Rs.{pPrice.toLocaleString()}</p>
+                             <div className="text-right">
+                                {pDiscount > 0 && <span className="text-[10px] text-slate-400 line-through mr-1 block leading-none">Rs.{pPrice.toLocaleString()}</span>}
+                                <p className="text-lg font-black text-slate-900 tracking-tighter leading-none">Rs.{discountedPrice.toLocaleString()}</p>
+                             </div>
                           </div>
                           
                           <div className="flex items-center justify-between px-2 py-2 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-primary/5 group-hover:border-primary/10 transition-colors">
@@ -494,17 +521,32 @@ export default function POSTerminal() {
           </div>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
-             <div className="flex items-center justify-between mb-8 pr-4">
+             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pr-4 gap-4">
                 <div>
                    <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Recent Sale History</h2>
                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Manage your in-store sales</p>
                 </div>
-                <button 
-                  onClick={() => setView('catalog')}
-                  className="px-6 py-3.5 bg-slate-900 text-gold rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 hover:bg-primary hover:text-white transition-all active:scale-95"
-                >
-                  <Plus size={18} /> New Sale
-                </button>
+                
+                <div className="flex items-center gap-4">
+                   <div className="relative group w-full md:w-64">
+                      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                         <Search className="text-slate-400 group-focus-within:text-primary transition-all duration-300" size={16} />
+                      </div>
+                      <input
+                         type="text"
+                         placeholder="Search sales..."
+                         value={historySearch}
+                         onChange={(e) => setHistorySearch(e.target.value)}
+                         className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 font-bold shadow-sm rounded-xl text-[11px] uppercase tracking-wider"
+                      />
+                   </div>
+                   <button 
+                     onClick={() => setView('catalog')}
+                     className="px-6 py-3.5 bg-slate-900 text-gold rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 hover:bg-primary hover:text-white transition-all active:scale-95 shrink-0"
+                   >
+                     <Plus size={18} /> New Sale
+                   </button>
+                </div>
              </div>
 
              <div className="flex-1 overflow-y-auto pr-4 no-scrollbar">
@@ -522,10 +564,10 @@ export default function POSTerminal() {
                     <tbody className="divide-y divide-slate-50">
                       {historyLoading ? (
                         <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em] animate-pulse">Loading records...</td></tr>
-                      ) : history.length === 0 ? (
+                      ) : filteredHistory.length === 0 ? (
                         <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em]">No sales found</td></tr>
                       ) : (
-                        history.map(order => (
+                        filteredHistory.map(order => (
                           <tr key={order._id} className="hover:bg-slate-50/50 transition-all group">
                             <td className="px-8 py-5">
                               <p className="font-mono text-[11px] font-black text-slate-900 uppercase leading-none mb-1.5">SEQ: {order._id.slice(-6).toUpperCase()}</p>
@@ -677,7 +719,12 @@ export default function POSTerminal() {
                       {/* Price - Right Aligned */}
                       <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right">
-                          <span className="font-black text-slate-900 text-[13px] tracking-tighter block leading-none">Rs.{(item.price * item.quantity).toLocaleString()}</span>
+                          {(item.discountPercentage > 0) && (
+                            <span className="text-[9px] text-rose-500 font-bold uppercase tracking-widest block leading-none mb-0.5">
+                              {item.discountPercentage}% OFF
+                            </span>
+                          )}
+                          <span className="font-black text-slate-900 text-[13px] tracking-tighter block leading-none">Rs.{(item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity).toLocaleString()}</span>
                           <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Line Total</span>
                         </div>
                         <button 

@@ -72,10 +72,10 @@ const Cart = () => {
   // If nothing is selected, show the total of all items in the cart.
   // Otherwise, show the total of only the selected items.
   const selectedTotal = selectedItems.size === 0
-    ? cart.reduce((total, item) => total + (item.price * item.quantity), 0)
+    ? cart.reduce((total, item) => total + (item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity), 0)
     : cart
       .filter(item => selectedItems.has(item.cartItemId || item._id))
-      .reduce((total, item) => total + (item.price * item.quantity), 0);
+      .reduce((total, item) => total + (item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity), 0);
 
   const handleCheckout = () => {
     if (!user) {
@@ -83,7 +83,7 @@ const Cart = () => {
       navigate('/login');
       return;
     }
-    
+
     const itemsToOrder = selectedItems.size === 0
       ? cart
       : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
@@ -103,7 +103,7 @@ const Cart = () => {
 
   const handlePlaceOrder = async (e) => {
     if (e) e.preventDefault();
-    
+
     const itemsToOrder = selectedItems.size === 0
       ? cart
       : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
@@ -154,6 +154,7 @@ const Cart = () => {
         category: item.pCategory,
         quantity: item.quantity,
         price: item.price,
+        discountPercentage: item.discountPercentage || 0,
         customization: item.customization ? {
           message: item.customization.message || "",
           flavor: item.customization.flavor || "",
@@ -312,7 +313,7 @@ const Cart = () => {
                   <div className="bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-50 animate-in fade-in slide-in-from-right-4 duration-500">
                     <div className="flex items-center justify-between mb-8">
                       <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Delivery Details</h2>
-                      <button 
+                      <button
                         onClick={() => setIsCheckoutMode(false)}
                         className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors"
                       >
@@ -324,8 +325,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">First Name *</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="firstName"
                             value={checkoutFormData.firstName}
                             onChange={handleInputChange}
@@ -336,8 +337,8 @@ const Cart = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Last Name</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="lastName"
                             value={checkoutFormData.lastName}
                             onChange={handleInputChange}
@@ -350,8 +351,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Email Address</label>
-                          <input 
-                            type="email" 
+                          <input
+                            type="email"
                             name="email"
                             value={checkoutFormData.email}
                             onChange={handleInputChange}
@@ -361,8 +362,8 @@ const Cart = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Phone Number *</label>
-                          <input 
-                            type="tel" 
+                          <input
+                            type="tel"
                             name="phone"
                             value={checkoutFormData.phone}
                             onChange={handleInputChange}
@@ -375,8 +376,8 @@ const Cart = () => {
 
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Delivery Address *</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           name="address"
                           value={checkoutFormData.address}
                           onChange={handleInputChange}
@@ -389,8 +390,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">City *</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="city"
                             value={checkoutFormData.city}
                             onChange={handleInputChange}
@@ -406,8 +407,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preferred Date</label>
-                          <input 
-                            type="date" 
+                          <input
+                            type="date"
                             name="scheduleDate"
                             value={checkoutFormData.scheduleDate}
                             onChange={handleInputChange}
@@ -416,8 +417,8 @@ const Cart = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preferred Time</label>
-                          <input 
-                            type="time" 
+                          <input
+                            type="time"
                             name="scheduleTime"
                             value={checkoutFormData.scheduleTime}
                             onChange={handleInputChange}
@@ -462,7 +463,7 @@ const Cart = () => {
                               )}
                             </div>
                             <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">{item.pCategory}</p>
-                            
+
                             {/* Customization Details */}
                             {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
                               <div className="text-[11px] text-[#84632A] space-y-0.5 mb-3 bg-[#FAF6F0]/80 p-2.5 rounded-xl border border-[#EADFC9]/60 max-w-xs md:max-w-sm">
@@ -508,8 +509,11 @@ const Cart = () => {
                             >
                               <Trash2 size={20} />
                             </button>
-                            <div className="font-black text-slate-900 text-sm md:text-base">
-                              Rs.{(item.price * item.quantity).toLocaleString()}
+                            <div>
+                              {(item.discountPercentage > 0) && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-widest block leading-none mb-1">{item.discountPercentage}% OFF</span>}
+                              <div className="font-black text-slate-900 text-sm md:text-base leading-none">
+                                Rs.{(item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity).toLocaleString()}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -601,7 +605,8 @@ const Cart = () => {
                   <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-1">Premium Value</span>
-                      <span className="text-2xl font-black text-slate-900">Rs.{detailProduct.price?.toLocaleString()}</span>
+                      {(detailProduct.discountPercentage > 0) && <span className="text-[12px] text-slate-400 line-through leading-none mb-1">Rs.{detailProduct.price?.toLocaleString()}</span>}
+                      <span className="text-2xl font-black text-slate-900 leading-none">Rs.{(detailProduct.price * (1 - (detailProduct.discountPercentage || 0) / 100))?.toLocaleString()}</span>
                     </div>
                   </div>
 

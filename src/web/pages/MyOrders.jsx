@@ -24,7 +24,7 @@ export default function MyOrders() {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            
+
             // Fetch standard orders
             const stdRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/orders/customer`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -37,7 +37,7 @@ export default function MyOrders() {
 
             // Combine and sort
             const combined = [...stdOrders, ...customOrders].sort((a, b) => b.createdAt - a.createdAt);
-            
+
             setOrders(combined);
         } catch (error) {
             console.error("Error fetching orders:", error);
@@ -78,7 +78,7 @@ export default function MyOrders() {
 
         payhere.onCompleted = function onCompleted(orderId) {
             toast.success("Payment successful!");
-            
+
             // Tell backend payment is complete
             axios.put(`${import.meta.env.VITE_BACKEND_URL}/api/custom-cakes/${request._id}/pay`, {
                 amountPaid: amountToPay,
@@ -167,7 +167,7 @@ export default function MyOrders() {
     return (
         <div className="bg-[#fbf9f4] min-h-screen flex flex-col">
             <Navbar />
-            
+
             <main className="flex-grow pt-24 pb-20 px-4 md:px-8">
                 <div className="max-w-5xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
@@ -205,7 +205,7 @@ export default function MyOrders() {
                                         <div key={`custom-${order._id}`} className="bg-white rounded-[32px] p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-black/5 transition-all flex flex-col lg:flex-row gap-8 relative overflow-hidden">
                                             {/* Badge */}
                                             <div className="absolute top-0 right-0 bg-[#C29D59] text-white text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-bl-xl">Custom Design</div>
-                                            
+
                                             {/* Image Reference */}
                                             <div className="w-full lg:w-48 shrink-0">
                                                 <div className="aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-100">
@@ -264,12 +264,12 @@ export default function MyOrders() {
                                                     <p className="text-xs font-medium text-slate-500 text-center mb-6">
                                                         {order.paymentRequired === 'Half' ? '50% deposit required to confirm your order.' : 'Full payment required to confirm your order.'}
                                                     </p>
-                                                    
+
                                                     <div className="text-2xl font-black text-slate-900 mb-6">
                                                         Rs. {order.paymentRequired === 'Half' ? (order.estimatedPrice / 2).toLocaleString() : order.estimatedPrice.toLocaleString()}
                                                     </div>
 
-                                                    <button 
+                                                    <button
                                                         onClick={() => handlePayment(order)}
                                                         className="w-full bg-[#C29D59] text-white py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-slate-900 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-[#C29D59]/20">
                                                         <CreditCard size={16} /> Pay Now
@@ -285,7 +285,7 @@ export default function MyOrders() {
                                     <div key={`std-${order._id}`} className="bg-white rounded-[32px] p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-black/5 transition-all relative overflow-hidden">
                                         {/* Badge */}
                                         <div className="absolute top-0 right-0 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest px-4 py-1 rounded-bl-xl">Standard Order</div>
-                                        
+
                                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-50 pt-4 md:pt-0">
                                             <div>
                                                 <div className="flex items-center gap-3 mb-2">
@@ -327,7 +327,7 @@ export default function MyOrders() {
                                                 </div>
                                             ))}
                                         </div>
-                                        
+
                                         {(order.scheduleDate || order.scheduleTime) && (
                                             <div className="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-sm font-medium text-slate-500">
                                                 <Clock size={16} className="text-primary" />
@@ -341,7 +341,7 @@ export default function MyOrders() {
                     )}
                 </div>
             </main>
-            
+
             <Footer />
         </div>
     );

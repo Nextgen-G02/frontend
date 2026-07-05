@@ -11,7 +11,7 @@ import 'swiper/css/thumbs';
 import { 
   Star, ChevronRight, Heart, Share2, ShieldCheck, 
   Truck, Clock, Calendar, CheckCircle2, ArrowRight,
-  ShoppingCart, Minus, Plus, MessageSquare, Award
+  ShoppingCart, Minus, Plus, MessageSquare, Award, X
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
@@ -42,6 +42,11 @@ export default function ProductDetails() {
   const [activeTab, setActiveTab] = useState('description');
   const [showShareMenu, setShowShareMenu] = useState(false);
 
+  const [reviews, setReviews] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, text: '', location: '' });
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -56,6 +61,15 @@ export default function ProductDetails() {
           setSelectedFlavor(data.flavors[0]);
         }
         
+        // Fetch product reviews
+        axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/reviews/product/${id}`)
+          .then(revRes => {
+             if (revRes.data.success) {
+               setReviews(revRes.data.data);
+             }
+          })
+          .catch(err => console.error("Error fetching reviews:", err));
+
         // Set main product and immediately stop loading screen
         setProduct(data);
         setLoading(false);
@@ -122,8 +136,10 @@ export default function ProductDetails() {
     : ['https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1000'];
 
   const basePrice = product.price || 0;
+  const discount = product.discountPercentage || 0;
+  const discountedBasePrice = basePrice * (1 - discount / 100);
   const weightMultiplier = selectedWeight ? (selectedWeight.priceMultiplier || 1) : 1;
-  const totalPrice = basePrice * weightMultiplier * quantity;
+  const totalPrice = discountedBasePrice * weightMultiplier * quantity;
 
   // Add to cart handler
   const handleAddToCart = () => {
@@ -133,7 +149,8 @@ export default function ProductDetails() {
     }
 
     const customProps = {
-      price: basePrice * weightMultiplier,
+      price: discountedBasePrice * weightMultiplier,
+      discountPercentage: discount,
       selectedFlavor: selectedFlavor || null,
       cakeMessage: cakeMessage || null,
       selectedWeight: selectedWeight || null
@@ -168,6 +185,43 @@ export default function ProductDetails() {
       .catch(() => {
         toast.error("Failed to copy link");
       });
+  };
+
+  const handleWriteReviewClick = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Please login to write a review');
+      navigate('/login');
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
+  const submitReview = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+      const token = localStorage.getItem('token');
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/reviews`, {
+        ...reviewForm,
+        productId: product._id
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Review added successfully!');
+      setIsModalOpen(false);
+      setReviewForm({ rating: 5, text: '', location: '' });
+      
+      // Refetch reviews dynamically
+      const revRes = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/reviews/product/${product._id}`);
+      if (revRes.data.success) {
+        setReviews(revRes.data.data);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -358,7 +412,9 @@ export default function ProductDetails() {
 
                   {/* Price */}
                   <div className="flex items-end gap-3 mb-4 pt-4 border-t border-slate-100">
+                    {discount > 0 && <span className="text-xl font-bold text-slate-400 line-through mb-1">Rs. {(basePrice * weightMultiplier * quantity).toLocaleString()}</span>}
                     <span className="text-3xl font-bold text-slate-900">Rs. {totalPrice.toLocaleString()}</span>
+                    {discount > 0 && <span className="text-xs font-bold bg-rose-500 text-white px-2 py-1 rounded-full mb-2">{discount}% OFF</span>}
                   </div>
                 </div>
 
@@ -482,7 +538,7 @@ export default function ProductDetails() {
           {/* Product Tabs Info */}
           <div className="mt-12 md:mt-20 pt-12 md:pt-16 border-t border-slate-200">
             <div className="flex flex-wrap gap-8 border-b border-slate-200 mb-8 px-4 justify-center">
-              {['description', 'delivery'].map((tab) => (
+              {['description', 'delivery', 'reviews'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -513,6 +569,50 @@ export default function ProductDetails() {
                         <li className="flex gap-2 items-start"><CheckCircle2 size={16} className="text-emerald-500 mt-0.5 shrink-0" /> Free delivery within 5km radius.</li>
                       </ul>
                     </div>
+                  </motion.div>
+                )}
+                {activeTab === 'reviews' && (
+                  <motion.div key="rev" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-8">
+                    <div className="flex justify-between items-center mb-6">
+                      <h4 className="font-bold text-slate-900 uppercase text-xs tracking-widest">Customer Reviews</h4>
+                      <button 
+                        onClick={handleWriteReviewClick}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#C29D59] text-white rounded-full font-bold uppercase tracking-wider text-[10px] hover:bg-[#a68246] transition-all shadow-lg active:scale-95"
+                      >
+                        <MessageSquare size={14} /> Write a Review
+                      </button>
+                    </div>
+
+                    {reviews.length === 0 ? (
+                      <div className="text-center py-12 text-slate-400">
+                        <MessageSquare size={32} className="mx-auto mb-3 opacity-30" />
+                        <p className="font-medium text-sm">No reviews yet for this product.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {reviews.map((rev) => (
+                          <div key={rev._id} className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-sm shadow-inner">
+                                  {rev.user ? rev.user.firstName[0].toUpperCase() : 'C'}
+                                </div>
+                                <div>
+                                  <h5 className="font-bold text-slate-900 text-sm">{rev.user ? `${rev.user.firstName} ${rev.user.lastName}` : 'Customer'}</h5>
+                                  <p className="text-[10px] text-[#C29D59] font-medium tracking-wide">{rev.location || 'Sri Lanka'} • {new Date(rev.createdAt).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star key={i} size={14} className={i < rev.rating ? "fill-[#C29D59] text-[#C29D59]" : "fill-slate-100 text-slate-100"} />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-slate-600 text-sm italic leading-relaxed">"{rev.text}"</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -583,6 +683,73 @@ export default function ProductDetails() {
           {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
         </button>
       </div>
+
+      {/* Write Review Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="bg-white rounded-3xl w-full max-w-lg p-6 md:p-10 relative z-10 shadow-2xl animate-in zoom-in duration-300">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-rose-500 transition-colors">
+              <X size={24} />
+            </button>
+            
+            <h3 className="font-serif text-3xl text-slate-900 mb-2">Leave a Review</h3>
+            <p className="text-sm text-slate-500 mb-8">Share your experience with {product?.pName}.</p>
+
+            <form onSubmit={submitReview} className="space-y-6">
+              {/* Star Rating Selection */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-3">Rate this product</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                      className="focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star size={32} className={star <= reviewForm.rating ? "fill-amber-400 text-amber-400" : "fill-slate-100 text-slate-200"} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Text */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-2">Your Review</label>
+                <textarea 
+                  required
+                  rows="4"
+                  value={reviewForm.text}
+                  onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                  placeholder="Tell us what you loved about this cake..."
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#C29D59] focus:border-[#C29D59] outline-none transition-all resize-none"
+                ></textarea>
+              </div>
+
+              {/* Location */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-2">Location (Optional)</label>
+                <input 
+                  type="text"
+                  value={reviewForm.location}
+                  onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
+                  placeholder="e.g. Colombo"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#C29D59] focus:border-[#C29D59] outline-none transition-all"
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={submitting}
+                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#C29D59] transition-colors disabled:opacity-50"
+              >
+                {submitting ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
