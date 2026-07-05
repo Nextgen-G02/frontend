@@ -15,6 +15,7 @@ const Cart = () => {
   const [detailProduct, setDetailProduct] = useState(null);
   const [isOrdering, setIsOrdering] = useState(false);
   const [isCheckoutMode, setIsCheckoutMode] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [checkoutFormData, setCheckoutFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,6 +29,22 @@ const Cart = () => {
 
   // Pre-fill form when user logs in or switches to checkout
   useEffect(() => {
+    const savedDetails = localStorage.getItem('saved_delivery_details');
+    if (savedDetails) {
+      try {
+        const parsed = JSON.parse(savedDetails);
+        setCheckoutFormData(prev => ({
+          ...prev,
+          ...parsed,
+          scheduleDate: prev.scheduleDate || '',
+          scheduleTime: prev.scheduleTime || ''
+        }));
+        return;
+      } catch (e) {
+        console.error("Error parsing saved_delivery_details", e);
+      }
+    }
+
     if (user) {
       setCheckoutFormData(prev => ({
         ...prev,
@@ -66,7 +83,7 @@ const Cart = () => {
       navigate('/login');
       return;
     }
-    
+
     const itemsToOrder = selectedItems.size === 0
       ? cart
       : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
@@ -86,7 +103,7 @@ const Cart = () => {
 
   const handlePlaceOrder = async (e) => {
     if (e) e.preventDefault();
-    
+
     const itemsToOrder = selectedItems.size === 0
       ? cart
       : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
@@ -100,6 +117,28 @@ const Cart = () => {
       toast.error("Please fill in all required delivery details");
       return;
     }
+
+    setShowSaveConfirm(true);
+  };
+
+  const executeOrderPlacement = async (shouldSave) => {
+    setShowSaveConfirm(false);
+
+    if (shouldSave) {
+      const detailsToSave = {
+        firstName: checkoutFormData.firstName,
+        lastName: checkoutFormData.lastName,
+        email: checkoutFormData.email,
+        phone: checkoutFormData.phone,
+        address: checkoutFormData.address,
+        city: checkoutFormData.city
+      };
+      localStorage.setItem('saved_delivery_details', JSON.stringify(detailsToSave));
+    }
+
+    const itemsToOrder = selectedItems.size === 0
+      ? cart
+      : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
 
     setIsOrdering(true);
     const orderData = {
@@ -274,7 +313,7 @@ const Cart = () => {
                   <div className="bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-slate-50 animate-in fade-in slide-in-from-right-4 duration-500">
                     <div className="flex items-center justify-between mb-8">
                       <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Delivery Details</h2>
-                      <button 
+                      <button
                         onClick={() => setIsCheckoutMode(false)}
                         className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-slate-900 transition-colors"
                       >
@@ -286,8 +325,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">First Name *</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="firstName"
                             value={checkoutFormData.firstName}
                             onChange={handleInputChange}
@@ -298,8 +337,8 @@ const Cart = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Last Name</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="lastName"
                             value={checkoutFormData.lastName}
                             onChange={handleInputChange}
@@ -312,8 +351,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Email Address</label>
-                          <input 
-                            type="email" 
+                          <input
+                            type="email"
                             name="email"
                             value={checkoutFormData.email}
                             onChange={handleInputChange}
@@ -323,8 +362,8 @@ const Cart = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Phone Number *</label>
-                          <input 
-                            type="tel" 
+                          <input
+                            type="tel"
                             name="phone"
                             value={checkoutFormData.phone}
                             onChange={handleInputChange}
@@ -337,8 +376,8 @@ const Cart = () => {
 
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Delivery Address *</label>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           name="address"
                           value={checkoutFormData.address}
                           onChange={handleInputChange}
@@ -351,8 +390,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">City *</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="city"
                             value={checkoutFormData.city}
                             onChange={handleInputChange}
@@ -368,8 +407,8 @@ const Cart = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preferred Date</label>
-                          <input 
-                            type="date" 
+                          <input
+                            type="date"
                             name="scheduleDate"
                             value={checkoutFormData.scheduleDate}
                             onChange={handleInputChange}
@@ -378,8 +417,8 @@ const Cart = () => {
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Preferred Time</label>
-                          <input 
-                            type="time" 
+                          <input
+                            type="time"
                             name="scheduleTime"
                             value={checkoutFormData.scheduleTime}
                             onChange={handleInputChange}
@@ -424,7 +463,7 @@ const Cart = () => {
                               )}
                             </div>
                             <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-2">{item.pCategory}</p>
-                            
+
                             {/* Customization Details */}
                             {(item.selectedFlavor || item.cakeMessage || item.selectedWeight) && (
                               <div className="text-[11px] text-[#84632A] space-y-0.5 mb-3 bg-[#FAF6F0]/80 p-2.5 rounded-xl border border-[#EADFC9]/60 max-w-xs md:max-w-sm">
@@ -579,6 +618,41 @@ const Cart = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Details Confirmation Modal */}
+      {showSaveConfirm && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative border border-slate-100 p-8 text-center space-y-6">
+            <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="text-gold w-8 h-8" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-serif text-slate-800 font-bold">
+                Save <span className="text-gold italic font-normal">Delivery Details</span>?
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                Would you like to save these delivery details to pre-fill them for your next order?
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onClick={() => executeOrderPlacement(true)}
+                className="flex-1 bg-slate-900 text-gold py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-md"
+              >
+                Yes, Save Details
+              </button>
+              <button
+                onClick={() => executeOrderPlacement(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all"
+              >
+                No, Not Now
+              </button>
             </div>
           </div>
         </div>

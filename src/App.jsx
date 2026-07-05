@@ -12,6 +12,7 @@ import ProductDetails from './web/pages/ProductDetails'
 import CustomizeCakeForm from './web/pages/CustomizeCakeForm'
 import MyOrders from './web/pages/MyOrders'
 import About from './web/pages/About'
+import Contact from './web/pages/Contact'
 import Wishlist from './web/pages/Wishlist'
 
 // System Pages
@@ -33,6 +34,7 @@ import AdminStaffManagement from './system/pages/Staff/Staff'
 import AdminExpenses from './system/pages/Expenses/Expenses'
 import CashDrawer from './system/pages/CashDrawer/CashDrawer'
 import NewsletterAdmin from './system/pages/Newsletter/NewsletterAdmin'
+import ReviewsManagement from './system/pages/Reviews/ReviewsManagement'
 
 // System Components
 import AdminLayout from './system/components/Layout'
@@ -45,6 +47,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/about' element={<About />} />
+        <Route path='/contact' element={<Contact />} />
         <Route path='/login' element={<Login />} />
         <Route path="/products" element={<Products />} />
         <Route path="/product/:id" element={<ProductDetails />} />
@@ -80,6 +83,7 @@ function App() {
         <Route path="/admin/expenses" element={<ProtectedRoute><AdminLayout><AdminExpenses /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/cash-drawer" element={<ProtectedRoute><AdminLayout><CashDrawer /></AdminLayout></ProtectedRoute>} />
         <Route path="/admin/newsletter" element={<ProtectedRoute><AdminLayout><NewsletterAdmin /></AdminLayout></ProtectedRoute>} />
+        <Route path="/admin/reviews" element={<ProtectedRoute><AdminLayout><ReviewsManagement /></AdminLayout></ProtectedRoute>} />
         <Route path="/staff" element={<ProtectedRoute><AdminLayout><AdminStaffManagement /></AdminLayout></ProtectedRoute>} />
 
       </Routes>

@@ -704,6 +704,7 @@ export default function POSTerminal() {
                             <option value="ml">ml</option>
                             <option value="l">l</option>
                             <option value="box">box</option>
+                            <option value="packet">packet</option>
                             <option value="pkt">pkt</option>
                           </select>
                         </div>

@@ -1,42 +1,86 @@
-import React, { useState } from 'react';
-import { Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react';
-
-const testimonialsList = [
-  {
-    name: "Amara Silva",
-    location: "Colombo",
-    text: "The customized chocolate cake we ordered for my daughter's birthday was an absolute masterpiece! It was not only gorgeous but incredibly moist and delicious.",
-    rating: 5,
-    initials: "AS"
-  },
-  {
-    name: "Roshan Perera",
-    location: "Kandy",
-    text: "Nirosha Sweet House serves the best traditional sweets I have ever tasted. Their cleanliness, premium ingredients, and prompt delivery are unmatched.",
-    rating: 5,
-    initials: "RP"
-  },
-  {
-    name: "Dilini Fernando",
-    location: "Negombo",
-    text: "Extremely reliable service! The custom design matched my reference photo exactly, and the flavor was out of this world. Highly recommend the butterscotch cake!",
-    rating: 5,
-    initials: "DF"
-  }
-];
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Star, Quote, ChevronLeft, ChevronRight, MessageSquare, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 export default function Testimonials() {
+  const [testimonialsList, setTestimonialsList] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, text: '', location: '' });
+  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/reviews`);
+      if (res.data.success) {
+        // Map backend data to frontend format
+        const mapped = res.data.data.map(r => ({
+          _id: r._id,
+          name: r.user ? `${r.user.firstName} ${r.user.lastName}` : 'Customer',
+          location: r.location || 'Sri Lanka',
+          text: r.text,
+          rating: r.rating,
+          initials: r.user ? r.user.firstName[0].toUpperCase() : 'C'
+        }));
+        setTestimonialsList(mapped);
+      }
+    } catch (error) {
+      console.error("Failed to fetch reviews", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const next = () => {
+    if (testimonialsList.length === 0) return;
     setActiveIndex((prev) => (prev === testimonialsList.length - 1 ? 0 : prev + 1));
   };
 
   const prev = () => {
+    if (testimonialsList.length === 0) return;
     setActiveIndex((prev) => (prev === 0 ? testimonialsList.length - 1 : prev - 1));
   };
 
-  const active = testimonialsList[activeIndex];
+  const handleWriteReviewClick = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Please login to write a review');
+      navigate('/login');
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
+  const submitReview = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+      const token = localStorage.getItem('token');
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/reviews`, reviewForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Review submitted successfully! It will appear after approval.');
+      setIsModalOpen(false);
+      setReviewForm({ rating: 5, text: '', location: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const active = testimonialsList.length > 0 ? testimonialsList[activeIndex] : null;
 
   return (
     <section className="py-16 md:py-24 bg-[#fbf9f4] relative overflow-hidden">
@@ -55,77 +99,163 @@ export default function Testimonials() {
           <h2 className="font-serif text-3xl md:text-5xl text-slate-900 leading-tight">
             Loved By Our <span className="italic font-light text-[#C29D59]">Community</span>
           </h2>
+          
+          <button 
+            onClick={handleWriteReviewClick}
+            className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[#C29D59] text-white rounded-full font-bold uppercase tracking-wider text-xs hover:bg-[#a68246] transition-all shadow-lg hover:shadow-xl active:scale-95"
+          >
+            <MessageSquare size={16} /> Write a Review
+          </button>
         </div>
 
         {/* Carousel Container */}
-        <div className="relative max-w-4xl mx-auto">
-          {/* Main Card */}
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_15px_50px_rgba(179,139,89,0.05)] p-8 md:p-16 text-center space-y-6 md:space-y-8 relative overflow-hidden transition-all duration-500">
-            {/* Quote Icon Background */}
-            <div className="absolute -top-4 -left-4 text-slate-50 opacity-5 pointer-events-none scale-150">
-              <Quote size={200} />
-            </div>
-
-            {/* Stars */}
-            <div className="flex items-center justify-center gap-1.5">
-              {[...Array(active.rating)].map((_, i) => (
-                <Star key={i} size={18} className="fill-[#C29D59] text-[#C29D59]" />
-              ))}
-            </div>
-
-            {/* Review text */}
-            <p className="font-serif text-lg md:text-2xl lg:text-3xl text-slate-700 leading-relaxed italic max-w-3xl mx-auto">
-              "{active.text}"
-            </p>
-
-            {/* User Meta */}
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center border-2 border-amber-100 text-sm md:text-base">
-                {active.initials}
-              </div>
-              <div>
-                <h4 className="font-sans font-bold text-slate-950 uppercase tracking-widest text-xs md:text-sm">
-                  {active.name}
-                </h4>
-                <p className="text-[10px] md:text-xs text-[#C29D59] font-medium tracking-wide">
-                  {active.location}, Sri Lanka
-                </p>
-              </div>
-            </div>
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C29D59] mx-auto"></div>
           </div>
+        ) : testimonialsList.length === 0 ? (
+          <div className="text-center py-20 text-slate-400 font-medium">
+            <MessageSquare size={48} className="mx-auto mb-4 opacity-30" />
+            No reviews yet. Be the first to leave one!
+          </div>
+        ) : (
+          <div className="relative max-w-4xl mx-auto">
+            {/* Main Card */}
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_15px_50px_rgba(179,139,89,0.05)] p-8 md:p-16 text-center space-y-6 md:space-y-8 relative overflow-hidden transition-all duration-500 min-h-[350px] flex flex-col justify-center">
+              {/* Quote Icon Background */}
+              <div className="absolute -top-4 -left-4 text-slate-50 opacity-5 pointer-events-none scale-150">
+                <Quote size={200} />
+              </div>
 
-          {/* Controls */}
-          <div className="flex justify-center items-center gap-4 mt-8 md:mt-10">
-            <button 
-              onClick={prev}
-              className="w-11 h-11 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-900 hover:bg-[#C29D59] hover:text-white hover:border-[#C29D59] transition-all duration-300 active:scale-95 group"
-            >
-              <ChevronLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+              {/* Stars */}
+              <div className="flex items-center justify-center gap-1.5 z-10 relative">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={18} className={i < active.rating ? "fill-[#C29D59] text-[#C29D59]" : "fill-slate-100 text-slate-100"} />
+                ))}
+              </div>
+
+              {/* Review text */}
+              <p className="font-serif text-lg md:text-2xl lg:text-3xl text-slate-700 leading-relaxed italic max-w-3xl mx-auto z-10 relative">
+                "{active.text}"
+              </p>
+
+              {/* User Meta */}
+              <div className="flex flex-col items-center gap-2 z-10 relative mt-auto">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center border-2 border-amber-100 text-sm md:text-base shadow-inner">
+                  {active.initials}
+                </div>
+                <div>
+                  <h4 className="font-sans font-bold text-slate-950 uppercase tracking-widest text-xs md:text-sm">
+                    {active.name}
+                  </h4>
+                  <p className="text-[10px] md:text-xs text-[#C29D59] font-medium tracking-wide">
+                    {active.location}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Controls */}
+            {testimonialsList.length > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-8 md:mt-10">
+                <button 
+                  onClick={prev}
+                  className="w-11 h-11 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-900 hover:bg-[#C29D59] hover:text-white hover:border-[#C29D59] transition-all duration-300 active:scale-95 group"
+                >
+                  <ChevronLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+                </button>
+                
+                {/* Slide Indicators */}
+                <div className="flex items-center gap-2 overflow-x-auto max-w-[150px] no-scrollbar">
+                  {testimonialsList.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveIndex(idx)}
+                      className={`h-1.5 rounded-full transition-all duration-500 shrink-0 ${
+                        activeIndex === idx ? "w-8 bg-[#C29D59]" : "w-1.5 bg-slate-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <button 
+                  onClick={next}
+                  className="w-11 h-11 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-950 hover:bg-[#C29D59] hover:text-white hover:border-[#C29D59] transition-all duration-300 active:scale-95 group"
+                >
+                  <ChevronRight size={20} className="group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Write Review Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="bg-white rounded-3xl w-full max-w-lg p-6 md:p-10 relative z-10 shadow-2xl animate-in zoom-in duration-300">
+            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-rose-500 transition-colors">
+              <X size={24} />
             </button>
             
-            {/* Slide Indicators */}
-            <div className="flex items-center gap-2">
-              {testimonialsList.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveIndex(idx)}
-                  className={`h-1.5 rounded-full transition-all duration-500 ${
-                    activeIndex === idx ? "w-8 bg-[#C29D59]" : "w-1.5 bg-slate-200"
-                  }`}
-                />
-              ))}
-            </div>
+            <h3 className="font-serif text-3xl text-slate-900 mb-2">Leave a Review</h3>
+            <p className="text-sm text-slate-500 mb-8">Share your experience with Nirosha Sweet House.</p>
 
-            <button 
-              onClick={next}
-              className="w-11 h-11 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center text-slate-950 hover:bg-[#C29D59] hover:text-white hover:border-[#C29D59] transition-all duration-300 active:scale-95 group"
-            >
-              <ChevronRight size={20} className="group-hover:translate-x-0.5 transition-transform" />
-            </button>
+            <form onSubmit={submitReview} className="space-y-6">
+              {/* Star Rating Selection */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-3">Rate your experience</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                      className="focus:outline-none transition-transform hover:scale-110"
+                    >
+                      <Star size={32} className={star <= reviewForm.rating ? "fill-amber-400 text-amber-400" : "fill-slate-100 text-slate-200"} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Review Text */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-2">Your Review</label>
+                <textarea 
+                  required
+                  rows="4"
+                  value={reviewForm.text}
+                  onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
+                  placeholder="Tell us what you loved about our sweets..."
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#C29D59] focus:border-[#C29D59] outline-none transition-all resize-none"
+                ></textarea>
+              </div>
+
+              {/* Location */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-2">Location (Optional)</label>
+                <input 
+                  type="text"
+                  value={reviewForm.location}
+                  onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
+                  placeholder="e.g. Colombo"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#C29D59] focus:border-[#C29D59] outline-none transition-all"
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={submitting}
+                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#C29D59] transition-colors disabled:opacity-50"
+              >
+                {submitting ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
           </div>
         </div>
-
-      </div>
+      )}
     </section>
   );
 }
