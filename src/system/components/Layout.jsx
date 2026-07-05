@@ -116,23 +116,22 @@ export default function AdminLayout({ children }) {
     }
   };
 
+  const hasPerm = (perm) => user?.role === 'admin' || (user?.permissions && user.permissions.includes(perm));
+
   const menuItems = [
-    { label: "Dashboard", path: "/admin", icon: LayoutDashboard },
-    { label: "POS Terminal", path: "/pos", icon: ShoppingCart },
-    { label: "Inventory", path: "/inventory", icon: Box },
-    { label: "Orders", path: "/orders", icon: ClipboardList },
-    { label: "Products", path: "/adminproduct", icon: Package },
-    { label: "Categories", path: "/admin/categories", icon: Layers },
-    // Admin Only
-    ...(user?.role === 'admin' ? [
-      { label: "Suppliers", path: "/admin/suppliers", icon: Truck },
-      { label: "Customers", path: "/admin/customers", icon: Users },
-      { label: "Financials", path: "/admin/financials", icon: BarChart3 },
-      { label: "Expenses", path: "/admin/expenses", icon: Receipt },
-      { label: "Cash Drawer", path: "/admin/cash-drawer", icon: Vault },
-      { label: "Staff", path: "/staff", icon: UserCog },
-      { label: "Newsletter", path: "/admin/newsletter", icon: Mail },
-    ] : []),
+    ...(hasPerm('view_reports') ? [{ label: "Dashboard", path: "/admin", icon: LayoutDashboard }] : []),
+    ...(hasPerm('use_pos') ? [{ label: "POS Terminal", path: "/pos", icon: ShoppingCart }] : []),
+    ...(hasPerm('manage_inventory') ? [{ label: "Inventory", path: "/inventory", icon: Box }] : []),
+    ...(hasPerm('manage_orders') ? [{ label: "Orders", path: "/orders", icon: ClipboardList }] : []),
+    ...(hasPerm('manage_products') ? [{ label: "Products", path: "/adminproduct", icon: Package }] : []),
+    ...(hasPerm('manage_products') ? [{ label: "Categories", path: "/admin/categories", icon: Layers }] : []),
+    ...(hasPerm('manage_suppliers') ? [{ label: "Suppliers", path: "/admin/suppliers", icon: Truck }] : []),
+    ...(hasPerm('manage_customers') ? [{ label: "Customers", path: "/admin/customers", icon: Users }] : []),
+    ...(hasPerm('view_reports') ? [{ label: "Financials", path: "/admin/financials", icon: BarChart3 }] : []),
+    ...(hasPerm('manage_expenses') ? [{ label: "Expenses", path: "/admin/expenses", icon: Receipt }] : []),
+    ...(hasPerm('manage_expenses') ? [{ label: "Cash Drawer", path: "/admin/cash-drawer", icon: Vault }] : []),
+    ...(user?.role === 'admin' ? [{ label: "Staff", path: "/staff", icon: UserCog }] : []),
+    ...(hasPerm('manage_marketing') ? [{ label: "Newsletter", path: "/admin/newsletter", icon: Mail }] : []),
   ];
 
   return (
