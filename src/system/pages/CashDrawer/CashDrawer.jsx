@@ -11,7 +11,8 @@ import {
   Calendar,
   ArrowRight,
   Pencil,
-  ArrowDownCircle
+  ArrowDownCircle,
+  Trash2
 } from "lucide-react";
 
 export default function CashDrawer() {
@@ -36,6 +37,8 @@ export default function CashDrawer() {
     openingBalance: "",
     notes: ""
   });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   useEffect(() => {
     fetchTodayDrawer();
@@ -144,6 +147,27 @@ export default function CashDrawer() {
       notes: log.notes || ""
     });
     setShowEditModal(true);
+  };
+
+  const confirmDelete = (id) => {
+    setDeleteTargetId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteDrawer = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/cash-drawer/${deleteTargetId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success("Drawer record deleted");
+      setShowDeleteConfirm(false);
+      setDeleteTargetId(null);
+      fetchTodayDrawer();
+      fetchHistory();
+    } catch (error) {
+      toast.error("Failed to delete drawer record");
+    }
   };
 
   return (
@@ -304,6 +328,12 @@ export default function CashDrawer() {
                             className="p-2 text-slate-300 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                           >
                             <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={() => confirmDelete(log._id)}
+                            className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 size={16} />
                           </button>
                         </td>
                       </tr>
@@ -545,6 +575,44 @@ export default function CashDrawer() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirm Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-md rounded-[40px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-4 bg-rose-50 text-rose-500 rounded-2xl">
+                  <Trash2 size={24} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Delete Record</h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">This action cannot be undone</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 font-medium mb-8">
+                Are you sure you want to permanently delete this cash drawer record? All data for this session will be lost.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => { setShowDeleteConfirm(false); setDeleteTargetId(null); }}
+                  className="flex-1 py-4 text-slate-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-slate-900 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteDrawer}
+                  className="flex-[2] py-4 bg-rose-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-rose-600 transition-all"
+                >
+                  Delete Record
+                </button>
+              </div>
             </div>
           </div>
         </div>
