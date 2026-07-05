@@ -237,8 +237,8 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
               toast.success(`${product.pName} added to cart!`);
             }}
             className={`flex-1 rounded-lg py-2 text-[9px] font-bold uppercase tracking-wide flex items-center justify-center gap-1 px-1 transition-all ${(product.stockStatus === "Out of Stock" || product.stock === 0)
-                ? "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
-                : "bg-gold/10 border border-gold/40 text-[#84632A] hover:bg-gold hover:text-white"
+              ? "bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed"
+              : "bg-gold/10 border border-gold/40 text-[#84632A] hover:bg-gold hover:text-white"
               }`}
           >
             <ShoppingCart size={12} />
@@ -275,8 +275,8 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
               setShowDeliveryModal(true);
             }}
             className={`flex-1 rounded-lg py-2 text-[9px] font-bold uppercase tracking-wide flex items-center justify-center gap-1 px-1 transition-all active:bg-slate-950 ${(product.stockStatus === "Out of Stock" || product.stock === 0)
-                ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
-                : "bg-gold text-slate-900 hover:bg-slate-900 hover:text-white shadow-lg shadow-gold/10"
+              ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
+              : "bg-gold text-slate-900 hover:bg-slate-900 hover:text-white shadow-lg shadow-gold/10"
               }`}
           >
             <CreditCard size={12} />
@@ -286,12 +286,12 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
       </div>
 
       {showDeliveryModal && createPortal(
-        <div 
-          onClick={(e) => e.stopPropagation()} 
+        <div
+          onClick={(e) => e.stopPropagation()}
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
         >
-          <div 
-            onClick={(e) => e.stopPropagation()} 
+          <div
+            onClick={(e) => e.stopPropagation()}
             className="bg-white w-full max-w-lg rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative border border-slate-100 flex flex-col"
           >
             <div className="h-2 w-full bg-gold"></div>
