@@ -72,10 +72,10 @@ const Cart = () => {
   // If nothing is selected, show the total of all items in the cart.
   // Otherwise, show the total of only the selected items.
   const selectedTotal = selectedItems.size === 0
-    ? cart.reduce((total, item) => total + (item.price * item.quantity), 0)
+    ? cart.reduce((total, item) => total + (item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity), 0)
     : cart
       .filter(item => selectedItems.has(item.cartItemId || item._id))
-      .reduce((total, item) => total + (item.price * item.quantity), 0);
+      .reduce((total, item) => total + (item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity), 0);
 
   const handleCheckout = () => {
     if (!user) {
@@ -154,6 +154,7 @@ const Cart = () => {
         category: item.pCategory,
         quantity: item.quantity,
         price: item.price,
+        discountPercentage: item.discountPercentage || 0,
         customization: item.customization ? {
           message: item.customization.message || "",
           flavor: item.customization.flavor || "",
@@ -508,8 +509,11 @@ const Cart = () => {
                             >
                               <Trash2 size={20} />
                             </button>
-                            <div className="font-black text-slate-900 text-sm md:text-base">
-                              Rs.{(item.price * item.quantity).toLocaleString()}
+                            <div>
+                              {(item.discountPercentage > 0) && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-widest block leading-none mb-1">{item.discountPercentage}% OFF</span>}
+                              <div className="font-black text-slate-900 text-sm md:text-base leading-none">
+                                Rs.{(item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity).toLocaleString()}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -601,7 +605,8 @@ const Cart = () => {
                   <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-1">Premium Value</span>
-                      <span className="text-2xl font-black text-slate-900">Rs.{detailProduct.price?.toLocaleString()}</span>
+                      {(detailProduct.discountPercentage > 0) && <span className="text-[12px] text-slate-400 line-through leading-none mb-1">Rs.{detailProduct.price?.toLocaleString()}</span>}
+                      <span className="text-2xl font-black text-slate-900 leading-none">Rs.{(detailProduct.price * (1 - (detailProduct.discountPercentage || 0) / 100))?.toLocaleString()}</span>
                     </div>
                   </div>
 

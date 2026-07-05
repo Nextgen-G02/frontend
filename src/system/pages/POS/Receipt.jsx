@@ -8,6 +8,13 @@ export default function Receipt({ order, onClose }) {
     window.print();
   };
 
+  const totalSavings = order.items?.reduce((sum, item) => {
+    const originalPrice = item.price;
+    const discount = item.discountPercentage || 0;
+    const discountedPrice = originalPrice * (1 - discount / 100);
+    return sum + (originalPrice - discountedPrice) * item.quantity;
+  }, 0) || 0;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
@@ -93,11 +100,12 @@ export default function Receipt({ order, onClose }) {
                       <p className="font-black text-slate-900 uppercase leading-tight">{item.pName}</p>
                     </td>
                     <td className="py-3 text-center font-black text-slate-400">
-                       <span className="text-slate-900">Rs.{item.price}</span>
+                       {(item.discountPercentage > 0) && <span className="text-[9px] line-through text-slate-300 block">Rs.{item.price}</span>}
+                       <span className="text-slate-900">Rs.{item.price * (1 - (item.discountPercentage || 0) / 100)}</span>
                        <span className="text-[10px] block">/{item.unit || 'pcs'}</span>
                     </td>
                     <td className="py-3 text-center font-black text-slate-900">{item.quantity}</td>
-                    <td className="py-3 text-right font-black text-slate-900">Rs.{item.price * item.quantity}</td>
+                    <td className="py-3 text-right font-black text-slate-900">Rs.{item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity}</td>
                   </tr>
                 ))}
               </tbody>
@@ -108,6 +116,7 @@ export default function Receipt({ order, onClose }) {
             <div className="flex justify-between items-center text-slate-400 font-bold text-[13px] uppercase tracking-widest">
               <p>Total Items: {order.items?.length || 0}</p>
               <div className="text-right">
+                {totalSavings > 0 && <p className="text-emerald-500 mb-1">Total Savings: Rs.{totalSavings.toLocaleString()}</p>}
                 <p>Subtotal: Rs.{order.totalAmount}</p>
               </div>
             </div>
@@ -123,10 +132,6 @@ export default function Receipt({ order, onClose }) {
           <div className="mt-10 text-center space-y-4">
             <div className="inline-block p-4 bg-slate-50/50 rounded-2xl border border-slate-100 w-full">
                <p className="text-[13px] font-black text-slate-900 uppercase tracking-[0.2em]">Thank you for shopping with us!</p>
-               <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-2 leading-relaxed">
-                 Please keep this receipt for returns within 7 days. <br/>
-                 Items must be in original packaging.
-               </p>
             </div>
             
             <div className="flex justify-center gap-4 opacity-20 grayscale">
