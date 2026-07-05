@@ -122,8 +122,10 @@ export default function ProductDetails() {
     : ['https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=1000'];
 
   const basePrice = product.price || 0;
+  const discount = product.discountPercentage || 0;
+  const discountedBasePrice = basePrice * (1 - discount / 100);
   const weightMultiplier = selectedWeight ? (selectedWeight.priceMultiplier || 1) : 1;
-  const totalPrice = basePrice * weightMultiplier * quantity;
+  const totalPrice = discountedBasePrice * weightMultiplier * quantity;
 
   // Add to cart handler
   const handleAddToCart = () => {
@@ -133,7 +135,8 @@ export default function ProductDetails() {
     }
 
     const customProps = {
-      price: basePrice * weightMultiplier,
+      price: discountedBasePrice * weightMultiplier,
+      discountPercentage: discount,
       selectedFlavor: selectedFlavor || null,
       cakeMessage: cakeMessage || null,
       selectedWeight: selectedWeight || null
@@ -358,7 +361,9 @@ export default function ProductDetails() {
 
                   {/* Price */}
                   <div className="flex items-end gap-3 mb-4 pt-4 border-t border-slate-100">
+                    {discount > 0 && <span className="text-xl font-bold text-slate-400 line-through mb-1">Rs. {(basePrice * weightMultiplier * quantity).toLocaleString()}</span>}
                     <span className="text-3xl font-bold text-slate-900">Rs. {totalPrice.toLocaleString()}</span>
+                    {discount > 0 && <span className="text-xs font-bold bg-rose-500 text-white px-2 py-1 rounded-full mb-2">{discount}% OFF</span>}
                   </div>
                 </div>
 

@@ -123,6 +123,7 @@ const OrderForm = () => {
                 quantity: 1, 
                 unit: product.unit || 'pcs',
                 price: product.price, 
+                discountPercentage: product.discountPercentage || 0,
                 isCustom: false,
                 customization: { message: '', flavor: '', specialInstructions: '' } 
             }]
@@ -162,7 +163,12 @@ const OrderForm = () => {
     }, [productSearch]);
 
     const calculateTotal = () => {
-        return formData.items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
+        return formData.items.reduce((sum, item) => {
+            const p = Number(item.price) || 0;
+            const d = Number(item.discountPercentage) || 0;
+            const q = Number(item.quantity) || 1;
+            return sum + (p * (1 - d / 100) * q);
+        }, 0);
     };
 
     const formatRs = (amount) => `Rs. ${Number(amount || 0).toLocaleString()}`;
@@ -185,6 +191,7 @@ const OrderForm = () => {
                     category: selectedProd.pCategory,
                     unit: selectedProd.unit || 'pcs',
                     price: selectedProd.price,
+                    discountPercentage: selectedProd.discountPercentage || 0,
                 };
             }
         } else {
@@ -336,7 +343,10 @@ const OrderForm = () => {
                                                             <p className="text-[11px] font-black text-slate-900 uppercase group-hover:text-primary">{p.pName}</p>
                                                             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{p.productId}</p>
                                                         </div>
-                                                        <span className="text-[11px] font-black text-slate-900">Rs.{p.price}</span>
+                                                        <div className="text-right">
+                                                            {p.discountPercentage > 0 && <span className="text-[9px] text-slate-400 line-through block leading-none mb-1">Rs.{p.price}</span>}
+                                                            <span className="text-[11px] font-black text-slate-900 leading-none">Rs.{p.price * (1 - (p.discountPercentage || 0) / 100)}</span>
+                                                        </div>
                                                     </button>
                                                 ))}
                                             </div>
@@ -425,8 +435,9 @@ const OrderForm = () => {
                                             <div className="space-y-1.5">
                                                 <label className="lg:hidden text-[10px] font-black text-slate-400 uppercase tracking-widest">Total</label>
                                                 <div className="px-4 py-3 bg-primary/5 border border-primary/20 rounded-xl text-right">
-                                                    <p className="text-base font-black text-slate-900 tabular-nums">
-                                                        {formatRs(item.price * item.quantity)}
+                                                    {item.discountPercentage > 0 && <span className="text-[9px] font-bold text-rose-500 block mb-0.5">{item.discountPercentage}% OFF</span>}
+                                                    <p className="text-base font-black text-slate-900 tabular-nums leading-none">
+                                                        {formatRs(item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity)}
                                                     </p>
                                                 </div>
                                             </div>
