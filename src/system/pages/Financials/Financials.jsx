@@ -83,8 +83,8 @@ export default function AdminFinancials() {
         return;
       }
 
-      const headers = ["Date", "Orders", "Revenue (Rs.)"];
-      const rows = dailyData.map(day => [day._id, day.orders, day.revenue]);
+      const headers = ["Date", "Orders", "Revenue (Rs.)", "Profit (Rs.)"];
+      const rows = dailyData.map(day => [day._id, day.orders, day.revenue, day.profit]);
       
       const csvContent = "data:text/csv;charset=utf-8," + 
         [headers, ...rows].map(e => e.join(",")).join("\n");

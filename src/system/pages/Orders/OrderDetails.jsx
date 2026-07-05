@@ -255,14 +255,14 @@ const OrderDetails = () => {
                                 <div className="md:col-span-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-100">
                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm"><CreditCard size={20} /></div>
                                     <div>
-                                        <span className="font-black text-slate-900 text-base tracking-tighter block">{order.phone || 'GUEST_NODE'}</span>
+                                        <span className="font-black text-slate-900 text-base tracking-tighter block">{order.phone || 'Not Provided'}</span>
                                         <span className="text-[10px] font-black text-slate-400 uppercase">Phone Number</span>
                                     </div>
                                 </div>
                                 <div className="md:col-span-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4 transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-100">
                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-400 shadow-sm shrink-0"><MapPin size={20} /></div>
                                     <div className="truncate">
-                                        <p className="font-medium text-slate-600 italic text-[13px] truncate">"{order.address || 'Default Hub'}"</p>
+                                        <p className="font-medium text-slate-600 italic text-[13px] truncate">"{order.address || 'Store Pickup'}"</p>
                                         <span className="text-[10px] font-black text-slate-400 uppercase">Address</span>
                                     </div>
                                 </div>
@@ -326,15 +326,17 @@ const OrderDetails = () => {
                     <div className="xl:col-span-4 space-y-6">
                         {/* State Controller Grid */}
                         <div className="bg-white p-6 rounded-[32px] border border-slate-200/60 shadow-sm">
-                            <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] mb-5 flex items-center gap-3"><div className="w-2 h-4 bg-primary rounded-full"></div> Order Status</h2>
+                            <h2 className="font-black text-slate-900 uppercase text-[11px] tracking-[0.4em] mb-5 flex items-center gap-3"><div className="w-2 h-4 bg-primary rounded-full"></div> Update Status</h2>
                             <div className="grid grid-cols-2 gap-3">
                                 {['Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled'].map(status => (
-                                    <button key={status} disabled={updating || order.orderStatus === status || isEditing} onClick={() => handleStatusUpdate(status)} className={`text-left p-4 rounded-2xl border-2 transition-all flex flex-col justify-between h-20 relative overflow-hidden active:scale-95 ${order.orderStatus === status ? `${getStatusStyle(status)} border-transparent shadow-lg shadow-primary/10` : 'bg-slate-50/50 border-slate-100 text-slate-600 hover:border-primary/40'}`}>
-                                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] relative z-10 ${order.orderStatus === status ? 'text-white/80' : 'text-slate-400'}`}>{status}</span>
-                                        <div className="flex justify-between items-end relative z-10">
-                                            <span className={`font-black text-base tracking-tighter ${order.orderStatus === status ? 'text-white' : 'text-slate-900'}`}>{status.slice(0, 4)}</span>
-                                            {order.orderStatus === status && <CheckCircle2 size={16} />}
-                                        </div>
+                                    <button 
+                                        key={status} 
+                                        disabled={updating || order.orderStatus === status || isEditing} 
+                                        onClick={() => handleStatusUpdate(status)} 
+                                        className={`p-3 rounded-xl border-2 transition-all flex items-center justify-between relative overflow-hidden active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${order.orderStatus === status ? `${getStatusStyle(status)} border-transparent shadow-md` : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-primary/50 hover:bg-white'}`}
+                                    >
+                                        <span className={`font-black text-xs uppercase tracking-widest ${order.orderStatus === status ? 'text-white' : 'text-slate-700'}`}>{status}</span>
+                                        {order.orderStatus === status && <CheckCircle2 size={16} className="text-white" />}
                                     </button>
                                 ))}
                             </div>
@@ -359,8 +361,8 @@ const OrderDetails = () => {
                                 </div>
                             </div>
                             <div className="bg-white/5 p-8 border-t border-white/10 grid grid-cols-2 gap-6 relative z-10">
-                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Calendar size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Date</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleDate || 'ONDEMAND'}</p></div>
-                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Clock size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Time</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleTime || 'ASAP_VECTOR'}</p></div>
+                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Calendar size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Date</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleDate || 'Not Set'}</p></div>
+                                <div className="space-y-2"><div className="flex items-center gap-3 text-primary"><Clock size={16} /><span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Due Time</span></div><p className="font-black text-white text-[13px] uppercase tracking-tighter">{order.scheduleTime || 'Not Set'}</p></div>
                             </div>
                         </div>
                     </div>
