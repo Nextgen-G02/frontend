@@ -114,8 +114,9 @@ export default function ReviewsManagement() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] w-1/4">Customer</th>
-                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] w-1/2">Review Content</th>
+                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] w-1/5">Customer</th>
+                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] w-1/5">Product</th>
+                <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] w-2/5">Review Content</th>
                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">Status</th>
                 <th className="px-8 md:px-10 py-5 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] text-right">Actions</th>
               </tr>
@@ -123,14 +124,14 @@ export default function ReviewsManagement() {
             <tbody className="divide-y divide-slate-50">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="px-12 py-32 text-center">
+                  <td colSpan="5" className="px-12 py-32 text-center">
                     <MessageSquare className="animate-pulse mx-auto mb-6 text-primary" size={48} />
                     <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400">Loading reviews...</p>
                   </td>
                 </tr>
               ) : filteredReviews.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-12 py-32 text-center text-slate-300">
+                  <td colSpan="5" className="px-12 py-32 text-center text-slate-300">
                     <MessageSquare className="mx-auto mb-6 opacity-10" size={80} />
                     <p className="font-black uppercase tracking-widest text-xs tracking-[0.2em]">No reviews found.</p>
                   </td>
@@ -157,6 +158,10 @@ export default function ReviewsManagement() {
                           </p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-8 md:px-10 py-5 md:py-6 align-top">
+                      <p className="font-bold text-slate-900 text-sm mb-1">{rev.product ? rev.product.pName : 'Unknown Product'}</p>
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 bg-slate-50 border border-slate-100 px-2 py-1 rounded-md">Item</span>
                     </td>
                     <td className="px-8 md:px-10 py-5 md:py-6 align-top">
                       <div className="flex flex-col gap-2">

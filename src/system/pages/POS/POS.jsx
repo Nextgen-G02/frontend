@@ -38,6 +38,7 @@ export default function POSTerminal() {
   const [view, setView] = useState("catalog"); // "catalog" or "history"
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historySearch, setHistorySearch] = useState("");
   
   // StrictMode & Double-Execution Guard
   const isMounted = React.useRef(true);
@@ -181,6 +182,17 @@ export default function POSTerminal() {
       setHistoryLoading(false);
     }
   };
+
+  const filteredHistory = React.useMemo(() => {
+    if (!historySearch.trim()) return history;
+    const normalize = (val) => String(val || "").trim().toLowerCase();
+    const query = normalize(historySearch);
+    return history.filter(order => 
+      normalize(order._id.slice(-6)).includes(query) ||
+      normalize(order.customerName).includes(query) ||
+      normalize(order.orderStatus).includes(query)
+    );
+  }, [history, historySearch]);
 
   const handleCancelSale = async (orderId) => {
     if (!window.confirm("Are you sure you want to cancel this sale? This will restore inventory.")) return;
@@ -509,17 +521,32 @@ export default function POSTerminal() {
           </div>
         ) : (
           <div className="flex-1 flex flex-col overflow-hidden">
-             <div className="flex items-center justify-between mb-8 pr-4">
+             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 pr-4 gap-4">
                 <div>
                    <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Recent Sale History</h2>
                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Manage your in-store sales</p>
                 </div>
-                <button 
-                  onClick={() => setView('catalog')}
-                  className="px-6 py-3.5 bg-slate-900 text-gold rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 hover:bg-primary hover:text-white transition-all active:scale-95"
-                >
-                  <Plus size={18} /> New Sale
-                </button>
+                
+                <div className="flex items-center gap-4">
+                   <div className="relative group w-full md:w-64">
+                      <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                         <Search className="text-slate-400 group-focus-within:text-primary transition-all duration-300" size={16} />
+                      </div>
+                      <input
+                         type="text"
+                         placeholder="Search sales..."
+                         value={historySearch}
+                         onChange={(e) => setHistorySearch(e.target.value)}
+                         className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400 font-bold shadow-sm rounded-xl text-[11px] uppercase tracking-wider"
+                      />
+                   </div>
+                   <button 
+                     onClick={() => setView('catalog')}
+                     className="px-6 py-3.5 bg-slate-900 text-gold rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-3 hover:bg-primary hover:text-white transition-all active:scale-95 shrink-0"
+                   >
+                     <Plus size={18} /> New Sale
+                   </button>
+                </div>
              </div>
 
              <div className="flex-1 overflow-y-auto pr-4 no-scrollbar">
@@ -537,10 +564,10 @@ export default function POSTerminal() {
                     <tbody className="divide-y divide-slate-50">
                       {historyLoading ? (
                         <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em] animate-pulse">Loading records...</td></tr>
-                      ) : history.length === 0 ? (
+                      ) : filteredHistory.length === 0 ? (
                         <tr><td colSpan="5" className="py-24 text-center font-black text-[11px] text-slate-400 uppercase tracking-[0.4em]">No sales found</td></tr>
                       ) : (
-                        history.map(order => (
+                        filteredHistory.map(order => (
                           <tr key={order._id} className="hover:bg-slate-50/50 transition-all group">
                             <td className="px-8 py-5">
                               <p className="font-mono text-[11px] font-black text-slate-900 uppercase leading-none mb-1.5">SEQ: {order._id.slice(-6).toUpperCase()}</p>

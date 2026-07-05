@@ -9,10 +9,6 @@ export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, text: '', location: '' });
-  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,34 +48,6 @@ export default function Testimonials() {
     setActiveIndex((prev) => (prev === 0 ? testimonialsList.length - 1 : prev - 1));
   };
 
-  const handleWriteReviewClick = () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      toast.error('Please login to write a review');
-      navigate('/login');
-      return;
-    }
-    setIsModalOpen(true);
-  };
-
-  const submitReview = async (e) => {
-    e.preventDefault();
-    try {
-      setSubmitting(true);
-      const token = localStorage.getItem('token');
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/reviews`, reviewForm, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Review submitted successfully! It will appear after approval.');
-      setIsModalOpen(false);
-      setReviewForm({ rating: 5, text: '', location: '' });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to submit review');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const active = testimonialsList.length > 0 ? testimonialsList[activeIndex] : null;
 
   return (
@@ -100,12 +68,6 @@ export default function Testimonials() {
             Loved By Our <span className="italic font-light text-[#C29D59]">Community</span>
           </h2>
           
-          <button 
-            onClick={handleWriteReviewClick}
-            className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[#C29D59] text-white rounded-full font-bold uppercase tracking-wider text-xs hover:bg-[#a68246] transition-all shadow-lg hover:shadow-xl active:scale-95"
-          >
-            <MessageSquare size={16} /> Write a Review
-          </button>
         </div>
 
         {/* Carousel Container */}
@@ -190,72 +152,6 @@ export default function Testimonials() {
         )}
       </div>
 
-      {/* Write Review Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
-          <div className="bg-white rounded-3xl w-full max-w-lg p-6 md:p-10 relative z-10 shadow-2xl animate-in zoom-in duration-300">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-rose-500 transition-colors">
-              <X size={24} />
-            </button>
-            
-            <h3 className="font-serif text-3xl text-slate-900 mb-2">Leave a Review</h3>
-            <p className="text-sm text-slate-500 mb-8">Share your experience with Nirosha Sweet House.</p>
-
-            <form onSubmit={submitReview} className="space-y-6">
-              {/* Star Rating Selection */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-3">Rate your experience</label>
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
-                      className="focus:outline-none transition-transform hover:scale-110"
-                    >
-                      <Star size={32} className={star <= reviewForm.rating ? "fill-amber-400 text-amber-400" : "fill-slate-100 text-slate-200"} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Review Text */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-2">Your Review</label>
-                <textarea 
-                  required
-                  rows="4"
-                  value={reviewForm.text}
-                  onChange={(e) => setReviewForm({ ...reviewForm, text: e.target.value })}
-                  placeholder="Tell us what you loved about our sweets..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#C29D59] focus:border-[#C29D59] outline-none transition-all resize-none"
-                ></textarea>
-              </div>
-
-              {/* Location */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-widest text-slate-900 mb-2">Location (Optional)</label>
-                <input 
-                  type="text"
-                  value={reviewForm.location}
-                  onChange={(e) => setReviewForm({ ...reviewForm, location: e.target.value })}
-                  placeholder="e.g. Colombo"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#C29D59] focus:border-[#C29D59] outline-none transition-all"
-                />
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={submitting}
-                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#C29D59] transition-colors disabled:opacity-50"
-              >
-                {submitting ? 'Submitting...' : 'Submit Review'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
