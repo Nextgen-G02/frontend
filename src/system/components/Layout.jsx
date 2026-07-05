@@ -21,7 +21,8 @@ import {
   Receipt,
   Vault,
   Cake,
-  Mail
+  Mail,
+  Star
 } from "lucide-react";
 import { useAuth } from "../../shared/context/AuthContext";
 
@@ -132,6 +133,7 @@ export default function AdminLayout({ children }) {
     ...(hasPerm('manage_expenses') ? [{ label: "Cash Drawer", path: "/admin/cash-drawer", icon: Vault }] : []),
     ...(user?.role === 'admin' ? [{ label: "Staff", path: "/staff", icon: UserCog }] : []),
     ...(hasPerm('manage_marketing') ? [{ label: "Newsletter", path: "/admin/newsletter", icon: Mail }] : []),
+    ...(hasPerm('manage_marketing') ? [{ label: "Reviews", path: "/admin/reviews", icon: Star }] : []),
   ];
 
   return (
