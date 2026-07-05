@@ -415,8 +415,12 @@ const OrderForm = () => {
                                                         className="px-3 py-3 text-xs font-bold text-primary bg-transparent outline-none uppercase cursor-pointer min-w-[52px]"
                                                     >
                                                         <option value="pcs">pcs</option>
-                                                        <option value="kg">kg</option>
                                                         <option value="box">box</option>
+                                                        <option value="packet">packet</option>
+                                                        <option value="kg">kg</option>
+                                                        <option value="g">g</option>
+                                                        <option value="ml">ml</option>
+                                                        <option value="l">l</option>
                                                     </select>
                                                 </div>
                                             </div>
