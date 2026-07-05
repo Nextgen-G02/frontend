@@ -15,6 +15,7 @@ const Cart = () => {
   const [detailProduct, setDetailProduct] = useState(null);
   const [isOrdering, setIsOrdering] = useState(false);
   const [isCheckoutMode, setIsCheckoutMode] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [checkoutFormData, setCheckoutFormData] = useState({
     firstName: '',
     lastName: '',
@@ -28,6 +29,22 @@ const Cart = () => {
 
   // Pre-fill form when user logs in or switches to checkout
   useEffect(() => {
+    const savedDetails = localStorage.getItem('saved_delivery_details');
+    if (savedDetails) {
+      try {
+        const parsed = JSON.parse(savedDetails);
+        setCheckoutFormData(prev => ({
+          ...prev,
+          ...parsed,
+          scheduleDate: prev.scheduleDate || '',
+          scheduleTime: prev.scheduleTime || ''
+        }));
+        return;
+      } catch (e) {
+        console.error("Error parsing saved_delivery_details", e);
+      }
+    }
+
     if (user) {
       setCheckoutFormData(prev => ({
         ...prev,
@@ -55,10 +72,10 @@ const Cart = () => {
   // If nothing is selected, show the total of all items in the cart.
   // Otherwise, show the total of only the selected items.
   const selectedTotal = selectedItems.size === 0
-    ? cart.reduce((total, item) => total + (item.price * item.quantity), 0)
+    ? cart.reduce((total, item) => total + (item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity), 0)
     : cart
       .filter(item => selectedItems.has(item.cartItemId || item._id))
-      .reduce((total, item) => total + (item.price * item.quantity), 0);
+      .reduce((total, item) => total + (item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity), 0);
 
   const handleCheckout = () => {
     if (!user) {
@@ -101,6 +118,28 @@ const Cart = () => {
       return;
     }
 
+    setShowSaveConfirm(true);
+  };
+
+  const executeOrderPlacement = async (shouldSave) => {
+    setShowSaveConfirm(false);
+
+    if (shouldSave) {
+      const detailsToSave = {
+        firstName: checkoutFormData.firstName,
+        lastName: checkoutFormData.lastName,
+        email: checkoutFormData.email,
+        phone: checkoutFormData.phone,
+        address: checkoutFormData.address,
+        city: checkoutFormData.city
+      };
+      localStorage.setItem('saved_delivery_details', JSON.stringify(detailsToSave));
+    }
+
+    const itemsToOrder = selectedItems.size === 0
+      ? cart
+      : cart.filter(item => selectedItems.has(item.cartItemId || item._id));
+
     setIsOrdering(true);
     const orderData = {
       customerName: `${checkoutFormData.firstName} ${checkoutFormData.lastName}`,
@@ -115,6 +154,7 @@ const Cart = () => {
         category: item.pCategory,
         quantity: item.quantity,
         price: item.price,
+        discountPercentage: item.discountPercentage || 0,
         customization: item.customization ? {
           message: item.customization.message || "",
           flavor: item.customization.flavor || "",
@@ -469,8 +509,11 @@ const Cart = () => {
                             >
                               <Trash2 size={20} />
                             </button>
-                            <div className="font-black text-slate-900 text-sm md:text-base">
-                              Rs.{(item.price * item.quantity).toLocaleString()}
+                            <div>
+                              {(item.discountPercentage > 0) && <span className="text-[10px] text-rose-500 font-bold uppercase tracking-widest block leading-none mb-1">{item.discountPercentage}% OFF</span>}
+                              <div className="font-black text-slate-900 text-sm md:text-base leading-none">
+                                Rs.{(item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity).toLocaleString()}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -562,7 +605,8 @@ const Cart = () => {
                   <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-1">Premium Value</span>
-                      <span className="text-2xl font-black text-slate-900">Rs.{detailProduct.price?.toLocaleString()}</span>
+                      {(detailProduct.discountPercentage > 0) && <span className="text-[12px] text-slate-400 line-through leading-none mb-1">Rs.{detailProduct.price?.toLocaleString()}</span>}
+                      <span className="text-2xl font-black text-slate-900 leading-none">Rs.{(detailProduct.price * (1 - (detailProduct.discountPercentage || 0) / 100))?.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -574,6 +618,41 @@ const Cart = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Save Details Confirmation Modal */}
+      {showSaveConfirm && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative border border-slate-100 p-8 text-center space-y-6">
+            <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="text-gold w-8 h-8" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-serif text-slate-800 font-bold">
+                Save <span className="text-gold italic font-normal">Delivery Details</span>?
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                Would you like to save these delivery details to pre-fill them for your next order?
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onClick={() => executeOrderPlacement(true)}
+                className="flex-1 bg-slate-900 text-gold py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-md"
+              >
+                Yes, Save Details
+              </button>
+              <button
+                onClick={() => executeOrderPlacement(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all"
+              >
+                No, Not Now
+              </button>
             </div>
           </div>
         </div>

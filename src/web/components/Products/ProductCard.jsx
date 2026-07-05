@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { ShoppingCart, CreditCard, X } from "lucide-react";
+import { ShoppingCart, CreditCard, X, CheckCircle2 } from "lucide-react";
 import { useCart } from "../../../shared/context/CartContext";
 import { useAuth } from "../../../shared/context/AuthContext";
 import { toast } from "react-hot-toast";
@@ -12,6 +12,7 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
   const navigate = useNavigate();
 
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [deliveryDetails, setDeliveryDetails] = useState({
     firstName: "",
     lastName: "",
@@ -27,6 +28,9 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
   };
 
   const handleBuyNow = async (product, details) => {
+    const pDiscount = product.discountPercentage || 0;
+    const discountedPrice = product.price * (1 - pDiscount / 100);
+
     const orderData = {
       customerName: `${details.firstName} ${details.lastName}`,
       phone: details.phone,
@@ -38,9 +42,10 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
         pName: product.pName,
         category: product.pCategory,
         quantity: 1,
-        price: product.price
+        price: product.price,
+        discountPercentage: pDiscount
       }],
-      totalAmount: product.price,
+      totalAmount: discountedPrice,
       paymentStatus: 'Unpaid',
       orderStatus: 'Pending'
     };
@@ -76,7 +81,7 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
         },
         body: JSON.stringify({
           order_id: createdOrder._id,
-          amount: product.price,
+          amount: discountedPrice,
           currency: "LKR"
         })
       });
@@ -139,6 +144,21 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
       toast.error("Please fill in all required delivery details");
       return;
     }
+    setShowSaveConfirm(true);
+  };
+
+  const executeBuyNow = (shouldSave) => {
+    setShowSaveConfirm(false);
+    if (shouldSave) {
+      const detailsToSave = {
+        firstName: deliveryDetails.firstName,
+        lastName: deliveryDetails.lastName,
+        phone: deliveryDetails.phone,
+        address: deliveryDetails.address,
+        city: deliveryDetails.city
+      };
+      localStorage.setItem('saved_delivery_details', JSON.stringify(detailsToSave));
+    }
     setShowDeliveryModal(false);
     handleBuyNow(product, deliveryDetails);
   };
@@ -159,10 +179,15 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
             alt={product.pName}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
             <span className="text-[8px] font-black px-2 py-1 rounded-full bg-white/90 backdrop-blur-sm text-slate-900 border border-slate-100 shadow-sm uppercase tracking-widest">
               {product.pCategory}
             </span>
+            {(product.discountPercentage > 0) && (
+              <span className="text-[8px] font-black px-2 py-1 rounded-full bg-rose-500 text-white shadow-sm uppercase tracking-widest">
+                {product.discountPercentage}% OFF
+              </span>
+            )}
           </div>
         </div>
 
@@ -182,8 +207,9 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
           <div className={`flex justify-between items-end ${hideDescription ? 'mb-1 mt-2' : 'mb-4 mt-auto'}`}>
             <div className="flex flex-col">
               <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Unit Val</span>
-              <span className="text-sm md:text-base font-black text-slate-900 tracking-tighter">
-                Rs.{product.price?.toLocaleString()}
+              {(product.discountPercentage > 0) && <span className="text-[10px] text-slate-400 line-through leading-none mb-0.5">Rs.{product.price?.toLocaleString()}</span>}
+              <span className="text-sm md:text-base font-black text-slate-900 tracking-tighter leading-none">
+                Rs.{(product.price * (1 - (product.discountPercentage || 0) / 100))?.toLocaleString()}
               </span>
             </div>
             <div className="text-right">
@@ -227,12 +253,22 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
                 navigate('/login');
                 return;
               }
+              const savedDetails = localStorage.getItem('saved_delivery_details');
+              let parsedDetails = {};
+              if (savedDetails) {
+                try {
+                  parsedDetails = JSON.parse(savedDetails);
+                } catch (e) {
+                  console.error("Error parsing saved_delivery_details", e);
+                }
+              }
+
               setDeliveryDetails({
-                firstName: user.firstName || "",
-                lastName: user.lastName || "",
-                phone: user.phone || "",
-                address: user.address || "",
-                city: "Colombo",
+                firstName: parsedDetails.firstName || user.firstName || "",
+                lastName: parsedDetails.lastName || user.lastName || "",
+                phone: parsedDetails.phone || user.phone || "",
+                address: parsedDetails.address || user.address || "",
+                city: parsedDetails.city || "Colombo",
                 scheduleDate: "",
                 scheduleTime: ""
               });
@@ -376,6 +412,41 @@ const ProductCard = ({ product, hideDescription = false, isHomepageTheme = false
                   Confirm & Pay
                 </button>
               </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showSaveConfirm && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-md rounded-[32px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 relative border border-slate-100 p-8 text-center space-y-6">
+            <div className="w-16 h-16 bg-gold/10 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="text-gold w-8 h-8" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-serif text-slate-800 font-bold">
+                Save <span className="text-gold italic font-normal">Delivery Details</span>?
+              </h3>
+              <p className="text-sm text-slate-500 font-medium">
+                Would you like to save these delivery details to pre-fill them for your next order?
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onClick={() => executeBuyNow(true)}
+                className="flex-1 bg-slate-900 text-gold py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-md cursor-pointer"
+              >
+                Yes, Save Details
+              </button>
+              <button
+                onClick={() => executeBuyNow(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-3.5 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all cursor-pointer"
+              >
+                No, Not Now
+              </button>
             </div>
           </div>
         </div>,

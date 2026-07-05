@@ -206,7 +206,7 @@ export default function POSTerminal() {
           item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
         );
       }
-      return [...prev, { ...product, quantity: 1, customization: { message: "", flavor: "", specialInstructions: "" } }];
+      return [...prev, { ...product, quantity: 1, discountPercentage: product.discountPercentage || 0, customization: { message: "", flavor: "", specialInstructions: "" } }];
     });
   };
 
@@ -227,7 +227,11 @@ export default function POSTerminal() {
   };
 
   const calculateTotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.reduce((sum, item) => {
+      const discount = item.discountPercentage || 0;
+      const finalPrice = item.price * (1 - discount / 100);
+      return sum + (finalPrice * item.quantity);
+    }, 0);
   };
 
   const handleCheckout = async () => {
@@ -247,6 +251,7 @@ export default function POSTerminal() {
           quantity: item.quantity,
           unit: item.unit || 'pcs',
           price: item.price,
+          discountPercentage: item.discountPercentage || 0,
           customization: item.customization
         })),
         paymentMethod: paymentMethod || "Cash",
@@ -437,6 +442,8 @@ export default function POSTerminal() {
                   const pUnit = product.unit || "pcs";
                   const pStock = typeof product.stock === 'number' ? product.stock : 0;
                   const pImage = product.images?.[0] || product.pImg?.[0] || "https://images.unsplash.com/photo-1621303837174-89787a7d4729";
+                  const pDiscount = product.discountPercentage || 0;
+                  const discountedPrice = pPrice * (1 - pDiscount / 100);
 
                   return (
                     <button
@@ -450,7 +457,12 @@ export default function POSTerminal() {
                       </div>
                       
                       {/* Visual Identity */}
-                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-slate-50 p-1.5 border border-slate-100 group-hover:border-primary/30 transition-all duration-700 shadow-inner">
+                      <div className="w-32 h-32 mx-auto rounded-full overflow-hidden bg-slate-50 p-1.5 border border-slate-100 group-hover:border-primary/30 transition-all duration-700 shadow-inner relative">
+                        {pDiscount > 0 && (
+                          <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-rose-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md z-20">
+                            {pDiscount}% OFF
+                          </div>
+                        )}
                         <img 
                           src={pImage} 
                           alt={pName}
@@ -471,7 +483,10 @@ export default function POSTerminal() {
                         <div className="mt-auto space-y-3">
                           <div className="flex items-center justify-between px-2">
                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rate</p>
-                             <p className="text-lg font-black text-slate-900 tracking-tighter">Rs.{pPrice.toLocaleString()}</p>
+                             <div className="text-right">
+                                {pDiscount > 0 && <span className="text-[10px] text-slate-400 line-through mr-1 block leading-none">Rs.{pPrice.toLocaleString()}</span>}
+                                <p className="text-lg font-black text-slate-900 tracking-tighter leading-none">Rs.{discountedPrice.toLocaleString()}</p>
+                             </div>
                           </div>
                           
                           <div className="flex items-center justify-between px-2 py-2 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-primary/5 group-hover:border-primary/10 transition-colors">
@@ -662,6 +677,7 @@ export default function POSTerminal() {
                             <option value="ml">ml</option>
                             <option value="l">l</option>
                             <option value="box">box</option>
+                            <option value="packet">packet</option>
                             <option value="pkt">pkt</option>
                           </select>
                         </div>
@@ -676,7 +692,12 @@ export default function POSTerminal() {
                       {/* Price - Right Aligned */}
                       <div className="flex items-center gap-4 shrink-0">
                         <div className="text-right">
-                          <span className="font-black text-slate-900 text-[13px] tracking-tighter block leading-none">Rs.{(item.price * item.quantity).toLocaleString()}</span>
+                          {(item.discountPercentage > 0) && (
+                            <span className="text-[9px] text-rose-500 font-bold uppercase tracking-widest block leading-none mb-0.5">
+                              {item.discountPercentage}% OFF
+                            </span>
+                          )}
+                          <span className="font-black text-slate-900 text-[13px] tracking-tighter block leading-none">Rs.{(item.price * (1 - (item.discountPercentage || 0) / 100) * item.quantity).toLocaleString()}</span>
                           <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Line Total</span>
                         </div>
                         <button 

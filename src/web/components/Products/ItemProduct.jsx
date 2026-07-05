@@ -130,7 +130,8 @@ const ItemProduct = ({ searchParams }) => {
                   <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-1">Premium Value</span>
-                      <span className="text-2xl font-black text-slate-900">Rs.{selectedProduct.price?.toLocaleString()}</span>
+                      {(selectedProduct.discountPercentage > 0) && <span className="text-[12px] text-slate-400 line-through leading-none mb-1">Rs.{selectedProduct.price?.toLocaleString()}</span>}
+                      <span className="text-2xl font-black text-slate-900 leading-none">Rs.{(selectedProduct.price * (1 - (selectedProduct.discountPercentage || 0) / 100))?.toLocaleString()}</span>
                     </div>
                     <div className="text-right">
                       <span className={`text-[10px] font-black uppercase tracking-widest block mb-1 ${selectedProduct.stockStatus === "In Stock" ? "text-emerald-500" : "text-amber-500"

@@ -66,11 +66,16 @@ const Footer = () => {
           <div>
             <h4 className="font-serif text-lg text-white mb-6 border-l-2 border-[#C29D59] pl-3">Support</h4>
             <ul className="space-y-3">
-              {['Help Center', 'Our Services', 'Contact Us', 'Pricing & Plans'].map((item) => (
-                <li key={item}>
-                  <Link to="#" className="text-xs hover:text-[#C29D59] flex items-center gap-2 transition-colors group">
+              {[
+                { label: 'Help Center', path: '#' },
+                { label: 'Our Services', path: '#' },
+                { label: 'Contact Us', path: '/contact' },
+                { label: 'Pricing & Plans', path: '#' }
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link to={item.path} className="text-xs hover:text-[#C29D59] flex items-center gap-2 transition-colors group">
                     <ChevronRight size={10} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -81,11 +86,16 @@ const Footer = () => {
           <div>
             <h4 className="font-serif text-lg text-white mb-6 border-l-2 border-[#C29D59] pl-3">Important</h4>
             <ul className="space-y-3">
-              {['About Us', 'Bespoke Process', 'My Account', 'Privacy & Policy'].map((item) => (
-                <li key={item}>
-                  <Link to="#" className="text-xs hover:text-[#C29D59] flex items-center gap-2 transition-colors group">
+              {[
+                { label: 'About Us', path: '/about' },
+                { label: 'Bespoke Process', path: '#' },
+                { label: 'My Account', path: '/my-orders' },
+                { label: 'Privacy & Policy', path: '#' }
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link to={item.path} className="text-xs hover:text-[#C29D59] flex items-center gap-2 transition-colors group">
                     <ChevronRight size={10} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -111,7 +121,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <p className="text-[9px] uppercase font-bold tracking-widest text-slate-600 mb-0.5">Email Us</p>
-                  <a href="mailto:info@niroshasweet.com" className="text-xs text-white hover:text-[#C29D59] transition-colors font-medium">info@niroshasweet.com</a>
+                  <a href="mailto:niroshasweethouse77@gmail.com" className="text-xs text-white hover:text-[#C29D59] transition-colors font-medium">niroshasweethouse77@gmail.com</a>
                 </div>
               </li>
             </ul>

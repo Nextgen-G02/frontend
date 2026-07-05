@@ -44,8 +44,8 @@ export default function About() {
             <div className="w-full lg:w-1/2 relative group">
               <div className="aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl relative z-10">
                 <img 
-                  src="https://images.unsplash.com/photo-1556217646-d5a2d057790b?q=80&w=1200&auto=format&fit=crop" 
-                  alt="Baker crafting pastry" 
+                  src="/images/founder.jpg" 
+                  alt="Nirosha Sweet House Founder Certificate Awarding Ceremony" 
                   className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
                 />
               </div>
